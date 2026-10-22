@@ -1,5 +1,6 @@
 package com.example.aquasample.ui.sample
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -64,16 +65,44 @@ class SampleViewModel : ViewModel() {
         }
     }
 
-    fun onAddPhoto() {
-        _uiState.update { it.copy(hasPhoto = true, photoCount = it.photoCount + 1) }
+    fun onPhotoCaptured(value: Bitmap): Boolean {
+        if (_uiState.value.photoBitmaps.size >= 5) return false
+        _uiState.update { state ->
+            val newList = state.photoBitmaps.toMutableList().apply { add(0, value) }
+            state.copy(photoBitmaps = newList)
+        }
+        return true
     }
 
-    fun onSaveSample() {
+    fun onPhotoAdded(value: Bitmap): Boolean {
+        if (_uiState.value.photoBitmaps.size >= 5) return false
+        _uiState.update { state ->
+            val newList = state.photoBitmaps.toMutableList().apply { add(value) }
+            state.copy(photoBitmaps = newList)
+        }
+        return true
+    }
+
+    fun onRemovePhoto(index: Int) {
+        _uiState.update { state ->
+            if (index in state.photoBitmaps.indices) {
+                val newList = state.photoBitmaps.toMutableList().apply { removeAt(index) }
+                state.copy(photoBitmaps = newList)
+            } else state
+        }
+    }
+
+    fun onSaveSample(onValidationError: () -> Unit): Boolean {
+        if (_uiState.value.photoBitmaps.isEmpty()) {
+            onValidationError()
+            return false
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
             delay(1000)
             _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
         }
+        return true
     }
 
     fun resetSavedSuccess() {

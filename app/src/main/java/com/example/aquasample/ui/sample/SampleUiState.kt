@@ -1,5 +1,7 @@
 package com.example.aquasample.ui.sample
 
+import android.graphics.Bitmap
+
 data class SampleUiState(
     val concesion: String = "Concesión Dalcahue #104",
     val tren: String = "Tren 02",
@@ -7,13 +9,15 @@ data class SampleUiState(
     val tramoLongitudCm: String = "150",
     val conteoManual: String = "30",
     val calibreMatrix: List<String> = List(30) { "" },
-    val hasPhoto: Boolean = true,
-    val photoCount: Int = 1,
+    val photoBitmaps: List<Bitmap> = emptyList(),
     val observaciones: String = "",
     val selectedTags: Set<String> = setOf("#ValvasSanas", "#SinFouling"),
     val isSaving: Boolean = false,
     val isSavedSuccess: Boolean = false
 ) {
+    val photoCount: Int
+        get() = photoBitmaps.size
+
     val averageCalibre: Double
         get() {
             val numbers = calibreMatrix.mapNotNull { it.toDoubleOrNull() }
