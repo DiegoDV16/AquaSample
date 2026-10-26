@@ -74,18 +74,22 @@ fun HistorialMuestrasScreen(
     var selectedFilter by remember { mutableStateOf("Todas") }
 
     val sampleList = remember {
-        listOf(
-            HistoryItem("#M-9024", "Línea L-04 · Tren 2", "Hoy, 10:30 AM", "COMPLETADO", 120, 62.4, "Juan Pérez"),
-            HistoryItem("#M-9023", "Línea L-02 · Tren 1", "Hoy, 09:15 AM", "PENDIENTE", 95, 54.0, "Carlos Soto"),
-            HistoryItem("#M-9022", "Línea L-03 · Tren 4", "Ayer, 16:45 PM", "COMPLETADO", 140, 60.8, "Juan Pérez"),
-            HistoryItem("#M-9021", "Línea L-01 · Tren 2", "02 Oct, 11:20 AM", "COMPLETADO", 110, 58.2, "Ana Silva")
-        )
+        com.example.aquasample.ui.sample.SampleRepository.samples.map {
+            HistoryItem(
+                id = it.id,
+                lineCode = "Línea ${it.linea} · Tren ${it.tren}",
+                date = it.fechaHora,
+                status = "COMPLETADO",
+                count = it.conteoManual.toIntOrNull() ?: 0,
+                avgCalibre = it.averageCalibre,
+                operator = com.example.aquasample.ui.sample.ProfileRepository.alias
+            )
+        }
     }
 
     val filteredList = sampleList.filter {
         it.id.contains(searchQuery, ignoreCase = true) ||
-                it.lineCode.contains(searchQuery, ignoreCase = true) ||
-                it.operator.contains(searchQuery, ignoreCase = true)
+                it.lineCode.contains(searchQuery, ignoreCase = true)
     }
 
     Scaffold(
@@ -104,6 +108,19 @@ fun HistorialMuestrasScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(
+                            text = "ONLINE",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                     IconButton(onClick = onLogout) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
@@ -156,7 +173,7 @@ fun HistorialMuestrasScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                listOf("Todas", "Por Línea", "Por Operador").forEach { filter ->
+                listOf("Todas", "Por Línea").forEach { filter ->
                     val isSelected = selectedFilter == filter
                     FilterChip(
                         selected = isSelected,

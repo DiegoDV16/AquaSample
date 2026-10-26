@@ -3,6 +3,9 @@ package com.example.aquasample.ui.sample
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,17 +15,7 @@ import kotlinx.coroutines.launch
 
 class SampleViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        SampleUiState(
-            calibreMatrix = List(30) { index ->
-                when (index) {
-                    0 -> "55"; 1 -> "62"; 2 -> "58"; 3 -> "60"; 4 -> "54"
-                    5 -> "64"; 6 -> "59"; 7 -> "61"; 8 -> "57"; 9 -> "63"
-                    else -> ""
-                }
-            }
-        )
-    )
+    private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
 
     fun onConcesionChanged(value: String) {
@@ -93,13 +86,36 @@ class SampleViewModel : ViewModel() {
     }
 
     fun onSaveSample(onValidationError: () -> Unit): Boolean {
-        if (_uiState.value.photoBitmaps.isEmpty()) {
+        val currentState = _uiState.value
+        if (currentState.photoBitmaps.isEmpty()) {
             onValidationError()
             return false
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            delay(1000)
+            delay(500)
+
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+            val fechaHora = dateFormat.format(Date())
+            val count = SampleRepository.samples.size + 1
+            val id = String.format("#M-%04d", count)
+
+            val savedSample = SavedSample(
+                id = id,
+                concesion = currentState.concesion,
+                tren = currentState.tren,
+                linea = currentState.linea,
+                tramoLongitudCm = currentState.tramoLongitudCm,
+                conteoManual = currentState.conteoManual,
+                calibreMatrix = currentState.calibreMatrix,
+                averageCalibre = currentState.averageCalibre,
+                photoBitmaps = currentState.photoBitmaps,
+                observaciones = currentState.observaciones,
+                selectedTags = currentState.selectedTags,
+                fechaHora = fechaHora
+            )
+            SampleRepository.addSample(savedSample)
+
             _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
         }
         return true

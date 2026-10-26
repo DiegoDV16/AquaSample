@@ -134,7 +134,7 @@ fun NuevaMuestraScreen(
                 actions = {
                     // Badge ONLINE
                     Surface(
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
@@ -142,7 +142,7 @@ fun NuevaMuestraScreen(
                             text = "ONLINE",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondary,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -200,7 +200,7 @@ fun NuevaMuestraScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Paso 2 de 3 - 65% completado",
+                            text = "Registro de Muestra",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -218,18 +218,6 @@ fun NuevaMuestraScreen(
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    LinearProgressIndicator(
-                        progress = { 0.65f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
                 }
             }
 
@@ -727,7 +715,7 @@ fun NuevaMuestraScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    val availableTags = listOf("#ValvasSanas", "#SinFouling", "#SustratoAdecuado", "#CrecimientoOptimo")
+                    val availableTags = listOf("ValvasSanas", "SinFouling", "SustratoAdecuado", "CrecimientoOptimo")
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -738,7 +726,7 @@ fun NuevaMuestraScreen(
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { viewModel.onToggleTag(tag) },
-                                label = { Text(tag) },
+                                label = { Text("#$tag") },
                                 leadingIcon = if (isSelected) {
                                     { Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
                                 } else null,
