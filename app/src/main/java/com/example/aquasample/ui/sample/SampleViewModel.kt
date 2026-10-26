@@ -1,7 +1,15 @@
 package com.example.aquasample.ui.sample
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.graphics.Bitmap
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.aquasample.data.local.database.AppDatabase
+import com.example.aquasample.data.local.entity.SampleEntity
+import com.google.gson.Gson
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,19 +17,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SampleViewModel : ViewModel() {
+class SampleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _uiState = MutableStateFlow(
-        SampleUiState(
-            calibreMatrix = List(30) { index ->
-                when (index) {
-                    0 -> "55"; 1 -> "62"; 2 -> "58"; 3 -> "60"; 4 -> "54"
-                    5 -> "64"; 6 -> "59"; 7 -> "61"; 8 -> "57"; 9 -> "63"
-                    else -> ""
-                }
-            }
-        )
-    )
+    private val dao = AppDatabase.getInstance(application).sampleDao()
+    private val gson = Gson()
+
+    private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
 
     fun onConcesionChanged(value: String) {
@@ -64,16 +65,69 @@ class SampleViewModel : ViewModel() {
         }
     }
 
-    fun onAddPhoto() {
-        _uiState.update { it.copy(hasPhoto = true, photoCount = it.photoCount + 1) }
+    fun onPhotoCaptured(value: Bitmap): Boolean {
+        if (_uiState.value.photoBitmaps.size >= 5) return false
+        _uiState.update { state ->
+            val newList = state.photoBitmaps.toMutableList().apply { add(0, value) }
+            state.copy(photoBitmaps = newList)
+        }
+        return true
     }
 
-    fun onSaveSample() {
+    fun onPhotoAdded(value: Bitmap): Boolean {
+        if (_uiState.value.photoBitmaps.size >= 5) return false
+        _uiState.update { state ->
+            val newList = state.photoBitmaps.toMutableList().apply { add(value) }
+            state.copy(photoBitmaps = newList)
+        }
+        return true
+    }
+
+    fun onRemovePhoto(index: Int) {
+        _uiState.update { state ->
+            if (index in state.photoBitmaps.indices) {
+                val newList = state.photoBitmaps.toMutableList().apply { removeAt(index) }
+                state.copy(photoBitmaps = newList)
+            } else state
+        }
+    }
+
+    fun onSaveSample(onValidationError: () -> Unit): Boolean {
+        val currentState = _uiState.value
+        if (currentState.photoBitmaps.isEmpty()) {
+            onValidationError()
+            return false
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            delay(1000)
+            delay(500)
+
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+            val fechaHora = dateFormat.format(Date())
+            val last = dao.getLastSample()
+            val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
+            val id = String.format("#M-%04d", nextNum)
+
+            val entity = SampleEntity(
+                id = id,
+                fechaHora = fechaHora,
+                concesion = currentState.concesion,
+                tren = currentState.tren,
+                linea = currentState.linea,
+                tramoLongitudCm = currentState.tramoLongitudCm,
+                conteoManual = currentState.conteoManual,
+                calibreMatrixJson = gson.toJson(currentState.calibreMatrix),
+                averageCalibre = currentState.averageCalibre,
+                observaciones = currentState.observaciones,
+                tagsCsv = currentState.selectedTags.joinToString(","),
+                photoCount = currentState.photoBitmaps.size,
+                operatorAlias = ProfileRepository.alias
+            )
+            dao.insertSample(entity)
+
             _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
         }
+        return true
     }
 
     fun resetSavedSuccess() {
