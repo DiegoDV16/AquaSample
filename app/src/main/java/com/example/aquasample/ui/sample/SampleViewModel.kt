@@ -1,8 +1,12 @@
 package com.example.aquasample.ui.sample
 
+import android.app.Application
 import android.graphics.Bitmap
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.aquasample.data.local.database.AppDatabase
+import com.example.aquasample.data.local.entity.SampleEntity
+import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -13,7 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SampleViewModel : ViewModel() {
+class SampleViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val dao = AppDatabase.getInstance(application).sampleDao()
+    private val gson = Gson()
 
     private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
@@ -97,24 +104,26 @@ class SampleViewModel : ViewModel() {
 
             val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
             val fechaHora = dateFormat.format(Date())
-            val count = SampleRepository.samples.size + 1
-            val id = String.format("#M-%04d", count)
+            val last = dao.getLastSample()
+            val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
+            val id = String.format("#M-%04d", nextNum)
 
-            val savedSample = SavedSample(
+            val entity = SampleEntity(
                 id = id,
+                fechaHora = fechaHora,
                 concesion = currentState.concesion,
                 tren = currentState.tren,
                 linea = currentState.linea,
                 tramoLongitudCm = currentState.tramoLongitudCm,
                 conteoManual = currentState.conteoManual,
-                calibreMatrix = currentState.calibreMatrix,
+                calibreMatrixJson = gson.toJson(currentState.calibreMatrix),
                 averageCalibre = currentState.averageCalibre,
-                photoBitmaps = currentState.photoBitmaps,
                 observaciones = currentState.observaciones,
-                selectedTags = currentState.selectedTags,
-                fechaHora = fechaHora
+                tagsCsv = currentState.selectedTags.joinToString(","),
+                photoCount = currentState.photoBitmaps.size,
+                operatorAlias = ProfileRepository.alias
             )
-            SampleRepository.addSample(savedSample)
+            dao.insertSample(entity)
 
             _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
         }

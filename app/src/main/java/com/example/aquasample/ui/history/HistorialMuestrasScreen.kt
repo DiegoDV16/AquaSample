@@ -40,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,9 +48,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.aquasample.data.local.database.AppDatabase
+import com.example.aquasample.ui.sample.ProfileRepository
 import com.example.aquasample.ui.theme.AquaSampleTheme
 
 data class HistoryItem(
@@ -70,21 +74,23 @@ fun HistorialMuestrasScreen(
     onNavigateToNewSample: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val dao = remember { AppDatabase.getInstance(context).sampleDao() }
+    val samples by dao.getAllSamples().collectAsState(initial = emptyList())
+
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Todas") }
 
-    val sampleList = remember {
-        com.example.aquasample.ui.sample.SampleRepository.samples.map {
-            HistoryItem(
-                id = it.id,
-                lineCode = "Línea ${it.linea} · Tren ${it.tren}",
-                date = it.fechaHora,
-                status = "COMPLETADO",
-                count = it.conteoManual.toIntOrNull() ?: 0,
-                avgCalibre = it.averageCalibre,
-                operator = com.example.aquasample.ui.sample.ProfileRepository.alias
-            )
-        }
+    val sampleList = samples.map {
+        HistoryItem(
+            id = it.id,
+            lineCode = "Línea ${it.linea} · Tren ${it.tren}",
+            date = it.fechaHora,
+            status = "COMPLETADO",
+            count = it.conteoManual.toIntOrNull() ?: it.photoCount,
+            avgCalibre = it.averageCalibre,
+            operator = it.operatorAlias.ifBlank { ProfileRepository.alias }
+        )
     }
 
     val filteredList = sampleList.filter {
