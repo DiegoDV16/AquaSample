@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -118,7 +119,10 @@ fun LoginContent(
                 Image(
                     painter = painterResource(id = R.drawable.ic_aldemar_logo),
                     contentDescription = "Logo ALDEMAR SpA",
-                    modifier = Modifier.size(96.dp)
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(130.dp),
+                    contentScale = ContentScale.Fit
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

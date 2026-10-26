@@ -7,6 +7,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -34,27 +36,32 @@ private val LightColorScheme = lightColorScheme(
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryAqua,
     onPrimary = OnPrimaryAqua,
-    primaryContainer = OnPrimaryContainerAqua,
-    onPrimaryContainer = PrimaryContainerAqua,
+    primaryContainer = PrimaryContainerAqua,
+    onPrimaryContainer = OnPrimaryContainerAqua,
     secondary = SecondaryMint,
     onSecondary = OnSecondaryMint,
-    background = OnBackgroundLight,
-    onBackground = BackgroundLight,
-    surface = OnSurfaceLight,
-    onSurface = SurfaceLight,
-    surfaceVariant = OnSurfaceVariantLight,
-    onSurfaceVariant = SurfaceVariantLight,
-    outline = OutlineLight,
+    secondaryContainer = SecondaryContainerMint,
+    onSecondaryContainer = OnSecondaryContainerMint,
+    background = Color(0xFF0F172A),
+    onBackground = Color(0xFFF8FAFC),
+    surface = Color(0xFF1E293B),
+    onSurface = Color(0xFFF8FAFC),
+    surfaceVariant = Color(0xFF334155),
+    onSurfaceVariant = Color(0xFF94A3B8),
+    outline = Color(0xFF475569),
     error = ErrorRed,
     onError = OnErrorRed
 )
 
 @Composable
 fun AquaSampleTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean? = null,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val managedDarkTheme = ThemeManager.isDarkMode.collectAsState().value
+    val useDarkTheme = darkTheme ?: managedDarkTheme
+
+    val colorScheme = if (useDarkTheme) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
