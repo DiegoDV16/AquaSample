@@ -5,8 +5,8 @@ import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.data.local.database.AppDatabase
-import com.example.aquasample.data.local.entity.SampleEntity
-import com.google.gson.Gson
+import com.example.aquasample.data.local.entity.MuestraEntity
+import com.example.aquasample.data.session.SessionManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,8 +19,7 @@ import kotlinx.coroutines.launch
 
 class SampleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val dao = AppDatabase.getInstance(application).sampleDao()
-    private val gson = Gson()
+    private val dao = AppDatabase.getInstance(application).muestraDao()
 
     private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
@@ -103,29 +102,48 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
             delay(500)
 
             val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-            val fechaHora = dateFormat.format(Date())
+            val now = Date()
+            val fechaHora = dateFormat.format(now)
             val last = dao.getLastSample()
             val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
             val id = String.format("#M-%04d", nextNum)
 
-            val entity = SampleEntity(
+            val currentSession = SessionManager.currentSession.value
+            val operatorId = currentSession?.id ?: "USR-001"
+            val operatorAlias = if (ProfileRepository.alias.isNotBlank()) ProfileRepository.alias else (currentSession?.nombreCompleto ?: "Operador")
+
+            val entity = MuestraEntity(
                 id = id,
-                fechaHora = fechaHora,
-                concesion = currentState.concesion,
-                tren = currentState.tren,
-                linea = currentState.linea,
-                tramoLongitudCm = currentState.tramoLongitudCm,
-                conteoManual = currentState.conteoManual,
-                calibreMatrixJson = gson.toJson(currentState.calibreMatrix),
+                centroId = 1L,
+                operadorId = operatorId,
+                concesion = currentState.concesion.ifBlank { "Concesión Dalcahue #104" },
+                tren = currentState.tren.ifBlank { "Tren 01" },
+                linea = currentState.linea.ifBlank { "Línea L-01" },
+                tramoLongitudCm = currentState.tramoLongitudCm.ifBlank { "150" },
+                conteoManual = currentState.conteoManual.ifBlank { "30" },
+                calibreMatrix = currentState.calibreMatrix,
                 averageCalibre = currentState.averageCalibre,
-                observaciones = currentState.observaciones,
-                tagsCsv = currentState.selectedTags.joinToString(","),
                 photoCount = currentState.photoBitmaps.size,
-                operatorAlias = ProfileRepository.alias
+                fotos = emptyList(),
+                observaciones = currentState.observaciones,
+                tags = currentState.selectedTags.toList(),
+                fechaHora = fechaHora,
+                timestamp = now.time,
+                estado = "COMPLETADO",
+                sincronizado = true,
+                operatorAlias = operatorAlias
             )
+            
+            // Inserción directa en la base de datos de Room
             dao.insertSample(entity)
 
-            _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
+            // Resetea el formulario y marca guardado exitoso
+            _uiState.update { 
+                SampleUiState(
+                    isSaving = false,
+                    isSavedSuccess = true
+                )
+            }
         }
         return true
     }
