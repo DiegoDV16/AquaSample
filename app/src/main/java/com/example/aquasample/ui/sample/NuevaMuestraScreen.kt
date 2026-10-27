@@ -1,8 +1,14 @@
 package com.example.aquasample.ui.sample
 
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,11 +34,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -65,12 +74,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aquasample.ui.theme.AquaSampleTheme
 
@@ -122,7 +134,7 @@ fun NuevaMuestraScreen(
                 actions = {
                     // Badge ONLINE
                     Surface(
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
@@ -130,7 +142,7 @@ fun NuevaMuestraScreen(
                             text = "ONLINE",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondary,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -188,7 +200,7 @@ fun NuevaMuestraScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Paso 2 de 3 - 65% completado",
+                            text = "Registro de Muestra",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -206,18 +218,6 @@ fun NuevaMuestraScreen(
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    LinearProgressIndicator(
-                        progress = { 0.65f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
                 }
             }
 
@@ -399,13 +399,49 @@ fun NuevaMuestraScreen(
                 }
             }
 
-            // Card Evidencia Fotográfica
+            // Card Evidencia Fotográfica (Obligatorio, máx 5 fotos, vista completa sin recortar, zoom gran escala)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
+                var selectedPhotoForFullscreen by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+
+                val cameraLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.TakePicturePreview()
+                ) { bitmap ->
+                    if (bitmap != null) {
+                        val added = viewModel.onPhotoCaptured(bitmap)
+                        if (added) {
+                            Toast.makeText(context, "Foto capturada con éxito", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Límite alcanzado: Máximo 5 fotos permitidas", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+                val galleryLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.GetContent()
+                ) { uri: Uri? ->
+                    if (uri != null) {
+                        try {
+                            val inputStream = context.contentResolver.openInputStream(uri)
+                            val bitmap = BitmapFactory.decodeStream(inputStream)
+                            if (bitmap != null) {
+                                val added = viewModel.onPhotoAdded(bitmap)
+                                if (added) {
+                                    Toast.makeText(context, "Imagen agregada desde galería", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Límite alcanzado: Máximo 5 fotos permitidas", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error al cargar la imagen", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -419,19 +455,19 @@ fun NuevaMuestraScreen(
                             Icon(
                                 imageVector = Icons.Default.CameraAlt,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = if (uiState.photoCount == 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Evidencia Fotográfica",
+                                text = "Evidencia Fotográfica *",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = if (uiState.photoCount == 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            color = if (uiState.photoCount > 0) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer,
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Row(
@@ -439,55 +475,104 @@ fun NuevaMuestraScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.CheckCircle,
+                                    imageVector = if (uiState.photoCount > 0) Icons.Default.CheckCircle else Icons.Default.Warning,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    tint = if (uiState.photoCount > 0) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "${uiState.photoCount} Foto Lista",
+                                    text = "${uiState.photoCount}/5 ${if (uiState.photoCount == 1) "Foto" else "Fotos"}",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    color = if (uiState.photoCount > 0) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
                         }
                     }
 
-                    // Vista previa simulada de foto
+                    // Recuadro de vista previa de todas las fotos añadidas (LazyRow con imágenes completas y botón X)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(140.dp)
+                            .height(160.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
+                                color = if (uiState.photoCount == 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(12.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.PhotoLibrary,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(40.dp)
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Vista Previa: Bandeja Mytilus #01",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "Capturado por Modelo AI / Conteo Visual listo",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            )
+                        if (uiState.photoBitmaps.isNotEmpty()) {
+                            LazyRow(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                items(uiState.photoBitmaps.size) { index ->
+                                    val bitmap = uiState.photoBitmaps[index]
+                                    Box(
+                                        modifier = Modifier
+                                            .size(120.dp, 140.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.surface)
+                                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                            .clickable { selectedPhotoForFullscreen = bitmap }
+                                    ) {
+                                        Image(
+                                            bitmap = bitmap.asImageBitmap(),
+                                            contentDescription = "Foto ${index + 1}",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit // Completa, no recortada
+                                        )
+
+                                        // Botón X para eliminar en la esquina superior derecha
+                                        IconButton(
+                                            onClick = { viewModel.onRemovePhoto(index) },
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .size(28.dp)
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
+                                                    shape = CircleShape
+                                                )
+                                                .padding(2.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Eliminar foto",
+                                                tint = MaterialTheme.colorScheme.onError,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.PhotoLibrary,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Campo obligatorio: Sin fotos",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                                Text(
+                                    text = "Debe adjuntar al menos 1 foto (máximo 5)",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
 
@@ -496,7 +581,7 @@ fun NuevaMuestraScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         OutlinedButton(
-                            onClick = { },
+                            onClick = { cameraLauncher.launch(null) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp)
                         ) {
@@ -506,7 +591,7 @@ fun NuevaMuestraScreen(
                         }
 
                         Button(
-                            onClick = viewModel::onAddPhoto,
+                            onClick = { galleryLauncher.launch("image/*") },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
@@ -514,6 +599,84 @@ fun NuevaMuestraScreen(
                             Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("Subir Adicional", color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 13.sp)
+                        }
+                    }
+                }
+
+                // Diálogo de visualización a gran escala (sobre la pantalla actual)
+                if (selectedPhotoForFullscreen != null) {
+                    Dialog(
+                        onDismissRequest = { selectedPhotoForFullscreen = null }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.95f))
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                // Barra superior con título y botón de cierre
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Vista a Gran Escala",
+                                        color = androidx.compose.ui.graphics.Color.White,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    IconButton(
+                                        onClick = { selectedPhotoForFullscreen = null },
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f), CircleShape)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Cerrar",
+                                            tint = androidx.compose.ui.graphics.Color.White
+                                        )
+                                    }
+                                }
+
+                                // Imagen completa (no recortada)
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        bitmap = selectedPhotoForFullscreen!!.asImageBitmap(),
+                                        contentDescription = "Imagen a gran escala",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Fit // Completa, no recortada
+                                    )
+                                }
+
+                                // Botón para volver a la pantalla actual
+                                Button(
+                                    onClick = { selectedPhotoForFullscreen = null },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp)
+                                        .height(48.dp)
+                                ) {
+                                    Text("Volver a la pantalla", fontWeight = FontWeight.Bold)
+                                }
+                            }
                         }
                     }
                 }
@@ -552,7 +715,7 @@ fun NuevaMuestraScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    val availableTags = listOf("#ValvasSanas", "#SinFouling", "#SustratoAdecuado", "#CrecimientoOptimo")
+                    val availableTags = listOf("ValvasSanas", "SinFouling", "SustratoAdecuado", "CrecimientoOptimo")
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -563,7 +726,7 @@ fun NuevaMuestraScreen(
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { viewModel.onToggleTag(tag) },
-                                label = { Text(tag) },
+                                label = { Text("#$tag") },
                                 leadingIcon = if (isSelected) {
                                     { Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
                                 } else null,
@@ -577,9 +740,17 @@ fun NuevaMuestraScreen(
                 }
             }
 
-            // Botón Guardar Registro
+            // Botón Guardar Registro (Valida que exista al menos 1 foto)
             Button(
-                onClick = viewModel::onSaveSample,
+                onClick = {
+                    viewModel.onSaveSample {
+                        Toast.makeText(
+                            context,
+                            "Campo obligatorio: Debe adjuntar al menos una foto de evidencia",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                },
                 enabled = !uiState.isSaving,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

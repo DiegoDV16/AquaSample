@@ -23,6 +23,7 @@ import com.example.aquasample.ui.admin.AdminUsuariosScreen
 import com.example.aquasample.ui.history.HistorialMuestrasScreen
 import com.example.aquasample.ui.home.HomeScreen
 import com.example.aquasample.ui.sample.NuevaMuestraScreen
+import com.example.aquasample.ui.sample.PerfilScreen
 import com.example.aquasample.ui.theme.AquaSampleTheme
 
 @Composable
@@ -36,7 +37,16 @@ fun MainScreen(
     }
 
     var selectedItem by remember(allowedItems) {
-        mutableStateOf(allowedItems.firstOrNull() ?: NavItem.Home)
+        mutableStateOf<NavItem>(allowedItems.firstOrNull() ?: NavItem.Home)
+    }
+    var showProfile by remember { mutableStateOf(false) }
+
+    if (showProfile && userSession.role == UserRole.OPERADOR) {
+        PerfilScreen(
+            modifier = modifier,
+            onBack = { showProfile = false }
+        )
+        return
     }
 
     Scaffold(
@@ -79,7 +89,8 @@ fun MainScreen(
                 modifier = screenModifier,
                 userSession = userSession,
                 onNavigateToNewSample = { selectedItem = NavItem.NewSample },
-                onLogout = onLogout
+                onLogout = onLogout,
+                onNavigateToProfile = { showProfile = true }
             )
             is NavItem.NewSample -> NuevaMuestraScreen(
                 modifier = screenModifier,
