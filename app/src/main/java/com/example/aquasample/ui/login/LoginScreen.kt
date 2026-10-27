@@ -2,9 +2,7 @@ package com.example.aquasample.ui.login
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,8 +28,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,12 +38,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import com.example.aquasample.R
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -58,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aquasample.R
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.ui.theme.AquaSampleTheme
 
@@ -79,7 +74,6 @@ fun LoginScreen(
         onEmailChanged = viewModel::onEmailChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,
-        onRoleSelect = viewModel::onRoleChipSelected,
         onSubmit = viewModel::onLoginSubmit
     )
 }
@@ -91,7 +85,6 @@ fun LoginContent(
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onTogglePasswordVisibility: () -> Unit,
-    onRoleSelect: (UserRole) -> Unit,
     onSubmit: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -289,49 +282,6 @@ fun LoginContent(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Acceso Rápido de Prueba (Demo):",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        UserRole.entries.forEach { role ->
-                            val isSelected = uiState.selectedRole == role
-                            val title = when (role) {
-                                UserRole.OPERADOR -> "Operador"
-                                UserRole.ANALISTA -> "Analista"
-                                UserRole.ADMINISTRADOR -> "Admin"
-                            }
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { onRoleSelect(role) },
-                                label = {
-                                    Text(
-                                        text = title,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                    )
-                                },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            )
-                        }
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -354,13 +304,11 @@ fun LoginScreenPreview() {
         LoginContent(
             uiState = LoginUiState(
                 email = "operador@aquasample.cl",
-                password = "••••••••",
-                selectedRole = UserRole.OPERADOR
+                password = "••••••••"
             ),
             onEmailChanged = {},
             onPasswordChanged = {},
             onTogglePasswordVisibility = {},
-            onRoleSelect = {},
             onSubmit = {}
         )
     }

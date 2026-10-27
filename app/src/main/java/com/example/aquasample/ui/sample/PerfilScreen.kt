@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import com.example.aquasample.ui.theme.AquaSampleTheme
 
 object ProfileRepository {
-    var alias: String = "Juan Pérez"
+    var alias: String = "Operador"
     var photoBitmap: Bitmap? = null
 }
 

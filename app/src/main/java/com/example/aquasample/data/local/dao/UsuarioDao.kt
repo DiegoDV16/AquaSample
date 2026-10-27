@@ -28,10 +28,10 @@ interface UsuarioDao {
     @Query("DELETE FROM usuarios WHERE id = :userId")
     suspend fun deleteUserById(userId: String): Int
 
-    @Query("SELECT * FROM usuarios WHERE email = :email AND passwordHash = :passwordHash AND estado = 'ACTIVO' LIMIT 1")
+    @Query("SELECT * FROM usuarios WHERE LOWER(email) = LOWER(:email) AND passwordHash = :passwordHash AND estado = 'ACTIVO' LIMIT 1")
     suspend fun login(email: String, passwordHash: String): UsuarioEntity?
 
-    @Query("SELECT * FROM usuarios WHERE email = :email LIMIT 1")
+    @Query("SELECT * FROM usuarios WHERE LOWER(email) = LOWER(:email) LIMIT 1")
     suspend fun getByEmail(email: String): UsuarioEntity?
 
     @Query("SELECT * FROM usuarios WHERE id = :id LIMIT 1")
