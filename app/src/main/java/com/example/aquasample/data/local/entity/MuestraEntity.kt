@@ -38,7 +38,7 @@ data class MuestraEntity(
     val tramoLongitudCm: String = "", // Coincide con campo tramoLongitudCm del formulario
     val conteoManual: String = "", // Coincide con campo conteoManual del formulario
     val calibreMatrix: List<String> = emptyList(), // Coincide con calibreMatrix (30 mediciones)
-    val averageCalibre: Double = 0.0, // Calibre promedio calculado
+    val averageCalibre: Double = 0.0, // Calibre promedio calculated
     val photoCount: Int = 0, // Cantidad de fotos tomadas
     val fotos: List<String> = emptyList(), // Rutas locales de fotos
     val observaciones: String = "", // Observaciones técnicas

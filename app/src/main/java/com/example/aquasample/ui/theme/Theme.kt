@@ -25,6 +25,11 @@ object ThemeManager {
         _isDarkTheme.value = !current
     }
 
+    fun toggleDarkMode() {
+        val current = _isDarkTheme.value ?: false
+        _isDarkTheme.value = !current
+    }
+
     fun setDarkTheme(isDark: Boolean?) {
         _isDarkTheme.value = isDark
     }

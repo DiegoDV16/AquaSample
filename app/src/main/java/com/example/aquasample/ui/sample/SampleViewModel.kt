@@ -5,7 +5,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.data.local.database.AppDatabase
 import com.example.aquasample.data.local.entity.MuestraEntity
+import com.example.aquasample.data.session.SessionManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class SampleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val muestraDao = AppDatabase.getInstance(application).muestraDao()
+    private val dao = AppDatabase.getInstance(application).muestraDao()
 
     private val _uiState = MutableStateFlow(
         SampleUiState(
@@ -74,37 +79,27 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun onSaveSample() {
-        val state = _uiState.value
-        val sampleId = "#M-${(9000..9999).random()}"
-        val sampleEntity = MuestraEntity(
-            id = sampleId,
-            concesion = state.concesion,
-            tren = state.tren,
-            linea = state.linea,
-            tramoLongitudCm = state.tramoLongitudCm,
-            conteoManual = state.conteoManual,
-            calibreMatrix = state.calibreMatrix.filter { it.isNotBlank() },
-            averageCalibre = state.averageCalibre,
-            photoCount = state.photoCount,
-            observaciones = state.observaciones,
-            tags = state.selectedTags.toList(),
-            fechaHora = "Hoy, " + java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date()),
-            estado = "COMPLETADO",
-            sincronizado = true
-        )
-
+        val currentState = _uiState.value
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isSaving = true) }
-            try {
-                muestraDao.insertSample(sampleEntity)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
-        }
-    }
+            delay(500)
 
-    fun resetSavedSuccess() {
-        _uiState.update { it.copy(isSavedSuccess = false) }
-    }
-}
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+            val now = Date()
+            val fechaHora = dateFormat.format(now)
+            val last = dao.getLastSample()
+            val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
+            val id = String.format(Locale.getDefault(), "#M-%04d", nextNum)
+
+            val currentSession = SessionManager.currentSession.value
+            val operatorId = currentSession?.id ?: "USR-001"
+            val operatorAlias = currentSession?.nombreCompleto ?: "Operador"
+
+            val entity = MuestraEntity(
+                id = id,
+                centroId = 1L,
+                operadorId = operatorId,
+                concesion = currentState.concesion.ifBlank { "Concesión Dalcahue #104" },
+                tren = currentState.tren.ifBlank { "Tren 01" },
+                linea = currentState.linea.ifBlank { "Línea L-01" },
+                tram
