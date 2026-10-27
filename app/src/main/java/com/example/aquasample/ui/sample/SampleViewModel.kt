@@ -5,8 +5,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.data.local.database.AppDatabase
-import com.example.aquasample.data.local.entity.SampleEntity
-import com.google.gson.Gson
+import com.example.aquasample.data.local.entity.MuestraEntity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,8 +18,7 @@ import kotlinx.coroutines.launch
 
 class SampleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val dao = AppDatabase.getInstance(application).sampleDao()
-    private val gson = Gson()
+    private val dao = AppDatabase.getInstance(application).muestraDao()
 
     private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
@@ -103,24 +101,31 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
             delay(500)
 
             val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-            val fechaHora = dateFormat.format(Date())
+            val now = Date()
+            val fechaHora = dateFormat.format(now)
             val last = dao.getLastSample()
             val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
             val id = String.format("#M-%04d", nextNum)
 
-            val entity = SampleEntity(
+            val entity = MuestraEntity(
                 id = id,
-                fechaHora = fechaHora,
+                centroId = 1L, // Concesión Dalcahue #104 por defecto
+                operadorId = "USR-001", // Francisca Rojas (Operador)
                 concesion = currentState.concesion,
                 tren = currentState.tren,
                 linea = currentState.linea,
                 tramoLongitudCm = currentState.tramoLongitudCm,
                 conteoManual = currentState.conteoManual,
-                calibreMatrixJson = gson.toJson(currentState.calibreMatrix),
+                calibreMatrix = currentState.calibreMatrix,
                 averageCalibre = currentState.averageCalibre,
-                observaciones = currentState.observaciones,
-                tagsCsv = currentState.selectedTags.joinToString(","),
                 photoCount = currentState.photoBitmaps.size,
+                fotos = emptyList(),
+                observaciones = currentState.observaciones,
+                tags = currentState.selectedTags.toList(),
+                fechaHora = fechaHora,
+                timestamp = now.time,
+                estado = "COMPLETADO",
+                sincronizado = true,
                 operatorAlias = ProfileRepository.alias
             )
             dao.insertSample(entity)
