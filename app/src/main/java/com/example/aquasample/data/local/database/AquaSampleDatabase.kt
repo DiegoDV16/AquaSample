@@ -61,8 +61,12 @@ abstract class AquaSampleDatabase : RoomDatabase() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 Executors.newSingleThreadExecutor().execute {
-                    val database = getInstance(context)
-                    populateInitialData(database)
+                    try {
+                        val database = getInstance(context)
+                        populateInitialData(database)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
 
@@ -111,58 +115,27 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     )
                 )
 
-                // 3. Usuarios Demo
+                // 3. Único usuario administrador del sistema por defecto
                 val usuarios = listOf(
                     UsuarioEntity(
-                        id = "USR-001",
-                        email = "operador@aquasample.cl",
-                        passwordHash = "operador123",
-                        nombres = "Francisca",
-                        apellidoPaterno = "Rojas",
-                        apellidoMaterno = "Soto",
-                        rolId = 1,
-                        estado = "ACTIVO"
-                    ),
-                    UsuarioEntity(
-                        id = "USR-002",
-                        email = "analista@aquasample.cl",
-                        passwordHash = "analista123",
-                        nombres = "Mateo",
-                        apellidoPaterno = "Cárdenas",
-                        apellidoMaterno = "Muñoz",
-                        rolId = 2,
-                        estado = "ACTIVO"
-                    ),
-                    UsuarioEntity(
-                        id = "USR-003",
+                        id = "USR-ADMIN",
                         email = "admin@aquasample.cl",
                         passwordHash = "admin123",
-                        nombres = "Andrea",
-                        apellidoPaterno = "Barrientos",
-                        apellidoMaterno = "Vargas",
+                        nombres = "Administrador",
+                        apellidoPaterno = "Sistema",
+                        apellidoMaterno = "",
                         rolId = 3,
-                        estado = "ACTIVO"
-                    ),
-                    UsuarioEntity(
-                        id = "USR-004",
-                        email = "francisca.rojas@aldemar.cl",
-                        passwordHash = "operador123",
-                        nombres = "Francisca",
-                        apellidoPaterno = "Rojas",
-                        apellidoMaterno = "Soto",
-                        rolId = 1,
                         estado = "ACTIVO"
                     )
                 )
 
-                // Insertar datos iniciales en hilo de fondo
-                runCatching {
-                    Executors.newSingleThreadExecutor().execute {
-                        kotlinx.coroutines.runBlocking {
-                            db.roleDao().insertRoles(roles)
-                            db.centroCultivoDao().insertCentros(centros)
-                            db.usuarioDao().insertUsers(usuarios)
-                        }
+                kotlinx.coroutines.runBlocking {
+                    try {
+                        db.roleDao().insertRoles(roles)
+                        db.centroCultivoDao().insertCentros(centros)
+                        db.usuarioDao().insertUsers(usuarios)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             }
