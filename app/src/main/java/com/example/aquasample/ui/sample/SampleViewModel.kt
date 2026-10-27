@@ -102,4 +102,50 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                 concesion = currentState.concesion.ifBlank { "Concesión Dalcahue #104" },
                 tren = currentState.tren.ifBlank { "Tren 01" },
                 linea = currentState.linea.ifBlank { "Línea L-01" },
+                tramoLongitudCm = currentState.tramoLongitudCm.ifBlank { "150" },
+                conteoManual = currentState.conteoManual.ifBlank { "30" },
+                calibreMatrix = currentState.calibreMatrix.filter { it.isNotBlank() },
+                averageCalibre = currentState.averageCalibre,
+                photoCount = currentState.photoCount,
+                fotos = emptyList(),
+                observaciones = currentState.observaciones,
+                tags = currentState.selectedTags.toList(),
+                fechaHora = fechaHora,
+                timestamp = now.time,
+                estado = "COMPLETADO",
+                sincronizado = true,
+                operatorAlias = operatorAlias
+            )
+
+            // Inserción directa en la base de datos de Room
+            dao.insertSample(entity)
+
+            // Resetea el estado y marca guardado exitoso
+            _uiState.update {
+                it.copy(
+                    isSaving = false,
+                    isSavedSuccess = true
+                )
+            }
+        }
+    }
+
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+            val now = Date()
+            val fechaHora = dateFormat.format(now)
+            val last = dao.getLastSample()
+            val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
+            val id = String.format(Locale.getDefault(), "#M-%04d", nextNum)
+
+            val currentSession = SessionManager.currentSession.value
+            val operatorId = currentSession?.id ?: "USR-001"
+            val operatorAlias = currentSession?.nombreCompleto ?: "Operador"
+
+            val entity = MuestraEntity(
+                id = id,
+                centroId = 1L,
+                operadorId = operatorId,
+                concesion = currentState.concesion.ifBlank { "Concesión Dalcahue #104" },
+                tren = currentState.tren.ifBlank { "Tren 01" },
+                linea = currentState.linea.ifBlank { "Línea L-01" },
                 tram
