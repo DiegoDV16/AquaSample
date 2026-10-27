@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -39,7 +38,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -61,7 +59,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.aquasample.data.local.database.AppDatabase
 import com.example.aquasample.data.local.entity.UsuarioEntity
 import com.example.aquasample.data.session.UserRole
@@ -76,7 +73,7 @@ data class UserItem(
     val name: String,
     val email: String,
     val role: UserRole,
-    val status: String = "Activo"
+    val status: String = "ACTIVO"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,6 +94,7 @@ fun AdminUsuariosScreen(
     var userToEdit by remember { mutableStateOf<UsuarioEntity?>(null) }
     var userToDelete by remember { mutableStateOf<UsuarioEntity?>(null) }
 
+    // Mapeo dinámico directo desde Room
     val userList = dbUsers.map { user ->
         val role = when (user.rolId) {
             1L -> UserRole.OPERADOR
@@ -117,6 +115,7 @@ fun AdminUsuariosScreen(
                 it.email.contains(searchQuery, ignoreCase = true)
     }
 
+    // Métricas calculadas dinámicamente según la base de datos local
     val operadoresCount = userList.count { it.role == UserRole.OPERADOR }
     val analistasCount = userList.count { it.role == UserRole.ANALISTA }
     val adminsCount = userList.count { it.role == UserRole.ADMINISTRADOR }
@@ -162,6 +161,7 @@ fun AdminUsuariosScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Módulos de Métricas
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -171,6 +171,7 @@ fun AdminUsuariosScreen(
                 AdminMetricCard("Admins", adminsCount.toString(), modifier = Modifier.weight(1f))
             }
 
+            // Búsqueda y Botón de Nuevo Usuario
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -210,6 +211,7 @@ fun AdminUsuariosScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
+            // Lista dinámica de usuarios
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -219,30 +221,14 @@ fun AdminUsuariosScreen(
                     UserCardItem(
                         user = userItem,
                         onEdit = {
-                            userToEdit = fullEntity ?: UsuarioEntity(
-                                id = userItem.id,
-                                email = userItem.email,
-                                passwordHash = "123456",
-                                nombres = userItem.name,
-                                apellidoPaterno = "",
-                                apellidoMaterno = "",
-                                rolId = when (userItem.role) {
-                                    UserRole.OPERADOR -> 1L
-                                    UserRole.ANALISTA -> 2L
-                                    UserRole.ADMINISTRADOR -> 3L
-                                }
-                            )
+                            if (fullEntity != null) {
+                                userToEdit = fullEntity
+                            }
                         },
                         onDelete = {
-                            userToDelete = fullEntity ?: UsuarioEntity(
-                                id = userItem.id,
-                                email = userItem.email,
-                                passwordHash = "",
-                                nombres = userItem.name,
-                                apellidoPaterno = "",
-                                apellidoMaterno = "",
-                                rolId = 1L
-                            )
+                            if (fullEntity != null) {
+                                userToDelete = fullEntity
+                            }
                         }
                     )
                 }
@@ -250,7 +236,7 @@ fun AdminUsuariosScreen(
         }
     }
 
-    // Modal Crear Usuario
+    // Modal Crear Usuario (Dinámico)
     if (showCreateDialog) {
         UserFormDialog(
             title = "Crear Nuevo Usuario",
@@ -261,7 +247,7 @@ fun AdminUsuariosScreen(
                     try {
                         usuarioDao.insertUser(newUser)
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "Usuario creado exitosamente", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Usuario creado exitosamente en Room", Toast.LENGTH_SHORT).show()
                             showCreateDialog = false
                         }
                     } catch (e: Exception) {
@@ -274,7 +260,7 @@ fun AdminUsuariosScreen(
         )
     }
 
-    // Modal Editar Usuario
+    // Modal Editar Usuario (Dinámico)
     userToEdit?.let { entity ->
         UserFormDialog(
             title = "Editar Usuario y Permisos",
@@ -298,7 +284,7 @@ fun AdminUsuariosScreen(
         )
     }
 
-    // Modal Confirmar Eliminar
+    // Modal Confirmar Eliminar Usuario (Dinámico)
     userToDelete?.let { entity ->
         AlertDialog(
             onDismissRequest = { userToDelete = null },
@@ -369,7 +355,7 @@ fun UserFormDialog(
                 OutlinedTextField(
                     value = nombres,
                     onValueChange = { nombres = it },
-                    label = { Text("Nombres") },
+                    label = { Text("Nombres *") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -392,14 +378,14 @@ fun UserFormDialog(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Correo electrónico") },
+                    label = { Text("Correo electrónico *") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text(if (initialUser != null) "Nueva contraseña (opcional)" else "Contraseña") },
+                    label = { Text(if (initialUser != null) "Nueva contraseña (opcional)" else "Contraseña *") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -439,7 +425,7 @@ fun UserFormDialog(
             Button(
                 onClick = {
                     if (nombres.isBlank() || email.isBlank()) return@Button
-                    val id = initialUser?.id ?: "USR-${System.currentTimeMillis().toString().takeLast(4)}"
+                    val id = initialUser?.id ?: "USR-${(100..999).random()}"
                     val rolId = when (selectedRole) {
                         UserRole.OPERADOR -> 1L
                         UserRole.ANALISTA -> 2L
