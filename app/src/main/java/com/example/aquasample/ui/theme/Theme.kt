@@ -12,28 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
-object ThemeManager {
-    private val _isDarkTheme = MutableStateFlow<Boolean?>(null)
-    val isDarkTheme: StateFlow<Boolean?> = _isDarkTheme.asStateFlow()
-
-    fun toggleTheme(isSystemDark: Boolean) {
-        val current = _isDarkTheme.value ?: isSystemDark
-        _isDarkTheme.value = !current
-    }
-
-    fun toggleDarkMode() {
-        val current = _isDarkTheme.value ?: false
-        _isDarkTheme.value = !current
-    }
-
-    fun setDarkTheme(isDark: Boolean?) {
-        _isDarkTheme.value = isDark
-    }
-}
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryAqua,
@@ -77,7 +55,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun AquaSampleTheme(
-    darkTheme: Boolean = ThemeManager.isDarkTheme.collectAsState().value ?: isSystemInDarkTheme(),
+    darkTheme: Boolean = ThemeManager.isDarkTheme.collectAsState().value ?: false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
@@ -88,7 +66,7 @@ fun AquaSampleTheme(
             val window = (view.context as? Activity)?.window
             window?.let {
                 it.statusBarColor = colorScheme.primary.toArgb()
-                WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = false
+                WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !darkTheme
             }
         }
     }

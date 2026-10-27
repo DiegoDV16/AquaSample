@@ -1,6 +1,7 @@
 package com.example.aquasample.ui.sample
 
 import android.app.Application
+import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.data.local.database.AppDatabase
@@ -21,17 +22,7 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
 
     private val dao = AppDatabase.getInstance(application).muestraDao()
 
-    private val _uiState = MutableStateFlow(
-        SampleUiState(
-            calibreMatrix = List(30) { index ->
-                when (index) {
-                    0 -> "55"; 1 -> "62"; 2 -> "58"; 3 -> "60"; 4 -> "54"
-                    5 -> "64"; 6 -> "59"; 7 -> "61"; 8 -> "57"; 9 -> "63"
-                    else -> ""
-                }
-            }
-        )
-    )
+    private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
 
     fun onConcesionChanged(value: String) {
@@ -74,12 +65,40 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun onAddPhoto() {
-        _uiState.update { it.copy(hasPhoto = true, photoCount = it.photoCount + 1) }
+    fun onPhotoCaptured(value: Bitmap): Boolean {
+        if (_uiState.value.photoBitmaps.size >= 5) return false
+        _uiState.update { state ->
+            val newList = state.photoBitmaps.toMutableList().apply { add(0, value) }
+            state.copy(photoBitmaps = newList)
+        }
+        return true
     }
 
-    fun onSaveSample() {
+    fun onPhotoAdded(value: Bitmap): Boolean {
+        if (_uiState.value.photoBitmaps.size >= 5) return false
+        _uiState.update { state ->
+            val newList = state.photoBitmaps.toMutableList().apply { add(value) }
+            state.copy(photoBitmaps = newList)
+        }
+        return true
+    }
+
+    fun onRemovePhoto(index: Int) {
+        _uiState.update { state ->
+            if (index in state.photoBitmaps.indices) {
+                val newList = state.photoBitmaps.toMutableList().apply { removeAt(index) }
+                state.copy(photoBitmaps = newList)
+            } else state
+        }
+    }
+
+    fun onSaveSample(onValidationError: () -> Unit = {}): Boolean {
         val currentState = _uiState.value
+        if (currentState.photoBitmaps.isEmpty()) {
+            onValidationError()
+            return false
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isSaving = true) }
             delay(500)
@@ -93,7 +112,7 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
 
             val currentSession = SessionManager.currentSession.value
             val operatorId = currentSession?.id ?: "USR-001"
-            val operatorAlias = currentSession?.nombreCompleto ?: "Operador"
+            val operatorAlias = if (ProfileRepository.alias.isNotBlank()) ProfileRepository.alias else (currentSession?.nombreCompleto ?: "Operador")
 
             val entity = MuestraEntity(
                 id = id,
@@ -102,4 +121,36 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                 concesion = currentState.concesion.ifBlank { "Concesión Dalcahue #104" },
                 tren = currentState.tren.ifBlank { "Tren 01" },
                 linea = currentState.linea.ifBlank { "Línea L-01" },
-                tram
+                tramoLongitudCm = currentState.tramoLongitudCm.ifBlank { "150" },
+                conteoManual = currentState.conteoManual.ifBlank { "30" },
+                calibreMatrix = currentState.calibreMatrix,
+                averageCalibre = currentState.averageCalibre,
+                photoCount = currentState.photoBitmaps.size,
+                fotos = emptyList(),
+                observaciones = currentState.observaciones,
+                tags = currentState.selectedTags.toList(),
+                fechaHora = fechaHora,
+                timestamp = now.time,
+                estado = "COMPLETADO",
+                sincronizado = true,
+                operatorAlias = operatorAlias
+            )
+
+            // Inserción directa en la base de datos de Room
+            dao.insertSample(entity)
+
+            // Resetea el estado y marca guardado exitoso
+            _uiState.update {
+                SampleUiState(
+                    isSaving = false,
+                    isSavedSuccess = true
+                )
+            }
+        }
+        return true
+    }
+
+    fun resetSavedSuccess() {
+        _uiState.update { it.copy(isSavedSuccess = false) }
+    }
+}

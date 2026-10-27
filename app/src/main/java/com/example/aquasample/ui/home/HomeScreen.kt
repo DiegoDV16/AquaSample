@@ -1,6 +1,8 @@
 package com.example.aquasample.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,20 +37,26 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.data.session.UserSession
+import com.example.aquasample.ui.sample.ProfileRepository
 import com.example.aquasample.ui.theme.AquaSampleTheme
 import com.example.aquasample.ui.theme.ThemeManager
 
@@ -58,7 +66,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     userSession: UserSession = UserSession("1", "operador", "Juan Pérez", "operador@aquasample.cl", UserRole.OPERADOR),
     onNavigateToNewSample: () -> Unit = {},
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -142,7 +151,13 @@ fun HomeScreen(
         ) {
             // Tarjeta de Bienvenida
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = if (userSession.role == UserRole.OPERADOR) {
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigateToProfile() }
+                } else {
+                    Modifier.fillMaxWidth()
+                },
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -157,23 +172,34 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .size(52.dp)
+                            .clip(CircleShape)
                             .background(
                                 color = MaterialTheme.colorScheme.primary,
                                 shape = CircleShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = userSession.nombreCompleto.take(1),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
-                        )
+                        val photo = ProfileRepository.photoBitmap
+                        if (userSession.role == UserRole.OPERADOR && photo != null) {
+                            Image(
+                                bitmap = photo.asImageBitmap(),
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text(
+                                text = if (userSession.role == UserRole.OPERADOR) ProfileRepository.alias.take(1).uppercase() else userSession.nombreCompleto.take(1),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
-                            text = "¡Hola, ${userSession.nombreCompleto}!",
+                            text = if (userSession.role == UserRole.OPERADOR) "¡Hola, ${ProfileRepository.alias}!" else "¡Hola, ${userSession.nombreCompleto}!",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -243,6 +269,41 @@ fun HomeScreen(
                         text = "Registrar Nueva Muestra",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Tarjeta de Configuración de Apariencia (Switch Modo Oscuro)
+            val isDarkMode by ThemeManager.isDarkMode.collectAsState()
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.DarkMode,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Modo Oscuro",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Switch(
+                        checked = isDarkMode,
+                        onCheckedChange = { ThemeManager.toggleDarkMode() }
                     )
                 }
             }
