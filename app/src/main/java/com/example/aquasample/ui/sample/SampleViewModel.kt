@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.data.local.database.AppDatabase
 import com.example.aquasample.data.local.entity.MuestraEntity
+import com.example.aquasample.data.session.SessionManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -107,15 +108,19 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
             val nextNum = (last?.id?.substringAfterLast("-")?.toIntOrNull() ?: 0) + 1
             val id = String.format("#M-%04d", nextNum)
 
+            val currentSession = SessionManager.currentSession.value
+            val operatorId = currentSession?.id ?: "USR-001"
+            val operatorAlias = if (ProfileRepository.alias.isNotBlank()) ProfileRepository.alias else (currentSession?.nombreCompleto ?: "Operador")
+
             val entity = MuestraEntity(
                 id = id,
-                centroId = 1L, // Concesión Dalcahue #104 por defecto
-                operadorId = "USR-001", // Francisca Rojas (Operador)
-                concesion = currentState.concesion,
-                tren = currentState.tren,
-                linea = currentState.linea,
-                tramoLongitudCm = currentState.tramoLongitudCm,
-                conteoManual = currentState.conteoManual,
+                centroId = 1L,
+                operadorId = operatorId,
+                concesion = currentState.concesion.ifBlank { "Concesión Dalcahue #104" },
+                tren = currentState.tren.ifBlank { "Tren 01" },
+                linea = currentState.linea.ifBlank { "Línea L-01" },
+                tramoLongitudCm = currentState.tramoLongitudCm.ifBlank { "150" },
+                conteoManual = currentState.conteoManual.ifBlank { "30" },
                 calibreMatrix = currentState.calibreMatrix,
                 averageCalibre = currentState.averageCalibre,
                 photoCount = currentState.photoBitmaps.size,
@@ -126,11 +131,19 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                 timestamp = now.time,
                 estado = "COMPLETADO",
                 sincronizado = true,
-                operatorAlias = ProfileRepository.alias
+                operatorAlias = operatorAlias
             )
+            
+            // Inserción directa en la base de datos de Room
             dao.insertSample(entity)
 
-            _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
+            // Resetea el formulario y marca guardado exitoso
+            _uiState.update { 
+                SampleUiState(
+                    isSaving = false,
+                    isSavedSuccess = true
+                )
+            }
         }
         return true
     }
