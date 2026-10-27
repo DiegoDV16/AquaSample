@@ -21,6 +21,18 @@ class UsuarioRepository(private val usuarioDao: UsuarioDao) {
         usuarioDao.insertUsers(users)
     }
 
+    suspend fun updateUser(user: UsuarioEntity) = withContext(Dispatchers.IO) {
+        usuarioDao.updateUser(user)
+    }
+
+    suspend fun deleteUser(user: UsuarioEntity) = withContext(Dispatchers.IO) {
+        usuarioDao.deleteUser(user)
+    }
+
+    suspend fun deleteUserById(userId: String) = withContext(Dispatchers.IO) {
+        usuarioDao.deleteUserById(userId)
+    }
+
     suspend fun login(email: String, passwordHash: String): UsuarioEntity? = withContext(Dispatchers.IO) {
         usuarioDao.login(email, passwordHash)
     }

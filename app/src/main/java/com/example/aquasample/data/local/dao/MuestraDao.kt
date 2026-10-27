@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MuestraDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSample(sample: MuestraEntity)
+    suspend fun insertSample(sample: MuestraEntity): Long
 
     @Update
-    suspend fun updateSample(sample: MuestraEntity)
+    suspend fun updateSample(sample: MuestraEntity): Int
 
     @Delete
-    suspend fun deleteSample(sample: MuestraEntity)
+    suspend fun deleteSample(sample: MuestraEntity): Int
 
     @Query("SELECT * FROM muestras WHERE id = :id LIMIT 1")
     suspend fun getSampleById(id: String): MuestraEntity?
@@ -61,5 +61,5 @@ interface MuestraDao {
     suspend fun getLastSample(): MuestraEntity?
 
     @Query("UPDATE muestras SET sincronizado = :sincronizado, estado = :nuevoEstado WHERE id = :id")
-    suspend fun updateEstadoSincronizacion(id: String, sincronizado: Boolean, nuevoEstado: String)
+    suspend fun updateEstadoSincronizacion(id: String, sincronizado: Boolean, nuevoEstado: String): Int
 }

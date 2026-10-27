@@ -13,7 +13,7 @@ interface CentroCultivoDao {
     suspend fun insertCentro(centro: CentroCultivoEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCentros(centros: List<CentroCultivoEntity>)
+    suspend fun insertCentros(centros: List<CentroCultivoEntity>): List<Long>
 
     @Query("SELECT * FROM centros_cultivo ORDER BY nombre ASC")
     fun getAllCentros(): Flow<List<CentroCultivoEntity>>

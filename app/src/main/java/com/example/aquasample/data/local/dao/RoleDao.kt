@@ -13,7 +13,7 @@ interface RoleDao {
     suspend fun insertRole(role: RoleEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRoles(roles: List<RoleEntity>)
+    suspend fun insertRoles(roles: List<RoleEntity>): List<Long>
 
     @Query("SELECT * FROM roles ORDER BY id ASC")
     fun getAllRoles(): Flow<List<RoleEntity>>
