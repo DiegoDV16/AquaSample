@@ -142,6 +142,16 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                         apellidoMaterno = "Vargas",
                         rolId = 3,
                         estado = "ACTIVO"
+                    ),
+                    UsuarioEntity(
+                        id = "USR-004",
+                        email = "francisca.rojas@aldemar.cl",
+                        passwordHash = "operador123",
+                        nombres = "Francisca",
+                        apellidoPaterno = "Rojas",
+                        apellidoMaterno = "Soto",
+                        rolId = 1,
+                        estado = "ACTIVO"
                     )
                 )
 

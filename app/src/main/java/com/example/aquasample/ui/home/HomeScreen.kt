@@ -196,6 +196,32 @@ fun HomeScreen(
                 }
             }
 
+            // Botón Nueva Muestra (Solo para OPERADOR)
+            if (userSession.role == UserRole.OPERADOR) {
+                Button(
+                    onClick = onNavigateToNewSample,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Registrar Nueva Muestra",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
             // Métricas Rápidas
             Text(
                 text = "Resumen de Terreno",
