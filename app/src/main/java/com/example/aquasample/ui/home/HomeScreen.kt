@@ -118,7 +118,7 @@ fun HomeScreen(
 
                     // Badge ONLINE
                     Surface(
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(end = 4.dp)
                     ) {
@@ -130,7 +130,7 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(8.dp)
                                     .background(
-                                        color = MaterialTheme.colorScheme.onSecondary,
+                                        color = MaterialTheme.colorScheme.primary,
                                         shape = CircleShape
                                     )
                             )
@@ -139,7 +139,7 @@ fun HomeScreen(
                                 text = "ONLINE",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondary
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
