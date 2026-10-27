@@ -44,16 +44,19 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.aquasample.data.local.database.AppDatabase
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.data.session.UserSession
 import com.example.aquasample.ui.sample.ProfileRepository
@@ -69,6 +72,18 @@ fun HomeScreen(
     onLogout: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val muestraDao = remember { AppDatabase.getInstance(context).muestraDao() }
+    val muestrasConDetalle by muestraDao.getAllMuestrasConDetalle().collectAsState(initial = emptyList())
+
+    val totalMuestrasCount = muestrasConDetalle.size
+    val avgCalibreValue = if (muestrasConDetalle.isNotEmpty()) {
+        val nonZero = muestrasConDetalle.map { it.muestra.averageCalibre }.filter { it > 0 }
+        if (nonZero.isNotEmpty()) String.format(java.util.Locale.getDefault(), "%.1f mm", nonZero.average()) else "0.0 mm"
+    } else {
+        "0.0 mm"
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -219,7 +234,7 @@ fun HomeScreen(
                 }
             }
 
-            // Métricas Rápidas
+            // Métricas Rápidas Dinámicas desde Room
             Text(
                 text = "Resumen de Terreno",
                 style = MaterialTheme.typography.titleMedium,
@@ -232,16 +247,16 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 MetricCard(
-                    title = "Muestras Hoy",
-                    value = "14",
-                    subtitle = "8 analizadas",
+                    title = "Muestras Registradas",
+                    value = totalMuestrasCount.toString(),
+                    subtitle = "Registros en Room",
                     icon = Icons.Default.Assessment,
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
                     title = "Calibre Prom.",
-                    value = "58.4 mm",
-                    subtitle = "+2.1 mm esta sem.",
+                    value = avgCalibreValue,
+                    subtitle = "Promedio calculado",
                     icon = Icons.Default.WaterDrop,
                     modifier = Modifier.weight(1f)
                 )
@@ -308,7 +323,7 @@ fun HomeScreen(
                 }
             }
 
-            // Muestras Recientes
+            // Muestras Recientes Dinámicas desde Room
             Text(
                 text = "Últimos Registros de Trazabilidad",
                 style = MaterialTheme.typography.titleMedium,
@@ -316,21 +331,43 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            RecentSampleItem(
-                code = "#M-9024",
-                location = "Línea L-04 · Tren 2",
-                status = "COMPLETADO",
-                count = "120 choritos",
-                avgCalibre = "62 mm"
-            )
-
-            RecentSampleItem(
-                code = "#M-9023",
-                location = "Línea L-02 · Tren 1",
-                status = "PENDIENTE",
-                count = "95 choritos",
-                avgCalibre = "54 mm"
-            )
+            if (muestrasConDetalle.isNotEmpty()) {
+                muestrasConDetalle.take(3).forEach { item ->
+                    val m = item.muestra
+                    val locationText = if (m.linea.isNotBlank() || m.tren.isNotBlank()) {
+                        "${m.linea.ifBlank { "Línea L-01" }} · ${m.tren.ifBlank { "Tren 01" }}"
+                    } else {
+                        m.concesion.ifBlank { "Concesión Dalcahue #104" }
+                    }
+                    val countText = if (m.conteoManual.isNotBlank()) "${m.conteoManual} ind." else "${m.photoCount} foto(s)"
+                    RecentSampleItem(
+                        code = m.id,
+                        location = locationText,
+                        status = m.estado.ifBlank { "COMPLETADO" },
+                        count = countText,
+                        avgCalibre = String.format(java.util.Locale.getDefault(), "%.1f mm", m.averageCalibre)
+                    )
+                }
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No hay registros de muestras aún. Presiona 'Registrar Nueva Muestra' para agregar la primera.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
     }
 }

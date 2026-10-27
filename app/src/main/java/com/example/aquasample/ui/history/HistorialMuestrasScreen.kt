@@ -84,33 +84,24 @@ fun HistorialMuestrasScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Todas") }
 
-    val sampleList = if (muestrasConDetalle.isNotEmpty()) {
-        muestrasConDetalle.map { item ->
-            val m = item.muestra
-            val operadorNombre = item.operadorNombreCompleto?.ifBlank { null }
-                ?: m.operatorAlias.ifBlank { "Francisca Rojas" }
-            val lineaTrenText = if (m.linea.isNotBlank() || m.tren.isNotBlank()) {
-                "${m.linea.ifBlank { "Línea L-01" }} · ${m.tren.ifBlank { "Tren 01" }}"
-            } else {
-                m.concesion.ifBlank { "Concesión Dalcahue #104" }
-            }
-
-            HistoryItem(
-                id = m.id,
-                lineCode = lineaTrenText,
-                date = m.fechaHora.ifBlank { "Hoy" },
-                status = m.estado.ifBlank { "COMPLETADO" },
-                count = m.conteoManual.toIntOrNull() ?: m.photoCount,
-                avgCalibre = m.averageCalibre,
-                operator = operadorNombre
-            )
+    val sampleList = muestrasConDetalle.map { item ->
+        val m = item.muestra
+        val operadorNombre = item.operadorNombreCompleto?.ifBlank { null }
+            ?: m.operatorAlias.ifBlank { "Operador" }
+        val lineaTrenText = if (m.linea.isNotBlank() || m.tren.isNotBlank()) {
+            "${m.linea.ifBlank { "Línea L-01" }} · ${m.tren.ifBlank { "Tren 01" }}"
+        } else {
+            m.concesion.ifBlank { "Concesión Dalcahue #104" }
         }
-    } else {
-        listOf(
-            HistoryItem("#M-9024", "Línea L-04 · Tren 2", "Hoy, 10:30 AM", "COMPLETADO", 120, 62.4, "Francisca Rojas"),
-            HistoryItem("#M-9023", "Línea L-02 · Tren 1", "Hoy, 09:15 AM", "COMPLETADO", 95, 54.0, "Mateo Cárdenas"),
-            HistoryItem("#M-9022", "Línea L-03 · Tren 4", "Ayer, 16:45 PM", "COMPLETADO", 140, 60.8, "Francisca Rojas"),
-            HistoryItem("#M-9021", "Línea L-01 · Tren 2", "02 Oct, 11:20 AM", "COMPLETADO", 110, 58.2, "Andrea Barrientos")
+
+        HistoryItem(
+            id = m.id,
+            lineCode = lineaTrenText,
+            date = m.fechaHora.ifBlank { "Hoy" },
+            status = m.estado.ifBlank { "COMPLETADO" },
+            count = m.conteoManual.toIntOrNull() ?: m.photoCount,
+            avgCalibre = m.averageCalibre,
+            operator = operadorNombre
         )
     }
 
@@ -213,12 +204,33 @@ fun HistorialMuestrasScreen(
                 }
             }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(filteredList) { item ->
-                    SampleHistoryCard(item = item)
+            if (filteredList.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredList) { item ->
+                        SampleHistoryCard(item = item)
+                    }
+                }
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No se encontraron muestras registradas en la base de datos.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
