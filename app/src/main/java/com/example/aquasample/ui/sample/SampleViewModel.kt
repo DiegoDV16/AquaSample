@@ -1,15 +1,20 @@
 package com.example.aquasample.ui.sample
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.example.aquasample.data.local.database.AppDatabase
+import com.example.aquasample.data.local.entity.MuestraEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SampleViewModel : ViewModel() {
+class SampleViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val muestraDao = AppDatabase.getInstance(application).muestraDao()
 
     private val _uiState = MutableStateFlow(
         SampleUiState(
@@ -69,9 +74,32 @@ class SampleViewModel : ViewModel() {
     }
 
     fun onSaveSample() {
-        viewModelScope.launch {
+        val state = _uiState.value
+        val sampleId = "#M-${(9000..9999).random()}"
+        val sampleEntity = MuestraEntity(
+            id = sampleId,
+            concesion = state.concesion,
+            tren = state.tren,
+            linea = state.linea,
+            tramoLongitudCm = state.tramoLongitudCm,
+            conteoManual = state.conteoManual,
+            calibreMatrix = state.calibreMatrix.filter { it.isNotBlank() },
+            averageCalibre = state.averageCalibre,
+            photoCount = state.photoCount,
+            observaciones = state.observaciones,
+            tags = state.selectedTags.toList(),
+            fechaHora = "Hoy, " + java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date()),
+            estado = "COMPLETADO",
+            sincronizado = true
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isSaving = true) }
-            delay(1000)
+            try {
+                muestraDao.insertSample(sampleEntity)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
         }
     }

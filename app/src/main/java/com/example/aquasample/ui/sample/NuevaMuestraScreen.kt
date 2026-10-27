@@ -72,7 +72,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import com.example.aquasample.ui.theme.AquaSampleTheme
+import com.example.aquasample.ui.theme.ThemeManager
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -120,6 +124,15 @@ fun NuevaMuestraScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
+                    val isDarkTheme = ThemeManager.isDarkTheme.collectAsState().value ?: isSystemInDarkTheme()
+                    IconButton(onClick = { ThemeManager.toggleTheme(isDarkTheme) }) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Cambiar Modo Oscuro/Claro",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
                     // Badge ONLINE
                     Surface(
                         color = MaterialTheme.colorScheme.secondary,

@@ -40,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,10 +48,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.aquasample.data.local.database.AppDatabase
 import com.example.aquasample.ui.theme.AquaSampleTheme
+import com.example.aquasample.ui.theme.ThemeManager
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 
 data class HistoryItem(
     val id: String,
@@ -70,15 +77,40 @@ fun HistorialMuestrasScreen(
     onNavigateToNewSample: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val muestraDao = remember { AppDatabase.getInstance(context).muestraDao() }
+    val muestrasConDetalle by muestraDao.getAllMuestrasConDetalle().collectAsState(initial = emptyList())
+
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Todas") }
 
-    val sampleList = remember {
+    val sampleList = if (muestrasConDetalle.isNotEmpty()) {
+        muestrasConDetalle.map { item ->
+            val m = item.muestra
+            val operadorNombre = item.operadorNombreCompleto?.ifBlank { null }
+                ?: m.operatorAlias.ifBlank { "Francisca Rojas" }
+            val lineaTrenText = if (m.linea.isNotBlank() || m.tren.isNotBlank()) {
+                "${m.linea.ifBlank { "Línea L-01" }} · ${m.tren.ifBlank { "Tren 01" }}"
+            } else {
+                m.concesion.ifBlank { "Concesión Dalcahue #104" }
+            }
+
+            HistoryItem(
+                id = m.id,
+                lineCode = lineaTrenText,
+                date = m.fechaHora.ifBlank { "Hoy" },
+                status = m.estado.ifBlank { "COMPLETADO" },
+                count = m.conteoManual.toIntOrNull() ?: m.photoCount,
+                avgCalibre = m.averageCalibre,
+                operator = operadorNombre
+            )
+        }
+    } else {
         listOf(
-            HistoryItem("#M-9024", "Línea L-04 · Tren 2", "Hoy, 10:30 AM", "COMPLETADO", 120, 62.4, "Juan Pérez"),
-            HistoryItem("#M-9023", "Línea L-02 · Tren 1", "Hoy, 09:15 AM", "PENDIENTE", 95, 54.0, "Carlos Soto"),
-            HistoryItem("#M-9022", "Línea L-03 · Tren 4", "Ayer, 16:45 PM", "COMPLETADO", 140, 60.8, "Juan Pérez"),
-            HistoryItem("#M-9021", "Línea L-01 · Tren 2", "02 Oct, 11:20 AM", "COMPLETADO", 110, 58.2, "Ana Silva")
+            HistoryItem("#M-9024", "Línea L-04 · Tren 2", "Hoy, 10:30 AM", "COMPLETADO", 120, 62.4, "Francisca Rojas"),
+            HistoryItem("#M-9023", "Línea L-02 · Tren 1", "Hoy, 09:15 AM", "COMPLETADO", 95, 54.0, "Mateo Cárdenas"),
+            HistoryItem("#M-9022", "Línea L-03 · Tren 4", "Ayer, 16:45 PM", "COMPLETADO", 140, 60.8, "Francisca Rojas"),
+            HistoryItem("#M-9021", "Línea L-01 · Tren 2", "02 Oct, 11:20 AM", "COMPLETADO", 110, 58.2, "Andrea Barrientos")
         )
     }
 
@@ -104,6 +136,14 @@ fun HistorialMuestrasScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
+                    val isDarkTheme = ThemeManager.isDarkTheme.collectAsState().value ?: isSystemInDarkTheme()
+                    IconButton(onClick = { ThemeManager.toggleTheme(isDarkTheme) }) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Cambiar Modo Oscuro/Claro",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                     IconButton(onClick = onLogout) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
