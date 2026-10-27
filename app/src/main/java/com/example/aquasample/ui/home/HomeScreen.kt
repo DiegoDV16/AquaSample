@@ -3,6 +3,7 @@ package com.example.aquasample.ui.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,23 +38,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.aquasample.data.local.database.AppDatabase
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.data.session.UserSession
 import com.example.aquasample.ui.sample.ProfileRepository
@@ -68,6 +72,18 @@ fun HomeScreen(
     onLogout: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val muestraDao = remember { AppDatabase.getInstance(context).muestraDao() }
+    val muestrasConDetalle by muestraDao.getAllMuestrasConDetalle().collectAsState(initial = emptyList())
+
+    val totalMuestrasCount = muestrasConDetalle.size
+    val avgCalibreValue = if (muestrasConDetalle.isNotEmpty()) {
+        val nonZero = muestrasConDetalle.map { it.muestra.averageCalibre }.filter { it > 0 }
+        if (nonZero.isNotEmpty()) String.format(java.util.Locale.getDefault(), "%.1f mm", nonZero.average()) else "0.0 mm"
+    } else {
+        "0.0 mm"
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -91,19 +107,41 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
+                    val isDarkTheme = ThemeManager.isDarkTheme.collectAsState().value ?: isSystemInDarkTheme()
+                    IconButton(onClick = { ThemeManager.toggleTheme(isDarkTheme) }) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Cambiar Modo Oscuro/Claro",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
                     // Badge ONLINE
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.secondary,
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 4.dp)
                     ) {
-                        Text(
-                            text = "ONLINE",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.onSecondary,
+                                        shape = CircleShape
+                                    )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "ONLINE",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
                     }
 
                     // Botón Cierre de Sesión Global
@@ -196,7 +234,7 @@ fun HomeScreen(
                 }
             }
 
-            // Métricas Rápidas
+            // Métricas Rápidas Dinámicas desde Room
             Text(
                 text = "Resumen de Terreno",
                 style = MaterialTheme.typography.titleMedium,
@@ -209,15 +247,48 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 MetricCard(
-                    title = "Muestras Hoy",
-                    value = "14",
-                    subtitle = "8 analizadas",
+                    title = "Muestras Registradas",
+                    value = totalMuestrasCount.toString(),
+                    subtitle = "Registros en Room",
                     icon = Icons.Default.Assessment,
+                    modifier = Modifier.weight(1f)
+                )
+                MetricCard(
+                    title = "Calibre Prom.",
+                    value = avgCalibreValue,
+                    subtitle = "Promedio calculado",
+                    icon = Icons.Default.WaterDrop,
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            // Tarjeta de Configuración de Apariencia (Modo Oscuro)
+            // Botón Nueva Muestra (Solo disponible para OPERADOR)
+            if (userSession.role == UserRole.OPERADOR) {
+                Button(
+                    onClick = onNavigateToNewSample,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Registrar Nueva Muestra",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Tarjeta de Configuración de Apariencia (Switch Modo Oscuro)
             val isDarkMode by ThemeManager.isDarkMode.collectAsState()
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -226,3 +297,205 @@ fun HomeScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.DarkMode,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Modo Oscuro",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Switch(
+                        checked = isDarkMode,
+                        onCheckedChange = { ThemeManager.toggleDarkMode() }
+                    )
+                }
+            }
+
+            // Muestras Recientes Dinámicas desde Room
+            Text(
+                text = "Últimos Registros de Trazabilidad",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            if (muestrasConDetalle.isNotEmpty()) {
+                muestrasConDetalle.take(3).forEach { item ->
+                    val m = item.muestra
+                    val locationText = if (m.linea.isNotBlank() || m.tren.isNotBlank()) {
+                        "${m.linea.ifBlank { "Línea L-01" }} · ${m.tren.ifBlank { "Tren 01" }}"
+                    } else {
+                        m.concesion.ifBlank { "Concesión Dalcahue #104" }
+                    }
+                    val countText = if (m.conteoManual.isNotBlank()) "${m.conteoManual} ind." else "${m.photoCount} foto(s)"
+                    RecentSampleItem(
+                        code = m.id,
+                        location = locationText,
+                        status = m.estado.ifBlank { "COMPLETADO" },
+                        count = countText,
+                        avgCalibre = String.format(java.util.Locale.getDefault(), "%.1f mm", m.averageCalibre)
+                    )
+                }
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No hay registros de muestras aún. Presiona 'Registrar Nueva Muestra' para agregar la primera.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MetricCard(
+    title: String,
+    value: String,
+    subtitle: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun RecentSampleItem(
+    code: String,
+    location: String,
+    status: String,
+    count: String,
+    avgCalibre: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = code,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        color = if (status == "COMPLETADO") {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        },
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = status,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (status == "COMPLETADO") {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = location,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "$count · Calibre prom: $avgCalibre",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    AquaSampleTheme {
+        HomeScreen()
+    }
+}

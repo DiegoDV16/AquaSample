@@ -1,6 +1,7 @@
 package com.example.aquasample.ui.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -53,8 +56,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.aquasample.data.local.database.AppDatabase
-import com.example.aquasample.ui.sample.ProfileRepository
 import com.example.aquasample.ui.theme.AquaSampleTheme
+import com.example.aquasample.ui.theme.ThemeManager
 
 data class HistoryItem(
     val id: String,
@@ -75,27 +78,37 @@ fun HistorialMuestrasScreen(
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val dao = remember { AppDatabase.getInstance(context).sampleDao() }
-    val samples by dao.getAllSamples().collectAsState(initial = emptyList())
+    val muestraDao = remember { AppDatabase.getInstance(context).muestraDao() }
+    val muestrasConDetalle by muestraDao.getAllMuestrasConDetalle().collectAsState(initial = emptyList())
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Todas") }
 
-    val sampleList = samples.map {
+    val sampleList = muestrasConDetalle.map { item ->
+        val m = item.muestra
+        val operadorNombre = item.operadorNombreCompleto?.ifBlank { null }
+            ?: m.operatorAlias.ifBlank { "Operador" }
+        val lineaTrenText = if (m.linea.isNotBlank() || m.tren.isNotBlank()) {
+            "${m.linea.ifBlank { "Línea L-01" }} · ${m.tren.ifBlank { "Tren 01" }}"
+        } else {
+            m.concesion.ifBlank { "Concesión Dalcahue #104" }
+        }
+
         HistoryItem(
-            id = it.id,
-            lineCode = "Línea ${it.linea} · Tren ${it.tren}",
-            date = it.fechaHora,
-            status = "COMPLETADO",
-            count = it.conteoManual.toIntOrNull() ?: it.photoCount,
-            avgCalibre = it.averageCalibre,
-            operator = it.operatorAlias.ifBlank { ProfileRepository.alias }
+            id = m.id,
+            lineCode = lineaTrenText,
+            date = m.fechaHora.ifBlank { "Hoy" },
+            status = m.estado.ifBlank { "COMPLETADO" },
+            count = m.conteoManual.toIntOrNull() ?: m.photoCount,
+            avgCalibre = m.averageCalibre,
+            operator = operadorNombre
         )
     }
 
     val filteredList = sampleList.filter {
         it.id.contains(searchQuery, ignoreCase = true) ||
-                it.lineCode.contains(searchQuery, ignoreCase = true)
+                it.lineCode.contains(searchQuery, ignoreCase = true) ||
+                it.operator.contains(searchQuery, ignoreCase = true)
     }
 
     Scaffold(
@@ -114,17 +127,12 @@ fun HistorialMuestrasScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = "ONLINE",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    val isDarkTheme = ThemeManager.isDarkTheme.collectAsState().value ?: isSystemInDarkTheme()
+                    IconButton(onClick = { ThemeManager.toggleTheme(isDarkTheme) }) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Cambiar Modo Oscuro/Claro",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     IconButton(onClick = onLogout) {
@@ -179,7 +187,7 @@ fun HistorialMuestrasScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                listOf("Todas", "Por Línea").forEach { filter ->
+                listOf("Todas", "Por Línea", "Por Operador").forEach { filter ->
                     val isSelected = selectedFilter == filter
                     FilterChip(
                         selected = isSelected,
@@ -196,12 +204,33 @@ fun HistorialMuestrasScreen(
                 }
             }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(filteredList) { item ->
-                    SampleHistoryCard(item = item)
+            if (filteredList.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredList) { item ->
+                        SampleHistoryCard(item = item)
+                    }
+                }
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No se encontraron muestras registradas en la base de datos.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
