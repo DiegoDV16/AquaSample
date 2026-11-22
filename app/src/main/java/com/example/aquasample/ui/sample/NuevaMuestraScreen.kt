@@ -85,6 +85,10 @@ fun NuevaMuestraScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchMarineConditions(latitude = -35.9, longitude = -72.9)
+    }
+
     LaunchedEffect(uiState.isSavedSuccess) {
         if (uiState.isSavedSuccess) {
             Toast.makeText(
@@ -573,6 +577,33 @@ fun NuevaMuestraScreen(
                                 )
                             )
                         }
+                    }
+                }
+            }
+
+            // Tarjeta de condiciones marinas (Open-Meteo Marine API)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Condiciones Marinas (Open-Meteo)",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    uiState.marineCurrent?.let { marine ->
+                        Text("Oleaje (m): ${marine.waveHeightMax ?: 0.0}")
+                        Text("Temperatura del mar: ${marine.temperatureWater ?: 0.0} °C")
+                        Text("Viento: ${marine.windSpeed10m ?: 0.0} m/s")
+                    }
+                    uiState.marineError?.let { error ->
+                        Text(text = error)
                     }
                 }
             }

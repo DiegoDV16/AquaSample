@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import com.example.aquasample.data.repository.MarineRepository
+import com.example.aquasample.data.remote.model.MarineCurrent
 import kotlinx.coroutines.launch
 
 class SampleViewModel : ViewModel() {
@@ -23,6 +25,8 @@ class SampleViewModel : ViewModel() {
         )
     )
     val uiState: StateFlow<SampleUiState> = _uiState.asStateFlow()
+
+    private val marineRepository = MarineRepository()
 
     fun onConcesionChanged(value: String) {
         _uiState.update { it.copy(concesion = value) }
@@ -68,11 +72,29 @@ class SampleViewModel : ViewModel() {
         _uiState.update { it.copy(hasPhoto = true, photoCount = it.photoCount + 1) }
     }
 
+    fun fetchMarineConditions(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingMarine = true, marineError = null) }
+            try {
+                val response = marineRepository.getMarineConditions(latitude, longitude)
+                _uiState.update { it.copy(isLoadingMarine = false, marineCurrent = response?.current) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoadingMarine = false, marineError = "No se pudo obtener las condiciones marinas") }
+            }
+        }
+    }
+
     fun onSaveSample() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
             delay(1000)
-            _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
+            _uiState.update {
+                it.copy(
+                    isSaving = false,
+                    isSavedSuccess = true,
+                    savedMarineCurrent = it.marineCurrent
+                )
+            }
         }
     }
 

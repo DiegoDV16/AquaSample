@@ -1,5 +1,7 @@
 package com.example.aquasample.ui.sample
 
+import com.example.aquasample.data.remote.model.MarineCurrent
+
 data class SampleUiState(
     val concesion: String = "Concesión Dalcahue #104",
     val tren: String = "Tren 02",
@@ -12,7 +14,11 @@ data class SampleUiState(
     val observaciones: String = "",
     val selectedTags: Set<String> = setOf("#ValvasSanas", "#SinFouling"),
     val isSaving: Boolean = false,
-    val isSavedSuccess: Boolean = false
+    val isSavedSuccess: Boolean = false,
+    val isLoadingMarine: Boolean = false,
+    val marineCurrent: MarineCurrent? = null,
+    val marineError: String? = null,
+    val savedMarineCurrent: MarineCurrent? = null
 ) {
     val averageCalibre: Double
         get() {
