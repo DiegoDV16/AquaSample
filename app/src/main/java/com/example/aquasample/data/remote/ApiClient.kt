@@ -8,17 +8,12 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * Cliente Retrofit de la app.
  *
- * Se apunta a `127.0.0.1` y se usa `adb reverse tcp:8080 tcp:8080` para que el
- * emulador (o un teléfono por USB) llegue al backend que corre en el PC:
- *
- *     adb reverse tcp:8080 tcp:8080
- *
- * Sin ese túnel hay que usar la IP de la máquina en la red local, por ejemplo
- * `http://192.168.1.50:8080/`, y volver a compilar.
+ * La URL se toma de [ServerConfig]: por defecto `127.0.0.1` para el emulador o
+ * un teléfono por USB con `adb reverse tcp:8080 tcp:8080`. En un teléfono por
+ * WiFi hay que configurar la IP del PC (por ejemplo `http://192.168.1.50:8080/`)
+ * o una URL pública desde Perfil → Servidor.
  */
 object ApiClient {
-
-    private const val BASE_URL = "http://127.0.0.1:8080/"
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -26,12 +21,24 @@ object ApiClient {
         .writeTimeout(20, TimeUnit.SECONDS)
         .build()
 
-    val api: AquaSampleApi by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(httpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(AquaSampleApi::class.java)
-    }
+    @Volatile
+    private var cachedUrl: String? = null
+
+    @Volatile
+    private var cachedApi: AquaSampleApi? = null
+
+    val api: AquaSampleApi
+        get() = synchronized(this) {
+            val url = ServerConfig.baseUrl
+            if (cachedApi == null || cachedUrl != url) {
+                cachedApi = Retrofit.Builder()
+                    .baseUrl(url)
+                    .client(httpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(AquaSampleApi::class.java)
+                cachedUrl = url
+            }
+            cachedApi!!
+        }
 }

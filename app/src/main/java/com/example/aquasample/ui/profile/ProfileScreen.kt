@@ -26,18 +26,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,8 +53,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aquasample.data.remote.ServerConfig
+import com.example.aquasample.data.sync.SyncScheduler
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.AquaScaffold
 import com.example.aquasample.ui.designsystem.AquaTextField
@@ -137,6 +146,9 @@ fun ProfileContent(
     modifier: Modifier = Modifier
 ) {
     val isDarkMode by ThemeManager.isDarkMode.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var showServerDialog by remember { mutableStateOf(false) }
+    var serverUrl by remember { mutableStateOf(ServerConfig.baseUrl) }
 
     AquaScaffold(
         modifier = modifier,
@@ -290,6 +302,37 @@ fun ProfileContent(
                 }
             }
 
+            SectionHeader(title = "Servidor de sincronización")
+            AquaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    Text(
+                        text = "Dirección actual",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = ServerConfig.baseUrl,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "En WiFi usa la IP del PC (ej. http://192.168.1.50:8080/). " +
+                            "En datos móviles necesitas una URL pública o un túnel.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    SecondaryButton(
+                        text = "Cambiar dirección",
+                        icon = Icons.Rounded.Dns,
+                        onClick = {
+                            serverUrl = ServerConfig.baseUrl
+                            showServerDialog = true
+                        }
+                    )
+                }
+            }
+
             SectionHeader(title = "Sesión")
             AquaCard {
                 ProfileInfoRow(label = "Rol", value = state.roleLabel.ifBlank { "—" })
@@ -304,12 +347,71 @@ fun ProfileContent(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "AquaSample 1.0.2",
+                text = "AquaSample 1.0.5",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+    }
+
+    if (showServerDialog) {
+        Dialog(
+            onDismissRequest = { showServerDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.xl),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(
+                    modifier = Modifier.padding(Spacing.xl),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    Text(
+                        text = "Servidor de sincronización",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    AquaTextField(
+                        value = serverUrl,
+                        onValueChange = { serverUrl = it },
+                        label = "URL del backend",
+                        placeholder = "http://192.168.1.50:8080/"
+                    )
+                    Text(
+                        text = "Debe terminar en /. Ejemplos: http://192.168.1.50:8080/ " +
+                            "o https://aquasample.onrender.com/",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        SecondaryButton(
+                            text = "Cancelar",
+                            onClick = { showServerDialog = false },
+                            modifier = Modifier.weight(1f)
+                        )
+                        PrimaryButton(
+                            text = "Guardar",
+                            onClick = {
+                                ServerConfig.baseUrl = serverUrl
+                                showServerDialog = false
+                                Toast.makeText(
+                                    context,
+                                    "Servidor actualizado. Sincronizando…",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                SyncScheduler.syncNow(context)
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
         }
     }
 }

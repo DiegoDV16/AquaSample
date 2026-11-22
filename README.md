@@ -19,6 +19,7 @@ offline.
 - Perfil con alias de terreno, foto y tema claro/oscuro.
 - GestiÃ³n de personal con altas, ediciones y bajas.
 - SincronizaciÃ³n offline: Room + WorkManager + Retrofit.
+- Servidor configurable desde **Perfil** (IP del PC en WiFi o URL pública), con reintento automático al recuperar conexión.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -84,8 +85,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.4-release.apk](dist/AquaSample-1.0.4-release.apk) (`versionName` 1.0.0).
-- SHA-256: `479c8ef85bd227bbb02f3895cd6be6e1a584c4968b3e04fc4c777e9102f4ebb4`.
+- [AquaSample-1.0.5-release.apk](dist/AquaSample-1.0.5-release.apk) (`versionName` 1.0.0).
+- SHA-256: `7dfecc2f6f523d52629c5d5413a99ad374d95058b320060200f641b9874f48bc`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 
@@ -112,6 +113,7 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 - [DiseÃ±o y arquitectura](docs/DESIGN.md)
 - [Informe de estado y brechas](docs/informe/AquaSample-Estado-del-Sistema-v2.docx)
 - [Backend](backend/README.md)
+- [Conectar la app con el backend](docs/DEPLOY.md)
 
 ## Estado
 

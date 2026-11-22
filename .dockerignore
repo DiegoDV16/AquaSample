@@ -1,0 +1,10 @@
+.git
+.gradle
+app/build
+backend/build
+backend/data
+backend/.gradle
+docs
+dist
+*.docx
+*.apk
