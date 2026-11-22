@@ -172,6 +172,15 @@ Se dispara al guardar una muestra, al abrir la app y cada 15 minutos con
 restricción de red. El inicio muestra cuántas muestras quedan pendientes y
 permite forzar la sincronización.
 
+### Conteo asistido
+
+- `CountingDialog` muestra la primera foto y permite marcar individuos con un
+  toque; tocar una marca existente la elimina.
+- Las coordenadas se normalizan (0..1) respecto de la imagen y se guardan como
+  JSON en `marcasConteo`; `conteoAsistido` mantiene el total para listados.
+- Room pasa a **versión 2** con una migración `1 → 2` que agrega ambas columnas
+  sin borrar datos. Se eliminó el `fallbackToDestructiveMigration`.
+
 ### Modelo de datos
 
 - `roles` (1:N) `usuarios`
@@ -207,9 +216,7 @@ Capturas en `docs/screenshots/`.
   en DataStore queda como paso siguiente.
 - **Backend sin autenticación**: la API es abierta y no valida roles; debe
   agregarse Spring Security/JWT antes de producción.
-- **Migraciones**: la app todavía usa `fallbackToDestructiveMigration`; cualquier
-  cambio de esquema borra los datos. Debe reemplazarse por migraciones explícitas.
-- **Conteo asistido**: el conteo sigue siendo manual; aún no se marcan individuos
-  sobre la fotografía.
+- **Migraciones**: Room ya migra de 1 a 2 conservando datos; el backend sigue con
+  `ddl-auto=update` y debería pasar a Flyway.
 - **Contraseñas**: se comparan en texto plano por compatibilidad con los datos
   existentes; debe migrarse a hash (BCrypt/Argon2) antes de producción.

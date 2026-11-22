@@ -10,6 +10,7 @@ offline.
 - Login por rol: operador, analista y administrador.
 - Registro de muestras en un asistente de tres pasos (ubicación, conteo/calibre y evidencia).
 - Cámara propia con CameraX, galería con Coil y visor con zoom (Telephoto).
+- Conteo asistido: marcar individuos sobre la foto, contador en vivo y corrección.
 - Historial con búsqueda, filtros por estado y período, agrupación por día.
 - Detalle con trazabilidad, matriz de calibre, fotos y validación de supervisor.
 - Perfil con alias de terreno, foto y tema claro/oscuro.
@@ -84,6 +85,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 - Backend probado con 14 casos (CRUD, duplicados, validación, filtros y Swagger).
 - Sincronización verificada en emulador: muestra pendiente enviada al backend y
   marcada como sincronizada en Room; el mismo flujo se probó sin túnel y al recuperarlo.
+- Migración de Room 1 → 2 verificada sobre una base existente: columnas nuevas y
+  las 10 muestras anteriores intactas.
 
 ## Documentación
 
@@ -93,8 +96,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## Estado
 
-Implementado: interfaz, navegación, perfiles, historial, detalle, cámara, backend,
-sincronización offline y gestión de personal.
+Implementado: interfaz, navegación, perfiles, historial, detalle, cámara, conteo
+asistido, backend, sincronización offline y gestión de personal.
 
-Pendiente: conteo asistido sobre la foto, reportes PDF/Excel, API externa
-(Open-Meteo), pruebas con cobertura, autenticación del backend y APK firmada.
+Pendiente: reportes PDF/Excel, API externa (Open-Meteo), pruebas con cobertura,
+autenticación del backend y APK firmada.
