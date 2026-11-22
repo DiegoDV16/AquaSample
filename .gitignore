@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Guías internas del asistente: no se publican en el repositorio
+/AGENT.md
+/SKILLS.md
