@@ -245,7 +245,7 @@ fun LoginContent(
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = "AquaSample 1.0.2 · Muestreo de choritos",
+            text = "AquaSample 1.0.3 · Muestreo de choritos",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -314,30 +314,21 @@ private fun LoginHero(modifier: Modifier = Modifier) {
         ) {
             Surface(
                 shape = RoundedCornerShape(24.dp),
-                color = Color.White,
-                modifier = Modifier.size(108.dp)
+                color = Color(0xFFE4E4E4),
+                modifier = Modifier.fillMaxWidth(0.58f)
             ) {
-                Box(
-                    modifier = Modifier.padding(Spacing.xs),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_aquasample_logo),
-                        contentDescription = "Logo AquaSample",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.ic_aquasample_lockup),
+                    contentDescription = "Logo AquaSample",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.xs),
+                    contentScale = ContentScale.Fit
+                )
             }
 
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
 
-            Text(
-                text = "AquaSample",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
             Text(
                 text = "Control de muestreo de choritos",
                 style = MaterialTheme.typography.bodyMedium,
