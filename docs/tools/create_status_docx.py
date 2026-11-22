@@ -227,7 +227,7 @@ def cover(doc):
         ("Documento", "Estado del sistema · versión 1.0"),
         ("Fecha", "22 de noviembre de 2026"),
         ("Repositorio", "github.com/DiegoDV16/AquaSample (público)"),
-        ("Commit auditado", "main · 378b54f (dashboard, gráficos y filtros)"),
+        ("Commit auditado", "main · 71b3bce (APK firmada 1.0.0)"),
         ("Plataforma", "Android · Kotlin 2.0.21 · Jetpack Compose · Material 3"),
         ("Backend", "Spring Boot 3.5.16 · H2 · springdoc 2.8.13"),
         ("Verificación", "App + backend en emulador, con sincronización offline y online"),
@@ -266,11 +266,10 @@ def summary(doc):
         "backend cuando hay conexión."
     )
     doc.add_paragraph(
-        "Frente a los 14 criterios de la pauta, 9 están completos, 4 son parciales y 1 sigue "
+        "Frente a los 14 criterios de la pauta, 10 están completos, 3 son parciales y 1 sigue "
         "pendiente. El único ítem sin implementar es el consumo de la API externa, que quedó a "
         "cargo de otro integrante. Las brechas parciales son la cobertura global de pruebas, la "
-        "APK firmada, el endurecimiento del backend, la documentación colaborativa y la "
-        "modificación en tiempo real."
+        "documentación colaborativa y la modificación en tiempo real."
     )
     doc.add_heading("Cifras clave del sistema", level=2)
     add_table(
@@ -287,7 +286,8 @@ def summary(doc):
             ("Catálogos", "3 centros y 8 tramos con CRUD, baja lógica y selección en cascada"),
             ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
-            ("Documentación", "README, DESIGN.md, informe y 19 capturas"),
+            ("Documentación", "README, DESIGN.md, informe y 20 capturas"),
+            ("APK", "Release 1.0.0 firmada (v2), 18 MB, instalada y verificada"),
             ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 81998ac)"),
         ],
         [4.6, 12.0],
@@ -297,8 +297,8 @@ def summary(doc):
         doc,
         ["Estado", "Cantidad", "Ítems"],
         [
-            ("Completo", "9", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; historial y dashboard; microservicios; offline; perfiles"),
-            ("Parcial", "4", "Pruebas (cobertura global); APK firmada; documentación; modificación en tiempo real"),
+            ("Completo", "10", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; historial y dashboard; microservicios; offline; perfiles; APK firmada"),
+            ("Parcial", "3", "Pruebas (cobertura global); documentación; modificación en tiempo real"),
             ("Pendiente", "1", "API externa con Retrofit (a cargo de otro integrante)"),
         ],
         [2.4, 2.0, 12.2],
@@ -614,6 +614,22 @@ def section_2(doc):
         ],
     )
 
+    doc.add_heading("2.14 APK firmada", level=2)
+    doc.add_paragraph(
+        "La entrega incluye un APK release 1.0.0 firmado con un keystore propio, versionName 1.0.0 "
+        "y versionCode 1. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
+        "se verificó con apksigner antes de instalar el APK en el emulador."
+    )
+    bullets(
+        doc,
+        [
+            "Firma APK Signature Scheme v2 con clave RSA de 2048 bits.",
+            "SHA-256 del APK: 98804a7943681f33693e3028873ed08134d6e0adbef3b29d6e5677ed88976686.",
+            "Instalado y abierto en el emulador; el build release no es depurable.",
+            "Guía de firma y respaldo en docs/RELEASE.md.",
+        ],
+    )
+
     paragraph = doc.add_paragraph(
         "Capturas representativas: login, panel de inicio, historial agrupado por día, detalle "
         "con trazabilidad, gestión de personal y perfil. La galería completa está en el Anexo C "
@@ -640,8 +656,8 @@ def section_3(doc):
         ("Consumo de APIs externas", "Pendiente", "—", "Retrofit/OkHttp, permiso INTERNET y Open-Meteo Marine con manejo de errores"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Parcial", "39 unitarias y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
-        ("APK firmada", "Parcial", "APK debug generada e instalada en el emulador", "Keystore, signingConfig de release, versionCode y APK firmada en teléfono"),
-        ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, informe, backend README y 15 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
+        ("APK firmada", "Completo", "Release 1.0.0 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
+        ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
     add_table(
@@ -682,13 +698,13 @@ def section_4(doc):
             ],
         ),
         (
-            "4.3 APK firmada",
-            "Solo se genera el APK de depuración, firmado con la clave debug; no hay signingConfig de release.",
-            "Crear un keystore, configurar signingConfigs, definir versionCode/versionName y verificar la firma con apksigner antes de instalarla en el teléfono.",
+            "4.3 Publicación en tienda (opcional)",
+            "El APK release 1.0.0 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
+            "Si se solicita publicar, crear la ficha, la política de privacidad y la cuenta de Google Play, y subir el APK o AAB firmado.",
             [
-                "APK release instalada y funcionando en el teléfono de la defensa.",
-                "Firma verificable y documentada (sin publicar la contraseña).",
-                "Versión y nombre coherentes con la entrega.",
+                "Ficha con capturas, descripción y política de privacidad.",
+                "APK/AAB firmado con el mismo keystore.",
+                "Revisión de la tienda aprobada.",
             ],
         ),
         (
@@ -756,7 +772,7 @@ def section_5(doc):
         [
             ("1", "Open-Meteo Marine con Retrofit y panel de condiciones (otro integrante)", "1–2 días", "API externa"),
             ("2", "Pruebas de ViewModels y Compose + umbral de cobertura", "2–3 días", "Cobertura global"),
-            ("3", "APK release firmada, Trello y Swagger publicado", "1–2 días", "Entrega y documentación"),
+            ("3", "Trello, Swagger publicado y guía de despliegue", "1–2 días", "Entrega y documentación"),
             ("4", "Spring Security/JWT y Flyway", "2 días", "Backend endurecido"),
         ],
         [1.4, 8.2, 2.4, 4.6],
@@ -773,7 +789,7 @@ def section_6(doc):
         [
             "El único ítem sin implementar es la API externa y está a cargo de otro integrante: coordinar la entrega antes de la presentación.",
             "La cobertura global es 2,9 %; si el docente exige 90 % global, habrá que instrumentar ViewModels y pantallas o acordar la métrica por lógica evaluable.",
-            "El APK de depuración no sirve como entrega firmada; instalar el release antes de la presentación.",
+            "La APK release ya está firmada y verificada; si se pide publicación, crear la cuenta de tienda y la ficha.",
             "El backend no tiene autenticación: no se puede demostrar que un operador no valide muestras.",
             "La cámara y el conteo están implementados y compilan, pero la verificación de toques en teléfono físico sigue pendiente.",
             "Falta el tablero Trello y publicar Swagger; el repositorio ya está público con main actualizado.",
@@ -816,7 +832,7 @@ def section_7(doc):
         "├── DESIGN.md\n"
         "├── informe/AquaSample-Estado-del-Sistema.docx\n"
         "├── ejemplos/  (informe PDF de ejemplo)\n"
-        "└── screenshots/  (19 capturas del sistema)",
+        "└── screenshots/  (20 capturas del sistema)",
     )
 
     doc.add_heading("B. Comandos de verificación", level=2)
@@ -824,6 +840,9 @@ def section_7(doc):
         doc,
         "# Compilar APK de depuración\n"
         ".\\gradlew.bat :app:assembleDebug\n"
+        "\n"
+        "# Compilar APK release firmada (requiere keystore.properties)\n"
+        ".\\gradlew.bat :app:assembleRelease\n"
         "\n"
         "# Ejecutar pruebas unitarias\n"
         ".\\gradlew.bat :app:testDebugUnitTest\n"
