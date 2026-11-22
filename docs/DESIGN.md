@@ -130,6 +130,7 @@ data/
   local/         Room (entidades, DAOs, base de datos)
   remote/        Retrofit: API, DTO y cliente
   sync/          WorkManager: worker y planificador
+  report/        Generación de informes PDF (PdfDocument)
   repository/    Repositorios (Muestra, Usuario, Centro, Perfil)
 di/              AppContainer (inyección manual, una instancia por app)
 backend/         Spring Boot: JPA + H2 + REST + Swagger (proyecto Gradle aparte)
@@ -180,6 +181,14 @@ permite forzar la sincronización.
   JSON en `marcasConteo`; `conteoAsistido` mantiene el total para listados.
 - Room pasa a **versión 2** con una migración `1 → 2` que agrega ambas columnas
   sin borrar datos. Se eliminó el `fallbackToDestructiveMigration`.
+
+### Reportes
+
+- `PdfReportGenerator` arma un informe A4 con `PdfDocument` (sin dependencias
+  externas): identificación, ubicación, conteo manual y asistido, matriz de
+  calibre, observaciones, etiquetas y una página con la primera fotografía.
+- El detalle lo genera en `Dispatchers.IO`, lo guarda en `cacheDir/reportes/` y lo
+  comparte con `FileProvider` mediante un `Intent.ACTION_SEND`.
 
 ### Modelo de datos
 

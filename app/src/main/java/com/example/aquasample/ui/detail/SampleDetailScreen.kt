@@ -1,5 +1,7 @@
 package com.example.aquasample.ui.detail
 
+import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -89,6 +93,20 @@ fun SampleDetailScreen(
 
     LaunchedEffect(sampleId) { viewModel.load(sampleId) }
 
+    val exportReport: () -> Unit = {
+        viewModel.exportPdf { result ->
+            result
+                .onSuccess { file -> sharePdf(context, file) }
+                .onFailure {
+                    Toast.makeText(
+                        context,
+                        "No se pudo generar el informe",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+        }
+    }
+
     AquaScaffold(
         modifier = modifier,
         topBar = {
@@ -115,6 +133,7 @@ fun SampleDetailScreen(
                 state = state,
                 canValidate = canValidate,
                 onOpenPhoto = { viewerPhoto = it },
+                onExportPdf = exportReport,
                 onValidate = {
                     viewModel.validateSample { error ->
                         Toast.makeText(
@@ -140,6 +159,7 @@ private fun DetailContent(
     state: SampleDetailUiState,
     canValidate: Boolean,
     onOpenPhoto: (String) -> Unit,
+    onExportPdf: () -> Unit,
     onValidate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -310,6 +330,29 @@ private fun DetailContent(
                     }
                 }
             }
+        }
+
+        SectionHeader(title = "Reporte")
+        AquaCard {
+            Text(
+                text = "Informe de la muestra",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = "PDF con identificación, ubicación, conteo, calibre y la primera fotografía.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(Spacing.lg))
+            PrimaryButton(
+                text = "Exportar informe PDF",
+                icon = Icons.Rounded.PictureAsPdf,
+                loading = state.isExporting,
+                onClick = onExportPdf
+            )
         }
 
         when {
@@ -515,6 +558,20 @@ private fun LoadingState(modifier: Modifier = Modifier) {
     }
 }
 
+private fun sharePdf(context: Context, file: File) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Compartir informe"))
+}
+
 @Preview(showBackground = true, heightDp = 1200)
 @Composable
 private fun DetailContentPreview() {
@@ -549,6 +606,7 @@ private fun DetailContentPreview() {
             ),
             canValidate = true,
             onOpenPhoto = {},
+            onExportPdf = {},
             onValidate = {}
         )
     }

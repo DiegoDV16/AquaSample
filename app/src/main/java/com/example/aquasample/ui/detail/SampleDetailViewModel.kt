@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.MuestraEntity
+import com.example.aquasample.data.report.PdfReportGenerator
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +25,7 @@ data class SampleDetailUiState(
     val operadorEmail: String? = null,
     val photos: List<String> = emptyList(),
     val isUpdating: Boolean = false,
+    val isExporting: Boolean = false,
     val error: String? = null
 )
 
@@ -95,6 +98,22 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
                         onResult("No se pudo validar la muestra: ${exception.localizedMessage}")
                     }
                 }
+        }
+    }
+
+    /** Genera el PDF de la muestra en segundo plano y entrega el archivo. */
+    fun exportPdf(onResult: (Result<File>) -> Unit) {
+        val state = _uiState.value
+        val sample = state.sample ?: return
+
+        _uiState.update { it.copy(isExporting = true) }
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                PdfReportGenerator(getApplication())
+                    .generate(sample, state.centroNombre, state.operadorNombre)
+            }
+            _uiState.update { it.copy(isExporting = false) }
+            withContext(Dispatchers.Main) { onResult(result) }
         }
     }
 }
