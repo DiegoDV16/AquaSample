@@ -1,8 +1,16 @@
 package com.example.aquasample.ui.login
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,28 +26,26 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Mail
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,261 +56,306 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aquasample.R
 import com.example.aquasample.data.session.UserRole
+import com.example.aquasample.ui.designsystem.AquaTextField
+import com.example.aquasample.ui.designsystem.PrimaryButton
 import com.example.aquasample.ui.theme.AquaSampleTheme
+import com.example.aquasample.ui.theme.Motion
+import com.example.aquasample.ui.theme.Ocean700
+import com.example.aquasample.ui.theme.Ocean900
+import com.example.aquasample.ui.theme.Spacing
 
+/**
+ * Pantalla de acceso. La validación y el estado viven en [LoginViewModel];
+ * esta capa solo dibuja y delega eventos.
+ */
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = viewModel(),
     onLoginSuccess: (UserRole) -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.isLoggedIn && uiState.authenticatedUserRole != null) {
-        onLoginSuccess(uiState.authenticatedUserRole!!)
+    LaunchedEffect(state.isLoggedIn, state.authenticatedUserRole) {
+        val role = state.authenticatedUserRole
+        if (state.isLoggedIn && role != null) {
+            onLoginSuccess(role)
+        }
     }
 
     LoginContent(
-        modifier = modifier,
-        uiState = uiState,
+        state = state,
         onEmailChanged = viewModel::onEmailChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,
-        onSubmit = viewModel::onLoginSubmit
+        onSubmit = viewModel::onLoginSubmit,
+        modifier = modifier
     )
 }
 
 @Composable
 fun LoginContent(
-    modifier: Modifier = Modifier,
-    uiState: LoginUiState,
+    state: LoginUiState,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onTogglePasswordVisibility: () -> Unit,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+    ) {
+        LoginHero()
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
-        Column(
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xl),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+            )
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Logo ALDEMAR SpA
-                Image(
-                    painter = painterResource(id = R.drawable.ic_aldemar_logo),
-                    contentDescription = "Logo ALDEMAR SpA",
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(130.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+            Column(modifier = Modifier.padding(Spacing.xxl)) {
                 Text(
-                    text = "AquaSample",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold
+                    text = "Iniciar sesión",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-
+                Spacer(Modifier.height(Spacing.xs))
                 Text(
-                    text = "Control de Muestreo · ALDEMAR SpA",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Accede con tu cuenta corporativa para continuar.",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(Modifier.height(Spacing.xl))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                AquaTextField(
+                    value = state.email,
+                    onValueChange = onEmailChanged,
+                    label = "Correo electrónico",
+                    placeholder = "nombre@aldemar.cl",
+                    leadingIcon = Icons.Rounded.Mail,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    )
+                )
+
+                Spacer(Modifier.height(Spacing.md))
+
+                AquaTextField(
+                    value = state.password,
+                    onValueChange = onPasswordChanged,
+                    label = "Contraseña",
+                    leadingIcon = Icons.Rounded.Lock,
+                    trailingIcon = {
+                        IconButton(onClick = onTogglePasswordVisibility) {
+                            Icon(
+                                imageVector = if (state.isPasswordVisible) {
+                                    Icons.Rounded.VisibilityOff
+                                } else {
+                                    Icons.Rounded.Visibility
+                                },
+                                contentDescription = if (state.isPasswordVisible) {
+                                    "Ocultar contraseña"
+                                } else {
+                                    "Mostrar contraseña"
+                                }
+                            )
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+                    visualTransformation = if (state.isPasswordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    }
+                )
+
+                AnimatedVisibility(
+                    visible = state.errorMessage != null,
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(Motion.Short)) +
+                        expandVertically(animationSpec = androidx.compose.animation.core.tween(Motion.Medium)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(Motion.Short)) +
+                        shrinkVertically(animationSpec = androidx.compose.animation.core.tween(Motion.Short))
                 ) {
-                    Column(
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(top = Spacing.md),
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ) {
-                        Text(
-                            text = "Iniciar Sesión",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Start
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        OutlinedTextField(
-                            value = uiState.email,
-                            onValueChange = onEmailChanged,
-                            label = { Text("Correo electrónico") },
-                            placeholder = { Text("ejemplo@aquasample.cl") },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Email,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next
-                            ),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = uiState.password,
-                            onValueChange = onPasswordChanged,
-                            label = { Text("Contraseña") },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            trailingIcon = {
-                                IconButton(onClick = onTogglePasswordVisibility) {
-                                    Icon(
-                                        imageVector = if (uiState.isPasswordVisible) {
-                                            Icons.Default.VisibilityOff
-                                        } else {
-                                            Icons.Default.Visibility
-                                        },
-                                        contentDescription = "Alternar visibilidad"
-                                    )
-                                }
-                            },
-                            singleLine = true,
-                            visualTransformation = if (uiState.isPasswordVisible) {
-                                VisualTransformation.None
-                            } else {
-                                PasswordVisualTransformation()
-                            },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = { onSubmit() }
-                            ),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        AnimatedVisibility(visible = uiState.errorMessage != null) {
-                            uiState.errorMessage?.let { error ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Error,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = error,
-                                        color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        Button(
-                            onClick = onSubmit,
-                            enabled = !uiState.isLoading,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
+                        Row(
+                            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.5.dp
-                                )
-                            } else {
-                                Text(
-                                    text = "Iniciar Sesión",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Rounded.ErrorOutline,
+                                contentDescription = null,
+                                modifier = Modifier.size(Spacing.lg)
+                            )
+                            Spacer(Modifier.width(Spacing.sm))
+                            Text(
+                                text = state.errorMessage.orEmpty(),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
+
+                Spacer(Modifier.height(Spacing.xl))
+
+                PrimaryButton(
+                    text = "Ingresar",
+                    onClick = onSubmit,
+                    loading = state.isLoading
+                )
+
+                Spacer(Modifier.height(Spacing.md))
+
+                Text(
+                    text = "¿Problemas de acceso? Contacta a tu supervisor.",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        Spacer(Modifier.height(Spacing.xl))
+
+        Text(
+            text = "AquaSample v2.5 · Uso interno ALDEMAR SpA",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(Spacing.xxl))
+    }
+}
+
+@Composable
+private fun LoginHero(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(300.dp)
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Ocean900, Ocean700)
+                )
+            )
+            drawCircle(
+                color = Color.White.copy(alpha = 0.06f),
+                radius = size.width * 0.55f,
+                center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.05f)
+            )
+            drawCircle(
+                color = Color.White.copy(alpha = 0.05f),
+                radius = size.width * 0.35f,
+                center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.85f)
+            )
+
+            val wave = Path().apply {
+                moveTo(0f, size.height * 0.88f)
+                cubicTo(
+                    size.width * 0.22f,
+                    size.height * 0.80f,
+                    size.width * 0.34f,
+                    size.height * 0.98f,
+                    size.width * 0.55f,
+                    size.height * 0.90f
+                )
+                cubicTo(
+                    size.width * 0.74f,
+                    size.height * 0.83f,
+                    size.width * 0.86f,
+                    size.height * 0.95f,
+                    size.width,
+                    size.height * 0.87f
+                )
+                lineTo(size.width, size.height)
+                lineTo(0f, size.height)
+                close()
+            }
+            drawPath(path = wave, color = Color.White.copy(alpha = 0.07f))
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = Spacing.xxl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color.White,
+                modifier = Modifier.size(84.dp)
+            ) {
+                Box(
+                    modifier = Modifier.padding(Spacing.md),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_aldemar_logo),
+                        contentDescription = "Logo ALDEMAR SpA",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(Modifier.height(Spacing.lg))
 
             Text(
-                text = "AquaSample v2.4 · Sistema de Control Técnico",
+                text = "AquaSample",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = "Control de muestreo · ALDEMAR SpA",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                color = Color.White.copy(alpha = 0.80f)
             )
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, heightDp = 900)
 @Composable
-fun LoginScreenPreview() {
+private fun LoginContentPreview() {
     AquaSampleTheme {
         LoginContent(
-            uiState = LoginUiState(
+            state = LoginUiState(
                 email = "operador@aquasample.cl",
-                password = "••••••••"
+                password = "••••••••",
+                isPasswordVisible = false
             ),
             onEmailChanged = {},
             onPasswordChanged = {},

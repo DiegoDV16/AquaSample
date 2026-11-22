@@ -1,7 +1,7 @@
 package com.example.aquasample.data.session
 
 import com.example.aquasample.data.local.entity.UsuarioEntity
-import com.example.aquasample.ui.sample.ProfileRepository
+import com.example.aquasample.data.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +21,7 @@ object SessionManager {
             role = role
         )
         _currentSession.value = session
-        ProfileRepository.alias = fullName
+        ProfileRepository.updateAlias(fullName)
     }
 
     fun loginWithRole(role: UserRole, customEmail: String? = null) {
@@ -49,7 +49,7 @@ object SessionManager {
             )
         }
         _currentSession.value = session
-        ProfileRepository.alias = session.nombreCompleto
+        ProfileRepository.updateAlias(session.nombreCompleto)
     }
 
     fun logout() {

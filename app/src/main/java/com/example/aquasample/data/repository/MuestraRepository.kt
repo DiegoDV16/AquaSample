@@ -37,6 +37,14 @@ class MuestraRepository(private val muestraDao: MuestraDao) {
         muestraDao.getLastSample()
     }
 
+    suspend fun getMuestraConDetalleById(id: String): MuestraConDetalle? = withContext(Dispatchers.IO) {
+        muestraDao.getMuestraConDetalleById(id)
+    }
+
+    suspend fun updateEstado(id: String, nuevoEstado: String): Int = withContext(Dispatchers.IO) {
+        muestraDao.updateEstado(id, nuevoEstado)
+    }
+
     suspend fun updateEstadoSincronizacion(id: String, sincronizado: Boolean, nuevoEstado: String) = withContext(Dispatchers.IO) {
         muestraDao.updateEstadoSincronizacion(id, sincronizado, nuevoEstado)
     }

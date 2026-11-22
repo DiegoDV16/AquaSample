@@ -10,7 +10,6 @@ import com.example.aquasample.data.local.converter.Converters
 import com.example.aquasample.data.local.dao.CentroCultivoDao
 import com.example.aquasample.data.local.dao.MuestraDao
 import com.example.aquasample.data.local.dao.RoleDao
-import com.example.aquasample.data.local.dao.SampleDao
 import com.example.aquasample.data.local.dao.UsuarioDao
 import com.example.aquasample.data.local.entity.CentroCultivoEntity
 import com.example.aquasample.data.local.entity.MuestraEntity
@@ -35,8 +34,6 @@ abstract class AquaSampleDatabase : RoomDatabase() {
     abstract fun centroCultivoDao(): CentroCultivoDao
     abstract fun usuarioDao(): UsuarioDao
     abstract fun muestraDao(): MuestraDao
-
-    fun sampleDao(): SampleDao = muestraDao()
 
     companion object {
         @Volatile

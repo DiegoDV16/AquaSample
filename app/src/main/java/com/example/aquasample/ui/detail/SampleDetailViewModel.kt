@@ -1,0 +1,121 @@
+package com.example.aquasample.ui.detail
+
+import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.aquasample.appContainer
+import com.example.aquasample.data.local.entity.MuestraEntity
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/** Estado del detalle de una muestra. */
+data class SampleDetailUiState(
+    val isLoading: Boolean = true,
+    val sample: MuestraEntity? = null,
+    val centroNombre: String? = null,
+    val centroCodigo: String? = null,
+    val operadorNombre: String? = null,
+    val operadorEmail: String? = null,
+    val photos: List<Bitmap> = emptyList(),
+    val isUpdating: Boolean = false,
+    val error: String? = null
+)
+
+/**
+ * ViewModel del detalle: carga la muestra con sus relaciones y permite al
+ * supervisor marcarla como validada.
+ */
+class SampleDetailViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = application.appContainer.muestraRepository
+    private val _uiState = MutableStateFlow(SampleDetailUiState())
+    val uiState: StateFlow<SampleDetailUiState> = _uiState.asStateFlow()
+
+    private var loadedId: String? = null
+
+    fun load(sampleId: String, force: Boolean = false) {
+        if (!force && loadedId == sampleId && _uiState.value.sample != null) return
+        loadedId = sampleId
+        _uiState.update { it.copy(isLoading = true, error = null) }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { repository.getMuestraConDetalleById(sampleId) }
+                .onSuccess { detalle ->
+                    if (detalle == null) {
+                        _uiState.update {
+                            it.copy(isLoading = false, error = "La muestra no existe en el dispositivo.")
+                        }
+                        return@onSuccess
+                    }
+                    val photos = detalle.muestra.fotos.mapNotNull { path -> decodePhoto(path) }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            sample = detalle.muestra,
+                            centroNombre = detalle.centroNombre,
+                            centroCodigo = detalle.centroCodigo,
+                            operadorNombre = detalle.operadorNombreCompleto,
+                            operadorEmail = detalle.operadorEmail,
+                            photos = photos,
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "No se pudo cargar la muestra: ${exception.localizedMessage}"
+                        )
+                    }
+                }
+        }
+    }
+
+    /** Marca la muestra como validada por el supervisor. */
+    fun validateSample(onResult: (String?) -> Unit) {
+        val sample = _uiState.value.sample ?: return
+        _uiState.update { it.copy(isUpdating = true) }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { repository.updateEstado(sample.id, "VALIDADO") }
+                .onSuccess {
+                    _uiState.update { it.copy(isUpdating = false) }
+                    load(sample.id, force = true)
+                    withContext(Dispatchers.Main) { onResult(null) }
+                }
+                .onFailure { exception ->
+                    _uiState.update { it.copy(isUpdating = false) }
+                    withContext(Dispatchers.Main) {
+                        onResult("No se pudo validar la muestra: ${exception.localizedMessage}")
+                    }
+                }
+        }
+    }
+
+    private fun decodePhoto(path: String): Bitmap? {
+        val file = File(path)
+        if (!file.exists()) return null
+
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+
+        var sampleSize = 1
+        while (bounds.outWidth / sampleSize > 1400 || bounds.outHeight / sampleSize > 1400) {
+            sampleSize *= 2
+        }
+
+        return runCatching {
+            BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sampleSize })
+        }.getOrNull()
+    }
+}

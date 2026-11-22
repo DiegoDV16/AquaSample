@@ -3,8 +3,7 @@ package com.example.aquasample.ui.login
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aquasample.data.local.database.AppDatabase
-import com.example.aquasample.data.local.entity.RoleEntity
+import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.UsuarioEntity
 import com.example.aquasample.data.session.SessionManager
 import com.example.aquasample.data.session.UserRole
@@ -15,9 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel del inicio de sesión. Toda la persistencia pasa por
+ * [com.example.aquasample.data.repository.UsuarioRepository].
+ */
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val usuarioDao = AppDatabase.getInstance(application).usuarioDao()
+    private val usuarioRepository = application.appContainer.usuarioRepository
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -51,13 +54,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            // Buscar usuario real en la base de datos Room SQLite
-            var user = usuarioDao.getByEmail(inputEmail)
+            var user = usuarioRepository.getByEmail(inputEmail)
 
-            // Garantizar que la cuenta Administrador inicial exista en SQLite
-            if (user == null && inputEmail.equals("admin@aquasample.cl", ignoreCase = true)) {
+            // Garantiza que la cuenta administradora inicial exista en SQLite.
+            if (user == null && inputEmail.equals(ADMIN_EMAIL, ignoreCase = true)) {
                 ensureAdminUserExists()
-                user = usuarioDao.getByEmail(inputEmail)
+                user = usuarioRepository.getByEmail(inputEmail)
             }
 
             if (user == null) {
@@ -113,15 +115,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun ensureAdminUserExists() {
-        val db = AppDatabase.getInstance(getApplication())
-        val roles = listOf(
-            RoleEntity(id = 1, nombre = "OPERADOR", descripcion = "Operador de Terreno para captura de muestras"),
-            RoleEntity(id = 2, nombre = "ANALISTA", descripcion = "Analista de laboratorio e inspección técnica"),
-            RoleEntity(id = 3, nombre = "ADMINISTRADOR", descripcion = "Administrador general del sistema y gestión de usuarios")
-        )
         val adminUser = UsuarioEntity(
             id = "USR-ADMIN",
-            email = "admin@aquasample.cl",
+            email = ADMIN_EMAIL,
             passwordHash = "admin123",
             nombres = "Administrador",
             apellidoPaterno = "Sistema",
@@ -129,15 +125,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             rolId = 3,
             estado = "ACTIVO"
         )
-        try {
-            db.roleDao().insertRoles(roles)
-            db.usuarioDao().insertUser(adminUser)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        runCatching { usuarioRepository.insertUser(adminUser) }
     }
 
     fun resetLoginState() {
         _uiState.update { LoginUiState() }
+    }
+
+    private companion object {
+        const val ADMIN_EMAIL = "admin@aquasample.cl"
     }
 }

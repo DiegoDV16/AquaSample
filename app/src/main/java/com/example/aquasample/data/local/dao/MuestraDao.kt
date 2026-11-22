@@ -60,6 +60,24 @@ interface MuestraDao {
     @Query("SELECT * FROM muestras ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLastSample(): MuestraEntity?
 
+    @Query("""
+        SELECT 
+            m.*,
+            c.nombre AS centroNombre,
+            c.codigo AS centroCodigo,
+            (u.nombres || ' ' || u.apellidoPaterno || ' ' || u.apellidoMaterno) AS operadorNombreCompleto,
+            u.email AS operadorEmail
+        FROM muestras m
+        LEFT JOIN centros_cultivo c ON m.centroId = c.id
+        LEFT JOIN usuarios u ON m.operadorId = u.id
+        WHERE m.id = :id
+        LIMIT 1
+    """)
+    suspend fun getMuestraConDetalleById(id: String): MuestraConDetalle?
+
+    @Query("UPDATE muestras SET estado = :nuevoEstado WHERE id = :id")
+    suspend fun updateEstado(id: String, nuevoEstado: String): Int
+
     @Query("UPDATE muestras SET sincronizado = :sincronizado, estado = :nuevoEstado WHERE id = :id")
     suspend fun updateEstadoSincronizacion(id: String, sincronizado: Boolean, nuevoEstado: String): Int
 }
