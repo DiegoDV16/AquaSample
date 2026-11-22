@@ -11,10 +11,12 @@ import com.example.aquasample.data.local.converter.Converters
 import com.example.aquasample.data.local.dao.CentroCultivoDao
 import com.example.aquasample.data.local.dao.MuestraDao
 import com.example.aquasample.data.local.dao.RoleDao
+import com.example.aquasample.data.local.dao.TramoDao
 import com.example.aquasample.data.local.dao.UsuarioDao
 import com.example.aquasample.data.local.entity.CentroCultivoEntity
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.data.local.entity.RoleEntity
+import com.example.aquasample.data.local.entity.TramoEntity
 import com.example.aquasample.data.local.entity.UsuarioEntity
 import java.util.concurrent.Executors
 
@@ -23,9 +25,10 @@ import java.util.concurrent.Executors
         RoleEntity::class,
         CentroCultivoEntity::class,
         UsuarioEntity::class,
-        MuestraEntity::class
+        MuestraEntity::class,
+        TramoEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -35,6 +38,7 @@ abstract class AquaSampleDatabase : RoomDatabase() {
     abstract fun centroCultivoDao(): CentroCultivoDao
     abstract fun usuarioDao(): UsuarioDao
     abstract fun muestraDao(): MuestraDao
+    abstract fun tramoDao(): TramoDao
 
     companion object {
         @Volatile
@@ -47,7 +51,7 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     AquaSampleDatabase::class.java,
                     "aquasample_db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
@@ -67,6 +71,47 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                 db.execSQL(
                     "ALTER TABLE muestras ADD COLUMN conteoAsistido INTEGER NOT NULL DEFAULT 0"
                 )
+            }
+        }
+
+        /**
+         * Crea el catálogo de tramos y enlaza cada muestra con su tramo. Los
+         * tramos iniciales replican las combinaciones tren/línea que ya usaban
+         * las muestras de demostración.
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS tramos (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        centroId INTEGER NOT NULL,
+                        tren TEXT NOT NULL,
+                        linea TEXT NOT NULL,
+                        longitudCm INTEGER NOT NULL,
+                        estado TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_tramos_centroId ON tramos (centroId)")
+                db.execSQL("ALTER TABLE muestras ADD COLUMN tramoId INTEGER")
+
+                val tramos = listOf(
+                    listOf(1, 1, "Tren 02", "Línea L-03", 145),
+                    listOf(2, 1, "Tren 03", "Línea L-01", 150),
+                    listOf(3, 2, "Tren 02", "Línea L-02", 160),
+                    listOf(4, 2, "Tren 01", "Línea L-03", 155),
+                    listOf(5, 3, "Tren 01", "Línea L-01", 140),
+                    listOf(6, 3, "Tren 04", "Línea L-04", 165),
+                    listOf(7, 1, "Tren 01", "Línea L-02", 150),
+                    listOf(8, 2, "Tren 03", "Línea L-04", 170)
+                )
+                tramos.forEach { (id, centroId, tren, linea, longitud) ->
+                    db.execSQL(
+                        "INSERT INTO tramos (id, centroId, tren, linea, longitudCm, estado) " +
+                            "VALUES ($id, $centroId, '$tren', '$linea', $longitud, 'ACTIVO')"
+                    )
+                }
             }
         }
 
@@ -128,7 +173,19 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     )
                 )
 
-                // 3. Único usuario administrador del sistema por defecto
+                // 3. Tramos de demostración (tren, línea y largo por centro)
+                val tramos = listOf(
+                    TramoEntity(1, 1, "Tren 02", "Línea L-03", 145),
+                    TramoEntity(2, 1, "Tren 03", "Línea L-01", 150),
+                    TramoEntity(3, 2, "Tren 02", "Línea L-02", 160),
+                    TramoEntity(4, 2, "Tren 01", "Línea L-03", 155),
+                    TramoEntity(5, 3, "Tren 01", "Línea L-01", 140),
+                    TramoEntity(6, 3, "Tren 04", "Línea L-04", 165),
+                    TramoEntity(7, 1, "Tren 01", "Línea L-02", 150),
+                    TramoEntity(8, 2, "Tren 03", "Línea L-04", 170)
+                )
+
+                // 4. Único usuario administrador del sistema por defecto
                 val usuarios = listOf(
                     UsuarioEntity(
                         id = "USR-ADMIN",
@@ -146,6 +203,7 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     try {
                         db.roleDao().insertRoles(roles)
                         db.centroCultivoDao().insertCentros(centros)
+                        db.tramoDao().insertTramos(tramos)
                         db.usuarioDao().insertUsers(usuarios)
                     } catch (e: Exception) {
                         e.printStackTrace()

@@ -9,6 +9,8 @@ data class CountMark(
 )
 
 data class SampleUiState(
+    val centroId: Long? = null,
+    val tramoId: Long? = null,
     val concesion: String = "",
     val tren: String = "",
     val linea: String = "",

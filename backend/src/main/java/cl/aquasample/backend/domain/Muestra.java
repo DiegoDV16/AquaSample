@@ -17,6 +17,8 @@ public class Muestra {
 
     private Long centroId;
 
+    private Long tramoId;
+
     private String operadorId;
 
     @NotBlank
@@ -82,6 +84,14 @@ public class Muestra {
 
     public void setCentroId(Long centroId) {
         this.centroId = centroId;
+    }
+
+    public Long getTramoId() {
+        return tramoId;
+    }
+
+    public void setTramoId(Long tramoId) {
+        this.tramoId = tramoId;
     }
 
     public String getOperadorId() {
@@ -239,6 +249,7 @@ public class Muestra {
     /** Copia los campos editables de otra muestra conservando el id. */
     public void copyFrom(Muestra other) {
         this.centroId = other.centroId;
+        this.tramoId = other.tramoId;
         this.operadorId = other.operadorId;
         this.concesion = other.concesion;
         this.tren = other.tren;

@@ -150,6 +150,18 @@ backend/         Spring Boot: JPA + H2 + REST + Swagger (proyecto Gradle aparte)
 - **Cámara**: CameraX (`Preview` + `ImageCapture`) captura un JPEG en resolución
   completa dentro de la app ([ui/camera/CameraCaptureDialog.kt](../app/src/main/java/com/example/aquasample/ui/camera/CameraCaptureDialog.kt)).
 
+### Catálogos operativos
+
+- `centros_cultivo` (código, nombre, comuna, estado) y `tramos`
+  (centro, tren, línea, largo, estado) viven en Room y se administran desde
+  **Personal → Centros y tramos**.
+- Las bajas son lógicas (`INACTIVO`) para no romper muestras históricas; un centro
+  inactivo deja de aparecer en el asistente.
+- El asistente elige primero el centro y luego un tramo de ese centro; al
+  seleccionarlo se completan tren, línea y largo, y la muestra guarda `tramoId`.
+- Room migra de **2 a 3** creando `tramos`, su índice y la columna
+  `muestras.tramoId`, conservando los datos existentes.
+
 ### Backend
 
 - Proyecto Gradle independiente en `backend/` (Spring Boot 3.5, Java 21, H2).
@@ -204,11 +216,13 @@ permite forzar la sincronización.
 ### Modelo de datos
 
 - `roles` (1:N) `usuarios`
+- `centros_cultivo` (1:N) `tramos`
 - `centros_cultivo` (1:N) `muestras`
+- `tramos` (1:N) `muestras`
 - `usuarios` (1:N) `muestras`
-- `muestras`: ubicación (concesión, tren, línea, tramo), conteo, matriz de
-  calibre (30 valores serializados), promedio, fotos, observaciones, etiquetas,
-  fecha, estado (`PENDIENTE` / `COMPLETADO` / `VALIDADO`) y sincronización.
+- `muestras`: centro, tramo, ubicación, conteo, matriz de calibre (30 valores
+  serializados), promedio, fotos, observaciones, etiquetas, fecha, estado
+  (`PENDIENTE` / `COMPLETADO` / `VALIDADO`) y sincronización.
 
 ---
 
@@ -223,6 +237,7 @@ permite forzar la sincronización.
 | Detalle | `ui/detail/SampleDetailScreen.kt` | Nueva |
 | Perfil | `ui/profile/ProfileScreen.kt` | Rediseñada |
 | Personal | `ui/admin/AdminUsuariosScreen.kt` | Rediseñada |
+| Centros y tramos | `ui/admin/AdminCatalogosScreen.kt` | Nueva |
 
 Capturas en `docs/screenshots/`.
 

@@ -78,8 +78,25 @@ class SampleValidatorTest {
     }
 
     @Test
+    fun `ubicacion exige tramo`() {
+        assertEquals(
+            "Selecciona un tramo del centro.",
+            SampleValidator.validate(
+                SampleUiState(concesion = "Concesión", tren = "Tren 01", linea = "Línea L-01"),
+                SampleValidator.STEP_LOCATION
+            )
+        )
+    }
+
+    @Test
     fun `validate despacha segun el paso`() {
-        val state = SampleUiState(concesion = "Concesión", tren = "Tren", linea = "Línea")
+        val state = SampleUiState(
+            centroId = 1,
+            tramoId = 1,
+            concesion = "Concesión",
+            tren = "Tren",
+            linea = "Línea"
+        )
 
         assertEquals(
             "Ingresa el largo del tramo en cm (mayor que 0).",

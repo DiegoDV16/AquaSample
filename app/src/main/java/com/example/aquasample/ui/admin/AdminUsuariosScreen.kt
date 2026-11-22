@@ -92,6 +92,7 @@ fun AdminUsuariosScreen(
     modifier: Modifier = Modifier,
     currentUserRole: UserRole = UserRole.ADMINISTRADOR,
     onLogout: () -> Unit = {},
+    onOpenCatalogs: () -> Unit = {},
     viewModel: AdminViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -162,6 +163,31 @@ fun AdminUsuariosScreen(
         ) {
             item(key = "stats") {
                 TeamStats(members = state.members)
+            }
+
+            item(key = "catalogs") {
+                AquaCard(contentPadding = PaddingValues(Spacing.md)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Centros y tramos",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Administra la base operativa del muestreo.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(Modifier.width(Spacing.sm))
+                        SecondaryButton(
+                            text = "Abrir",
+                            onClick = onOpenCatalogs,
+                            modifier = Modifier.width(112.dp)
+                        )
+                    }
+                }
             }
 
             item(key = "search") {

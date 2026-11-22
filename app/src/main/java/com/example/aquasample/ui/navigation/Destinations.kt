@@ -62,6 +62,14 @@ sealed class AppDestination(
         unselectedIcon = Icons.Outlined.Person
     )
 
+    /** Catálogos de centros y tramos; solo administración. */
+    data object AdminCatalogs : AppDestination(
+        route = "admin/catalogos",
+        label = "Catálogos",
+        selectedIcon = Icons.Rounded.Groups,
+        unselectedIcon = Icons.Outlined.Groups
+    )
+
     /** Detalle de una muestra; no aparece en la barra inferior. */
     data object SampleDetail : AppDestination(
         route = "muestra/{sampleId}",

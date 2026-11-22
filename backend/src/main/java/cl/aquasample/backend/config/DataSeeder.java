@@ -2,9 +2,11 @@ package cl.aquasample.backend.config;
 
 import cl.aquasample.backend.domain.CentroCultivo;
 import cl.aquasample.backend.domain.Muestra;
+import cl.aquasample.backend.domain.Tramo;
 import cl.aquasample.backend.domain.Usuario;
 import cl.aquasample.backend.repository.CentroCultivoRepository;
 import cl.aquasample.backend.repository.MuestraRepository;
+import cl.aquasample.backend.repository.TramoRepository;
 import cl.aquasample.backend.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,11 +24,14 @@ public class DataSeeder implements CommandLineRunner {
     private final CentroCultivoRepository centros;
     private final UsuarioRepository usuarios;
     private final MuestraRepository muestras;
+    private final TramoRepository tramos;
 
-    public DataSeeder(CentroCultivoRepository centros, UsuarioRepository usuarios, MuestraRepository muestras) {
+    public DataSeeder(CentroCultivoRepository centros, UsuarioRepository usuarios,
+                      MuestraRepository muestras, TramoRepository tramos) {
         this.centros = centros;
         this.usuarios = usuarios;
         this.muestras = muestras;
+        this.tramos = tramos;
     }
 
     @Override
@@ -37,14 +42,48 @@ public class DataSeeder implements CommandLineRunner {
                     new CentroCultivo("CONC-208", "Centro Canal Lemuy #208", "Puqueldón"),
                     new CentroCultivo("CONC-305", "Concesión Golfo Ancud #305", "Castro")));
         }
-        if (usuarios.count() == 0) {
-            usuarios.saveAll(List.of(
+        if (tramos.count() == 0) {
+            tramos.saveAll(List.of(
+                    tramo(1L, "Tren 02", "Línea L-03", 145),
+                    tramo(1L, "Tren 03", "Línea L-01", 150),
+                    tramo(1L, "Tren 01", "Línea L-02", 150),
+                    tramo(2L, "Tren 02", "Línea L-02", 160),
+                    tramo(2L, "Tren 01", "Línea L-03", 155),
+                    tramo(2L, "Tren 03", "Línea L-04", 170),
+                    tramo(3L, "Tren 01", "Línea L-01", 140),
+                    tramo(3L, "Tren 04", "Línea L-04", 165)));
+        }
+        if (usuarios.count() == 0) {            usuarios.saveAll(List.of(
                     usuario("USR-001", "operador@aquasample.cl", "operador123", "Francisca", "Rojas", "Soto", 1L),
                     usuario("USR-002", "analista@aquasample.cl", "analista123", "Mateo", "Cárdenas", "Muñoz", 2L),
                     usuario("USR-003", "admin@aquasample.cl", "admin123", "Andrea", "Barrientos", "Vargas", 3L)));
         }
         if (muestras.count() == 0) {
             seedMuestras();
+        }
+        backfillTramoIds();
+    }
+
+    /** Completa el tramo de muestras creadas antes de existir el catálogo. */
+    private void backfillTramoIds() {
+        for (Muestra muestra : muestras.findAll()) {
+            Long tramoId = muestra.getTramoId();
+            if (tramoId == null) {
+                long centroId = muestra.getCentroId() == null ? 1L : muestra.getCentroId();
+                tramoId = switch ((int) centroId) {
+                    case 2 -> 4L;
+                    case 3 -> 7L;
+                    default -> 1L;
+                };
+                muestra.setTramoId(tramoId);
+            }
+
+            tramos.findById(tramoId).ifPresent(tramo -> {
+                muestra.setTren(tramo.getTren());
+                muestra.setLinea(tramo.getLinea());
+                muestra.setTramoLongitudCm(String.valueOf(tramo.getLongitudCm()));
+                muestras.save(muestra);
+            });
         }
     }
 
@@ -60,6 +99,16 @@ public class DataSeeder implements CommandLineRunner {
         usuario.setRolId(rolId);
         usuario.setEstado("ACTIVO");
         return usuario;
+    }
+
+    private Tramo tramo(Long centroId, String tren, String linea, int longitudCm) {
+        var tramo = new Tramo();
+        tramo.setCentroId(centroId);
+        tramo.setTren(tren);
+        tramo.setLinea(linea);
+        tramo.setLongitudCm(longitudCm);
+        tramo.setEstado("ACTIVO");
+        return tramo;
     }
 
     private void seedMuestras() {
@@ -82,6 +131,11 @@ public class DataSeeder implements CommandLineRunner {
             var muestra = new Muestra();
             muestra.setId(String.format("#M-%04d", i + 1));
             muestra.setCentroId((long) (1 + (i % 3)));
+            muestra.setTramoId(switch (i % 3) {
+                case 0 -> 1L;
+                case 1 -> 4L;
+                default -> 7L;
+            });
             muestra.setOperadorId("USR-001");
             muestra.setConcesion(centrosNombres[i % 3]);
             muestra.setTren(trenes[i]);

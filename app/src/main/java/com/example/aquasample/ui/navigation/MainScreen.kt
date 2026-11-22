@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.data.session.UserSession
+import com.example.aquasample.ui.admin.AdminCatalogosScreen
 import com.example.aquasample.ui.admin.AdminUsuariosScreen
 import com.example.aquasample.ui.detail.SampleDetailScreen
 import com.example.aquasample.ui.history.HistorialMuestrasScreen
@@ -153,8 +154,15 @@ fun MainScreen(
             composable(AppDestination.Team.route) {
                 AdminUsuariosScreen(
                     currentUserRole = userSession.role,
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    onOpenCatalogs = {
+                        navController.navigate(AppDestination.AdminCatalogs.route)
+                    }
                 )
+            }
+
+            composable(AppDestination.AdminCatalogs.route) {
+                AdminCatalogosScreen(onBack = { navController.popBackStack() })
             }
 
             composable(AppDestination.Profile.route) {

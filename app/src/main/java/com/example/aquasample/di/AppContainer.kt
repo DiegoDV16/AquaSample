@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.aquasample.data.local.database.AquaSampleDatabase
 import com.example.aquasample.data.repository.CentroCultivoRepository
 import com.example.aquasample.data.repository.MuestraRepository
+import com.example.aquasample.data.repository.TramoRepository
 import com.example.aquasample.data.repository.UsuarioRepository
 
 /**
@@ -27,5 +28,9 @@ class AppContainer(context: Context) {
 
     val centroRepository: CentroCultivoRepository by lazy {
         CentroCultivoRepository(database.centroCultivoDao())
+    }
+
+    val tramoRepository: TramoRepository by lazy {
+        TramoRepository(database.tramoDao())
     }
 }

@@ -100,6 +100,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aquasample.data.local.entity.CentroCultivoEntity
+import com.example.aquasample.data.local.entity.TramoEntity
 import com.example.aquasample.ui.camera.CameraCaptureDialog
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.AquaDropdownField
@@ -121,13 +123,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val DEFAULT_CENTROS = listOf(
-    "Concesión Dalcahue #104",
-    "Centro Canal Lemuy #208",
-    "Concesión Golfo Ancud #305"
-)
-private val TRENES = listOf("Tren 01", "Tren 02", "Tren 03", "Tren 04")
-private val LINEAS = (1..8).map { "Línea L-0$it" }
 private val TAGS = listOf("ValvasSanas", "SinFouling", "SustratoAdecuado", "CrecimientoOptimo")
 
 /**
@@ -145,6 +140,7 @@ fun NuevaMuestraScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val centros by viewModel.centros.collectAsStateWithLifecycle()
+    val tramos by viewModel.tramos.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -157,6 +153,8 @@ fun NuevaMuestraScreen(
 
     // Al corregir cualquier dato, el mensaje de error deja de ser válido.
     LaunchedEffect(
+        uiState.centroId,
+        uiState.tramoId,
         uiState.concesion,
         uiState.tren,
         uiState.linea,
@@ -265,11 +263,10 @@ fun NuevaMuestraScreen(
                     when (currentStep) {
                         SampleViewModel.STEP_LOCATION -> LocationStep(
                             state = uiState,
-                            centros = centros.ifEmpty { DEFAULT_CENTROS },
-                            onConcesionChanged = viewModel::onConcesionChanged,
-                            onTrenChanged = viewModel::onTrenChanged,
-                            onLineaChanged = viewModel::onLineaChanged,
-                            onTramoChanged = viewModel::onTramoLongitudChanged
+                            centros = centros,
+                            tramos = tramos,
+                            onCentroSelected = viewModel::onCentroSelected,
+                            onTramoSelected = viewModel::onTramoSelected
                         )
 
                         SampleViewModel.STEP_MEASUREMENT -> MeasurementStep(
@@ -350,49 +347,75 @@ private fun decodeSampledBitmap(file: File, maxDimension: Int): Bitmap? {
 @Composable
 private fun LocationStep(
     state: SampleUiState,
-    centros: List<String>,
-    onConcesionChanged: (String) -> Unit,
-    onTrenChanged: (String) -> Unit,
-    onLineaChanged: (String) -> Unit,
-    onTramoChanged: (String) -> Unit
+    centros: List<CentroCultivoEntity>,
+    tramos: List<TramoEntity>,
+    onCentroSelected: (CentroCultivoEntity) -> Unit,
+    onTramoSelected: (TramoEntity) -> Unit
 ) {
+    val tramosDelCentro = tramos.filter { it.centroId == state.centroId }
+    val tramoSeleccionado = tramosDelCentro.firstOrNull { it.id == state.tramoId }
+
     AquaCard {
         AquaDropdownField(
             label = "Concesión / Centro",
             selected = state.concesion,
-            options = centros,
-            onSelected = onConcesionChanged,
+            options = centros.map { it.nombre },
+            onSelected = { nombre ->
+                centros.firstOrNull { it.nombre == nombre }?.let(onCentroSelected)
+            },
             placeholder = "Seleccionar centro"
         )
         Spacer(Modifier.height(Spacing.md))
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            Box(modifier = Modifier.weight(1f)) {
-                AquaDropdownField(
-                    label = "Tren",
-                    selected = state.tren,
-                    options = TRENES,
-                    onSelected = onTrenChanged
-                )
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                AquaDropdownField(
-                    label = "Línea",
-                    selected = state.linea,
-                    options = LINEAS,
-                    onSelected = onLineaChanged
-                )
+        AquaDropdownField(
+            label = "Tramo",
+            selected = tramoSeleccionado?.let { "${it.tren} · ${it.linea}" }.orEmpty(),
+            options = tramosDelCentro.map { "${it.tren} · ${it.linea}" },
+            onSelected = { etiqueta ->
+                tramosDelCentro
+                    .firstOrNull { "${it.tren} · ${it.linea}" == etiqueta }
+                    ?.let(onTramoSelected)
+            },
+            placeholder = when {
+                state.centroId == null -> "Primero elige un centro"
+                tramosDelCentro.isEmpty() -> "El centro no tiene tramos activos"
+                else -> "Seleccionar tramo"
+            },
+            enabled = state.centroId != null && tramosDelCentro.isNotEmpty()
+        )
+
+        if (tramoSeleccionado != null) {
+            Spacer(Modifier.height(Spacing.md))
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.GridOn,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Column {
+                        Text(
+                            text = "Largo del tramo: ${tramoSeleccionado.longitudCm} cm",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${tramoSeleccionado.tren} · ${tramoSeleccionado.linea}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
-        Spacer(Modifier.height(Spacing.md))
-        AquaTextField(
-            value = state.tramoLongitudCm,
-            onValueChange = onTramoChanged,
-            label = "Largo del tramo (cm)",
-            placeholder = "150",
-            leadingIcon = Icons.Rounded.GridOn,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            supportingText = "Distancia evaluada en terreno"
-        )
     }
 
     InfoBanner(
@@ -958,13 +981,32 @@ private fun LocationStepPreview() {
                 title = "Ubicación",
                 subtitle = "Paso 1 · Dónde se tomó la muestra"
             )
+            val centro = CentroCultivoEntity(
+                id = 1,
+                codigo = "CONC-104",
+                nombre = "Concesión Dalcahue #104",
+                comuna = "Dalcahue"
+            )
+            val tramo = TramoEntity(
+                id = 1,
+                centroId = 1,
+                tren = "Tren 01",
+                linea = "Línea L-01",
+                longitudCm = 150
+            )
             LocationStep(
-                state = SampleUiState(concesion = DEFAULT_CENTROS.first(), tren = "Tren 01"),
-                centros = DEFAULT_CENTROS,
-                onConcesionChanged = {},
-                onTrenChanged = {},
-                onLineaChanged = {},
-                onTramoChanged = {}
+                state = SampleUiState(
+                    centroId = 1,
+                    tramoId = 1,
+                    concesion = centro.nombre,
+                    tren = tramo.tren,
+                    linea = tramo.linea,
+                    tramoLongitudCm = "150"
+                ),
+                centros = listOf(centro),
+                tramos = listOf(tramo),
+                onCentroSelected = {},
+                onTramoSelected = {}
             )
         }
     }

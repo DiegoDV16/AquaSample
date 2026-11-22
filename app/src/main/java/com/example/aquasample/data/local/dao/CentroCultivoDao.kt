@@ -26,4 +26,7 @@ interface CentroCultivoDao {
 
     @Query("SELECT * FROM centros_cultivo WHERE codigo = :codigo LIMIT 1")
     suspend fun getCentroByCodigo(codigo: String): CentroCultivoEntity?
+
+    @Query("DELETE FROM centros_cultivo WHERE id = :id")
+    suspend fun deleteCentroById(id: Long)
 }

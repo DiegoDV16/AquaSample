@@ -5,7 +5,9 @@ import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
+import com.example.aquasample.data.local.entity.CentroCultivoEntity
 import com.example.aquasample.data.local.entity.MuestraEntity
+import com.example.aquasample.data.local.entity.TramoEntity
 import com.example.aquasample.data.repository.ProfileRepository
 import com.example.aquasample.data.session.SessionManager
 import com.google.gson.Gson
@@ -36,33 +38,49 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repository = application.appContainer.muestraRepository
     private val centroRepository = application.appContainer.centroRepository
+    private val tramoRepository = application.appContainer.tramoRepository
 
     private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState
 
     /** Centros de cultivo disponibles, leídos desde Room. */
-    val centros: StateFlow<List<String>> = centroRepository.centrosActivos
-        .map { centros -> centros.map { it.nombre } }
+    val centros: StateFlow<List<CentroCultivoEntity>> = centroRepository.centrosActivos
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
 
-    fun onConcesionChanged(value: String) {
-        _uiState.update { it.copy(concesion = value) }
+    /** Tramos activos de todos los centros; la UI filtra por el centro elegido. */
+    val tramos: StateFlow<List<TramoEntity>> = tramoRepository.tramosActivos
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
+    fun onCentroSelected(centro: CentroCultivoEntity) {
+        _uiState.update {
+            it.copy(
+                centroId = centro.id,
+                concesion = centro.nombre,
+                tramoId = null,
+                tren = "",
+                linea = "",
+                tramoLongitudCm = ""
+            )
+        }
     }
 
-    fun onTrenChanged(value: String) {
-        _uiState.update { it.copy(tren = value) }
-    }
-
-    fun onLineaChanged(value: String) {
-        _uiState.update { it.copy(linea = value) }
-    }
-
-    fun onTramoLongitudChanged(value: String) {
-        _uiState.update { it.copy(tramoLongitudCm = value) }
+    fun onTramoSelected(tramo: TramoEntity) {
+        _uiState.update {
+            it.copy(
+                tramoId = tramo.id,
+                tren = tramo.tren,
+                linea = tramo.linea,
+                tramoLongitudCm = tramo.longitudCm.toString()
+            )
+        }
     }
 
     fun onConteoManualChanged(value: String) {
@@ -150,16 +168,13 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                 val photoPaths = persistPhotos(id, state.photoBitmaps)
                 val session = SessionManager.currentSession.value
                 val operatorId = session?.id ?: "USR-001"
-                val centroId = centroRepository.centrosActivos
-                    .first()
-                    .firstOrNull { it.nombre == state.concesion }
-                    ?.id
                 val operatorAlias = ProfileRepository.alias
                     .ifBlank { session?.nombreCompleto ?: "Operador" }
 
                 val entity = MuestraEntity(
                     id = id,
-                    centroId = centroId,
+                    centroId = state.centroId,
+                    tramoId = state.tramoId,
                     operadorId = operatorId,
                     concesion = state.concesion,
                     tren = state.tren,

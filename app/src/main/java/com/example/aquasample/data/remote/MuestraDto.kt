@@ -12,6 +12,7 @@ import com.google.gson.Gson
 data class MuestraDto(
     val id: String,
     val centroId: Long? = null,
+    val tramoId: Long? = null,
     val operadorId: String? = null,
     val concesion: String = "",
     val tren: String? = null,
@@ -38,6 +39,7 @@ private val mapperGson = Gson()
 fun MuestraEntity.toDto(): MuestraDto = MuestraDto(
     id = id,
     centroId = centroId,
+    tramoId = tramoId,
     operadorId = operadorId,
     concesion = concesion,
     tren = tren,

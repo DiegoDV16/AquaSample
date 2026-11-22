@@ -31,6 +31,7 @@ data class MuestraEntity(
     @PrimaryKey
     val id: String, // ej. "#M-0001"
     val centroId: Long? = null,
+    val tramoId: Long? = null,
     val operadorId: String? = null,
     val concesion: String = "", // Coincide con campo concesion del formulario
     val tren: String = "", // Coincide con campo tren del formulario

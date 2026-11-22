@@ -11,6 +11,7 @@ offline.
 - Registro de muestras en un asistente de tres pasos (ubicación, conteo/calibre y evidencia).
 - Cámara propia con CameraX, galería con Coil y visor con zoom (Telephoto).
 - Conteo asistido: marcar individuos sobre la foto, contador en vivo y corrección.
+- Catálogos de centros y tramos con alta, edición y baja lógica; el asistente elige el tramo en cascada y completa tren, línea y largo.
 - Exportación de un informe PDF por muestra y compartición con FileProvider.
 - Historial con búsqueda, filtros por estado y período, agrupación por día.
 - Detalle con trazabilidad, matriz de calibre, fotos y validación de supervisor.
@@ -88,6 +89,9 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
   marcada como sincronizada en Room; el mismo flujo se probó sin túnel y al recuperarlo.
 - Migración de Room 1 → 2 verificada sobre una base existente: columnas nuevas y
   las 10 muestras anteriores intactas.
+- Migración 2 → 3 probada con una base v2 real: conserva centros y usuarios y crea
+  los 8 tramos del catálogo.
+- CRUD de tramos del backend probado (201, 200, 204 y 404 posterior).
 - PDF generado desde el detalle (58 KB, A4) y compartido con el selector de Android;
   hay un ejemplo en [docs/ejemplos](docs/ejemplos).
 - 39 pruebas unitarias (JUnit + MockK) y 2 instrumentadas de Compose en verde.
@@ -103,7 +107,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 ## Estado
 
 Implementado: interfaz, navegación, perfiles, historial, detalle, cámara, conteo
-asistido, informes PDF, backend, sincronización offline y gestión de personal.
+asistido, informes PDF, catálogos de centros y tramos, backend, sincronización
+offline y gestión de personal.
 
 Pendiente: API externa (Open-Meteo, a cargo de otro integrante), exportación a
 Excel, pruebas con cobertura, autenticación del backend y APK firmada.

@@ -11,12 +11,16 @@ object SampleValidator {
     const val STEP_EVIDENCE = 2
 
     fun validate(state: SampleUiState, step: Int): String? = when (step) {
-        STEP_LOCATION -> validateLocation(
-            concesion = state.concesion,
-            tren = state.tren,
-            linea = state.linea,
-            tramo = state.tramoLongitudCm
-        )
+        STEP_LOCATION -> if (state.tramoId == null) {
+            "Selecciona un tramo del centro."
+        } else {
+            validateLocation(
+                concesion = state.concesion,
+                tren = state.tren,
+                linea = state.linea,
+                tramo = state.tramoLongitudCm
+            )
+        }
 
         STEP_MEASUREMENT -> validateMeasurement(
             conteo = state.conteoManual,

@@ -27,4 +27,8 @@ class CentroCultivoRepository(private val centroCultivoDao: CentroCultivoDao) {
     suspend fun getCentroByCodigo(codigo: String): CentroCultivoEntity? = withContext(Dispatchers.IO) {
         centroCultivoDao.getCentroByCodigo(codigo)
     }
+
+    suspend fun deleteCentroById(id: Long) = withContext(Dispatchers.IO) {
+        centroCultivoDao.deleteCentroById(id)
+    }
 }
