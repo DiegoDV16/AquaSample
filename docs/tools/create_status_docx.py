@@ -227,7 +227,7 @@ def cover(doc):
         ("Documento", "Estado del sistema · versión 1.0"),
         ("Fecha", "22 de noviembre de 2026"),
         ("Repositorio", "github.com/DiegoDV16/AquaSample (público)"),
-        ("Commit auditado", "main · 71b3bce (APK firmada 1.0.0)"),
+        ("Commit auditado", "main · 90e356b (APK 1.0.1 con cuentas demo)"),
         ("Plataforma", "Android · Kotlin 2.0.21 · Jetpack Compose · Material 3"),
         ("Backend", "Spring Boot 3.5.16 · H2 · springdoc 2.8.13"),
         ("Verificación", "App + backend en emulador, con sincronización offline y online"),
@@ -286,8 +286,8 @@ def summary(doc):
             ("Catálogos", "3 centros y 8 tramos con CRUD, baja lógica y selección en cascada"),
             ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
-            ("Documentación", "README, DESIGN.md, informe y 20 capturas"),
-            ("APK", "Release 1.0.0 firmada (v2), 18 MB, instalada y verificada"),
+            ("Documentación", "README, DESIGN.md, informe y 21 capturas"),
+            ("APK", "Release 1.0.1 firmada (v2), 18 MB, instalada y verificada"),
             ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 81998ac)"),
         ],
         [4.6, 12.0],
@@ -616,16 +616,17 @@ def section_2(doc):
 
     doc.add_heading("2.14 APK firmada", level=2)
     doc.add_paragraph(
-        "La entrega incluye un APK release 1.0.0 firmado con un keystore propio, versionName 1.0.0 "
-        "y versionCode 1. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
+        "La entrega incluye un APK release 1.0.1 firmado con un keystore propio, versionName 1.0.1 "
+        "y versionCode 2. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
         "se verificó con apksigner antes de instalar el APK en el emulador."
     )
     bullets(
         doc,
         [
             "Firma APK Signature Scheme v2 con clave RSA de 2048 bits.",
-            "SHA-256 del APK: 98804a7943681f33693e3028873ed08134d6e0adbef3b29d6e5677ed88976686.",
+            "SHA-256 del APK: 670f569bffa2c5911806e7d045ec14dd0f15d082c94c2ab5721e7609262ddb66.",
             "Instalado y abierto en el emulador; el build release no es depurable.",
+            "Incluye las cuentas demo de operador, analista y administrador en una instalación limpia.",
             "Guía de firma y respaldo en docs/RELEASE.md.",
         ],
     )
@@ -656,7 +657,7 @@ def section_3(doc):
         ("Consumo de APIs externas", "Pendiente", "—", "Retrofit/OkHttp, permiso INTERNET y Open-Meteo Marine con manejo de errores"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Parcial", "39 unitarias y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
-        ("APK firmada", "Completo", "Release 1.0.0 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
+        ("APK firmada", "Completo", "Release 1.0.1 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
@@ -832,7 +833,7 @@ def section_7(doc):
         "├── DESIGN.md\n"
         "├── informe/AquaSample-Estado-del-Sistema.docx\n"
         "├── ejemplos/  (informe PDF de ejemplo)\n"
-        "└── screenshots/  (20 capturas del sistema)",
+        "└── screenshots/  (21 capturas del sistema)",
     )
 
     doc.add_heading("B. Comandos de verificación", level=2)
