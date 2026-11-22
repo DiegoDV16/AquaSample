@@ -1,6 +1,7 @@
 """Genera el informe Word de estado del sistema AquaSample."""
 
 from pathlib import Path
+import sys
 
 from docx import Document
 from docx.enum.table import WD_ALIGN_VERTICAL, WD_TABLE_ALIGNMENT
@@ -11,7 +12,7 @@ from docx.shared import Cm, Pt, RGBColor
 
 BASE = Path(r"C:\Users\diego\OneDrive\Documents\GitHub\AquaSample")
 SHOTS = BASE / "docs" / "screenshots"
-OUTPUT = BASE / "docs" / "informe" / "AquaSample-Estado-del-Sistema.docx"
+OUTPUT = Path(sys.argv[1]) if len(sys.argv) > 1 else BASE / "docs" / "informe" / "AquaSample-Estado-del-Sistema.docx"
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 OCEAN = RGBColor(0x0A, 0x57, 0x7A)
@@ -226,7 +227,7 @@ def cover(doc):
         ("Documento", "Estado del sistema · versión 1.0"),
         ("Fecha", "22 de noviembre de 2026"),
         ("Repositorio", "github.com/DiegoDV16/AquaSample (público)"),
-        ("Commit auditado", "main · 81998ac (catálogos de centros y tramos incluidos)"),
+        ("Commit auditado", "main · 378b54f (dashboard, gráficos y filtros)"),
         ("Plataforma", "Android · Kotlin 2.0.21 · Jetpack Compose · Material 3"),
         ("Backend", "Spring Boot 3.5.16 · H2 · springdoc 2.8.13"),
         ("Verificación", "App + backend en emulador, con sincronización offline y online"),

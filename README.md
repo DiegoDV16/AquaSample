@@ -102,7 +102,7 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 ## Documentación
 
 - [Diseño y arquitectura](docs/DESIGN.md)
-- [Informe de estado y brechas](docs/informe/AquaSample-Estado-del-Sistema.docx)
+- [Informe de estado y brechas](docs/informe/AquaSample-Estado-del-Sistema-v2.docx)
 - [Backend](backend/README.md)
 
 ## Estado
