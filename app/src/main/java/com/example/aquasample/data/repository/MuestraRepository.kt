@@ -37,6 +37,14 @@ class MuestraRepository(private val muestraDao: MuestraDao) {
         muestraDao.getLastSample()
     }
 
+    suspend fun getPendingSync(): List<MuestraEntity> = withContext(Dispatchers.IO) {
+        muestraDao.getPendingSync()
+    }
+
+    suspend fun markSynced(id: String): Int = withContext(Dispatchers.IO) {
+        muestraDao.markSynced(id)
+    }
+
     suspend fun getMuestraConDetalleById(id: String): MuestraConDetalle? = withContext(Dispatchers.IO) {
         muestraDao.getMuestraConDetalleById(id)
     }

@@ -60,6 +60,12 @@ interface MuestraDao {
     @Query("SELECT * FROM muestras ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLastSample(): MuestraEntity?
 
+    @Query("SELECT * FROM muestras WHERE sincronizado = 0 ORDER BY timestamp ASC")
+    suspend fun getPendingSync(): List<MuestraEntity>
+
+    @Query("UPDATE muestras SET sincronizado = 1 WHERE id = :id")
+    suspend fun markSynced(id: String): Int
+
     @Query("""
         SELECT 
             m.*,

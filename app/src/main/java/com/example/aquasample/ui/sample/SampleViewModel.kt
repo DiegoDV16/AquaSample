@@ -195,6 +195,7 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                 )
 
                 repository.insertSample(entity)
+                com.example.aquasample.data.sync.SyncScheduler.syncNow(getApplication())
 
                 _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
             } catch (exception: Exception) {

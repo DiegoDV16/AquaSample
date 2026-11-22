@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudDone
+import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
@@ -37,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -95,6 +97,7 @@ fun HomeScreen(
         onNewSample = onNewSample,
         onSeeAllSamples = onSeeAllSamples,
         onOpenSample = onOpenSample,
+        onSyncNow = viewModel::syncNow,
         onLogout = onLogout,
         modifier = modifier
     )
@@ -107,6 +110,7 @@ fun HomeContent(
     onNewSample: () -> Unit,
     onSeeAllSamples: () -> Unit,
     onOpenSample: (String) -> Unit,
+    onSyncNow: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -198,6 +202,12 @@ fun HomeContent(
             if (userSession.role == UserRole.OPERADOR) {
                 item(key = "new-sample-cta") {
                     NewSampleCard(onClick = onNewSample)
+                }
+            }
+
+            if (state.pendingSync > 0) {
+                item(key = "pending-sync") {
+                    PendingSyncCard(count = state.pendingSync, onSyncNow = onSyncNow)
                 }
             }
 
@@ -329,6 +339,45 @@ private fun GreetingCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.75f)
             )
+        }
+    }
+}
+
+@Composable
+private fun PendingSyncCard(
+    count: Int,
+    onSyncNow: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val semantic = MaterialTheme.statusColors
+    AquaCard(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Rounded.CloudOff,
+                contentDescription = null,
+                tint = semantic.warning
+            )
+            Spacer(Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (count == 1) {
+                        "1 muestra sin sincronizar"
+                    } else {
+                        "$count muestras sin sincronizar"
+                    },
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Se enviarán automáticamente al recuperar conexión.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            TextButton(onClick = onSyncNow) {
+                Text("Sincronizar")
+            }
         }
     }
 }
@@ -496,6 +545,7 @@ private fun HomeContentPreview() {
             onNewSample = {},
             onSeeAllSamples = {},
             onOpenSample = {},
+            onSyncNow = {},
             onLogout = {}
         )
     }

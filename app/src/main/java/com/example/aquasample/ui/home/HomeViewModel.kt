@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.MuestraConDetalle
+import com.example.aquasample.data.sync.SyncScheduler
 import com.example.aquasample.ui.designsystem.SampleStatus
 import com.example.aquasample.ui.model.SampleSummary
 import com.example.aquasample.ui.model.toSampleSummary
@@ -23,6 +24,7 @@ data class HomeUiState(
     val samplesThisWeek: Int = 0,
     val pendingValidation: Int = 0,
     val validatedSamples: Int = 0,
+    val pendingSync: Int = 0,
     val recent: List<SampleSummary> = emptyList(),
     val error: String? = null
 )
@@ -63,8 +65,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             validatedSamples = count {
                 SampleStatus.from(it.muestra.estado) == SampleStatus.VALIDADO
             },
+            pendingSync = count { !it.muestra.sincronizado },
             recent = take(4).map { it.toSampleSummary() }
         )
+    }
+
+    /** Dispara un intento inmediato de sincronización con el backend. */
+    fun syncNow() {
+        SyncScheduler.syncNow(getApplication())
     }
 
     private fun startOfWeekMillis(): Long {

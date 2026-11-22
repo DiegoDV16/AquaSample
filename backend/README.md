@@ -24,7 +24,17 @@ La API queda disponible en `http://localhost:8080`.
 | OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
 | Consola H2 | `http://localhost:8080/h2-console` (JDBC `jdbc:h2:file:./data/aquasample`, usuario `sa`, sin contraseña) |
 
-Desde el emulador Android, el host se ve como `http://10.0.2.2:8080`.
+Desde el emulador Android se recomienda un túnel de ADB para evitar el NAT y el
+firewall de Windows:
+
+```bash
+adb reverse tcp:8080 tcp:8080
+```
+
+La app apunta a `http://127.0.0.1:8080/`; con el túnel activo llega al backend del
+PC. En un teléfono físico también sirve `adb reverse`, o bien cambiar la URL por la
+IP de la máquina en la red local (por ejemplo `http://192.168.1.50:8080/`) y
+recompilar.
 
 La base H2 se guarda en `backend/data/` y se crea sola al arrancar. Los datos de
 demostración (3 centros, 3 usuarios y 8 muestras) se cargan si las tablas están vacías.
