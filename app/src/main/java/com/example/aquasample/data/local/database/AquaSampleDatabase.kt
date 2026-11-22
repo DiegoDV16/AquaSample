@@ -185,8 +185,28 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     TramoEntity(8, 2, "Tren 03", "Línea L-04", 170)
                 )
 
-                // 4. Único usuario administrador del sistema por defecto
+                // 4. Cuentas de demostración (una por rol)
                 val usuarios = listOf(
+                    UsuarioEntity(
+                        id = "USR-001",
+                        email = "operador@aquasample.cl",
+                        passwordHash = "operador123",
+                        nombres = "Francisca",
+                        apellidoPaterno = "Rojas",
+                        apellidoMaterno = "Soto",
+                        rolId = 1,
+                        estado = "ACTIVO"
+                    ),
+                    UsuarioEntity(
+                        id = "USR-002",
+                        email = "analista@aquasample.cl",
+                        passwordHash = "analista123",
+                        nombres = "Mateo",
+                        apellidoPaterno = "Cárdenas",
+                        apellidoMaterno = "Muñoz",
+                        rolId = 2,
+                        estado = "ACTIVO"
+                    ),
                     UsuarioEntity(
                         id = "USR-ADMIN",
                         email = "admin@aquasample.cl",

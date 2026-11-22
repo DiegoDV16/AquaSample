@@ -52,9 +52,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             var user = usuarioRepository.getByEmail(inputEmail)
 
-            // Garantiza que la cuenta administradora inicial exista en SQLite.
-            if (user == null && inputEmail.equals(ADMIN_EMAIL, ignoreCase = true)) {
-                ensureAdminUserExists()
+            // Garantiza que las cuentas de demostración existan en SQLite.
+            if (user == null) {
+                ensureDemoUserExists(inputEmail)
                 user = usuarioRepository.getByEmail(inputEmail)
             }
 
@@ -110,18 +110,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun ensureAdminUserExists() {
-        val adminUser = UsuarioEntity(
-            id = "USR-ADMIN",
-            email = ADMIN_EMAIL,
-            passwordHash = "admin123",
-            nombres = "Administrador",
-            apellidoPaterno = "Sistema",
-            apellidoMaterno = "",
-            rolId = 3,
-            estado = "ACTIVO"
-        )
-        runCatching { usuarioRepository.insertUser(adminUser) }
+    private suspend fun ensureDemoUserExists(email: String) {
+        val demoUser = DEMO_USERS[email.trim().lowercase()] ?: return
+        runCatching { usuarioRepository.insertUser(demoUser) }
     }
 
     fun resetLoginState() {
@@ -129,6 +120,37 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private companion object {
-        const val ADMIN_EMAIL = "admin@aquasample.cl"
+        val DEMO_USERS = listOf(
+            UsuarioEntity(
+                id = "USR-001",
+                email = "operador@aquasample.cl",
+                passwordHash = "operador123",
+                nombres = "Francisca",
+                apellidoPaterno = "Rojas",
+                apellidoMaterno = "Soto",
+                rolId = 1,
+                estado = "ACTIVO"
+            ),
+            UsuarioEntity(
+                id = "USR-002",
+                email = "analista@aquasample.cl",
+                passwordHash = "analista123",
+                nombres = "Mateo",
+                apellidoPaterno = "Cárdenas",
+                apellidoMaterno = "Muñoz",
+                rolId = 2,
+                estado = "ACTIVO"
+            ),
+            UsuarioEntity(
+                id = "USR-ADMIN",
+                email = "admin@aquasample.cl",
+                passwordHash = "admin123",
+                nombres = "Administrador",
+                apellidoPaterno = "Sistema",
+                apellidoMaterno = "",
+                rolId = 3,
+                estado = "ACTIVO"
+            )
+        ).associateBy { it.email.lowercase() }
     }
 }
