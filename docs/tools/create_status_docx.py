@@ -265,7 +265,7 @@ def summary(doc):
         "backend cuando hay conexión."
     )
     doc.add_paragraph(
-        "Frente a los 14 criterios de la pauta, 8 están completos, 5 son parciales y 1 sigue "
+        "Frente a los 14 criterios de la pauta, 9 están completos, 4 son parciales y 1 sigue "
         "pendiente. El único ítem sin implementar es el consumo de la API externa, que quedó a "
         "cargo de otro integrante. Las brechas parciales son la cobertura global de pruebas, la "
         "APK firmada, el endurecimiento del backend, la documentación colaborativa y la "
@@ -284,8 +284,9 @@ def summary(doc):
             ("Cobertura", "100 % en la lógica evaluable (validadores, filtros, mapeo y repositorio)"),
             ("Informes", "PDF A4 por muestra con FileProvider y ejemplo en docs/ejemplos"),
             ("Catálogos", "3 centros y 8 tramos con CRUD, baja lógica y selección en cascada"),
+            ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
-            ("Documentación", "README, DESIGN.md, informe y 17 capturas"),
+            ("Documentación", "README, DESIGN.md, informe y 19 capturas"),
             ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 81998ac)"),
         ],
         [4.6, 12.0],
@@ -295,8 +296,8 @@ def summary(doc):
         doc,
         ["Estado", "Cantidad", "Ítems"],
         [
-            ("Completo", "8", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; microservicios; persistencia offline; perfiles"),
-            ("Parcial", "5", "Historial/dashboard; pruebas (cobertura global); APK firmada; documentación; modificación en tiempo real"),
+            ("Completo", "9", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; historial y dashboard; microservicios; offline; perfiles"),
+            ("Parcial", "4", "Pruebas (cobertura global); APK firmada; documentación; modificación en tiempo real"),
             ("Pendiente", "1", "API externa con Retrofit (a cargo de otro integrante)"),
         ],
         [2.4, 2.0, 12.2],
@@ -596,6 +597,22 @@ def section_2(doc):
         ],
     )
 
+    doc.add_heading("2.13 Dashboard, gráficos y comparación", level=2)
+    doc.add_paragraph(
+        "El inicio incorpora dos gráficos dibujados con Canvas: distribución de muestras por "
+        "estado y evolución del calibre promedio de los últimos siete días. El historial suma "
+        "filtros por centro y tren y una tarjeta que compara el período elegido contra el anterior "
+        "en cantidad de muestras y calibre promedio."
+    )
+    bullets(
+        doc,
+        [
+            "Filtros de historial: búsqueda, estado, período, centro y tren, combinables.",
+            "Comparación: muestras y calibre del período actual frente al anterior, con variación.",
+            "Sin dependencias de gráficos: los componentes viven en ui/designsystem/Charts.kt.",
+        ],
+    )
+
     paragraph = doc.add_paragraph(
         "Capturas representativas: login, panel de inicio, historial agrupado por día, detalle "
         "con trazabilidad, gestión de personal y perfil. La galería completa está en el Anexo C "
@@ -616,7 +633,7 @@ def section_3(doc):
         ("Fotografías (CameraX/Coil/Telephoto)", "Completo", "CameraX captura dentro de la app, Coil carga la galería y Telephoto aporta el zoom", "Verificar en teléfono físico y conservar la resolución completa al guardar"),
         ("Conteo asistido", "Completo", "Marcas normalizadas sobre la foto, contador en vivo, corrección y migración Room v2", "Probar el flujo de toques en un teléfono físico"),
         ("Gestión por perfiles", "Completo", "Login por rol; operador registra; analista/admin validan; CRUD de personal", "Los permisos se aplican en UI; falta reforzarlos en backend"),
-        ("Historial y dashboard", "Parcial", "Búsqueda, filtros por estado y período, agrupación por día, detalle y KPIs", "Gráficos, comparación de períodos y filtros por centro/tren"),
+        ("Historial y dashboard", "Completo", "Búsqueda; filtros por estado, período, centro y tren; agrupación por día; tarjeta de comparación y gráficos en el inicio", "Validar los gráficos en un teléfono físico"),
         ("Reportabilidad (PDF/Excel)", "Completo", "PDF A4 por muestra con datos, calibre y foto, compartido con FileProvider", "Exportación a Excel opcional y reporte de jornada"),
         ("Microservicios Spring Boot", "Completo", "API Spring Boot con JPA, H2, CRUD, filtros, validación, Swagger y datos demo", "Autenticación por rol, migraciones versionadas y despliegue"),
         ("Consumo de APIs externas", "Pendiente", "—", "Retrofit/OkHttp, permiso INTERNET y Open-Meteo Marine con manejo de errores"),
@@ -798,7 +815,7 @@ def section_7(doc):
         "├── DESIGN.md\n"
         "├── informe/AquaSample-Estado-del-Sistema.docx\n"
         "├── ejemplos/  (informe PDF de ejemplo)\n"
-        "└── screenshots/  (17 capturas del sistema)",
+        "└── screenshots/  (19 capturas del sistema)",
     )
 
     doc.add_heading("B. Comandos de verificación", level=2)

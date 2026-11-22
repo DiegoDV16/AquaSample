@@ -2,6 +2,7 @@ package com.example.aquasample.ui.history
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aquasample.ui.designsystem.AquaCard
+import com.example.aquasample.ui.designsystem.AquaDropdownField
 import com.example.aquasample.ui.designsystem.AquaScaffold
 import com.example.aquasample.ui.designsystem.AquaTopBar
 import com.example.aquasample.ui.designsystem.EmptyState
@@ -83,6 +85,8 @@ fun HistorialMuestrasScreen(
         onQueryChange = viewModel::onQueryChange,
         onStatusChange = viewModel::onStatusChange,
         onPeriodChange = viewModel::onPeriodChange,
+        onCentroChange = viewModel::onCentroChange,
+        onTrenChange = viewModel::onTrenChange,
         onClearFilters = viewModel::clearFilters,
         onNavigateToNewSample = onNavigateToNewSample,
         onOpenSample = onOpenSample,
@@ -99,6 +103,8 @@ fun HistoryContent(
     onQueryChange: (String) -> Unit,
     onStatusChange: (SampleStatus?) -> Unit,
     onPeriodChange: (HistoryPeriod) -> Unit,
+    onCentroChange: (Long?) -> Unit,
+    onTrenChange: (String?) -> Unit,
     onClearFilters: () -> Unit,
     onNavigateToNewSample: () -> Unit,
     onOpenSample: (String) -> Unit,
@@ -218,6 +224,43 @@ fun HistoryContent(
                         )
                     }
                 }
+            }
+
+            item(key = "catalog-filters") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        AquaDropdownField(
+                            label = "Centro",
+                            selected = state.centros
+                                .firstOrNull { it.id == state.filters.centroId }
+                                ?.nombre
+                                ?: "Todos",
+                            options = listOf("Todos") + state.centros.map { it.nombre },
+                            onSelected = { nombre ->
+                                onCentroChange(
+                                    state.centros.firstOrNull { it.nombre == nombre }?.id
+                                )
+                            }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        AquaDropdownField(
+                            label = "Tren",
+                            selected = state.filters.tren ?: "Todos",
+                            options = listOf("Todos") + state.trenes,
+                            onSelected = { tren ->
+                                onTrenChange(tren.takeUnless { it == "Todos" })
+                            }
+                        )
+                    }
+                }
+            }
+
+            item(key = "comparison") {
+                ComparisonCard(state.comparison)
             }
 
             item(key = "result-count") {
@@ -450,10 +493,93 @@ private fun HistoryPreview() {
             onQueryChange = {},
             onStatusChange = {},
             onPeriodChange = {},
+            onCentroChange = {},
+            onTrenChange = {},
             onClearFilters = {},
             onNavigateToNewSample = {},
             onOpenSample = {},
             onLogout = {}
         )
+    }
+}
+
+@Composable
+private fun ComparisonCard(comparison: HistoryComparison) {
+    AquaCard {
+        Text(
+            text = "Comparación de períodos",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "${comparison.currentLabel} vs ${comparison.previousLabel}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(Spacing.md))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+        ) {
+            ComparisonMetric(
+                title = "Muestras",
+                current = comparison.currentCount.toString(),
+                previous = comparison.previousCount.toString(),
+                delta = comparison.countDeltaPercent
+                    ?.let { String.format(Locale.getDefault(), "%+d%%", it) },
+                modifier = Modifier.weight(1f)
+            )
+            ComparisonMetric(
+                title = "Calibre promedio",
+                current = comparison.currentAverageCalibre
+                    ?.let { String.format(Locale.getDefault(), "%.1f mm", it) }
+                    ?: "—",
+                previous = comparison.previousAverageCalibre
+                    ?.let { String.format(Locale.getDefault(), "%.1f mm", it) }
+                    ?: "—",
+                delta = comparison.calibreDelta
+                    ?.let { String.format(Locale.getDefault(), "%+.1f mm", it) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ComparisonMetric(
+    title: String,
+    current: String,
+    previous: String,
+    delta: String?,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = current,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Antes: $previous",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (delta != null) {
+            Text(
+                text = delta,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = if (delta.startsWith("-")) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+        }
     }
 }

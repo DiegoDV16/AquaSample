@@ -57,6 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.data.session.UserSession
 import com.example.aquasample.ui.designsystem.AquaCard
+import com.example.aquasample.ui.designsystem.ChartPoint
 import com.example.aquasample.ui.designsystem.AquaScaffold
 import com.example.aquasample.ui.designsystem.AquaTopBar
 import com.example.aquasample.ui.designsystem.EmptyState
@@ -67,6 +68,8 @@ import com.example.aquasample.ui.designsystem.MetricTone
 import com.example.aquasample.ui.designsystem.SampleStatus
 import com.example.aquasample.ui.designsystem.ScreenContentPadding
 import com.example.aquasample.ui.designsystem.SectionHeader
+import com.example.aquasample.ui.designsystem.StatusDistribution
+import com.example.aquasample.ui.designsystem.TrendChart
 import com.example.aquasample.ui.designsystem.StatusPill
 import com.example.aquasample.ui.model.SampleSummary
 import com.example.aquasample.ui.theme.AquaSampleTheme
@@ -195,6 +198,44 @@ fun HomeContent(
                         caption = "en revisión",
                         tone = if (state.pendingValidation > 0) MetricTone.Warning else MetricTone.Neutral,
                         modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            item(key = "status-chart") {
+                AquaCard {
+                    Text(
+                        text = "Estado de las muestras",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Distribución de ${state.totalSamples} registros",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(Spacing.md))
+                    StatusDistribution(counts = state.statusCounts)
+                }
+            }
+
+            item(key = "calibre-trend") {
+                AquaCard {
+                    Text(
+                        text = "Evolución del calibre",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Promedio diario de los últimos 7 días",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    TrendChart(
+                        points = state.trend.map {
+                            ChartPoint(label = it.label, value = it.value.toFloat())
+                        }
                     )
                 }
             }

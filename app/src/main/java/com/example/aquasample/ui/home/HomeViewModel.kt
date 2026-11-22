@@ -9,12 +9,18 @@ import com.example.aquasample.data.sync.SyncScheduler
 import com.example.aquasample.ui.designsystem.SampleStatus
 import com.example.aquasample.ui.model.SampleSummary
 import com.example.aquasample.ui.model.toSampleSummary
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+
+/** Punto de la serie de calibre promedio por día. */
+data class CalibrePoint(val label: String, val value: Double)
 
 /** Estado de la pantalla de inicio, derivado de los datos locales. */
 data class HomeUiState(
@@ -26,6 +32,8 @@ data class HomeUiState(
     val validatedSamples: Int = 0,
     val pendingSync: Int = 0,
     val recent: List<SampleSummary> = emptyList(),
+    val statusCounts: Map<SampleStatus, Int> = emptyMap(),
+    val trend: List<CalibrePoint> = emptyList(),
     val error: String? = null
 )
 
@@ -66,8 +74,43 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 SampleStatus.from(it.muestra.estado) == SampleStatus.VALIDADO
             },
             pendingSync = count { !it.muestra.sincronizado },
-            recent = take(4).map { it.toSampleSummary() }
+            recent = take(4).map { it.toSampleSummary() },
+            statusCounts = groupingBy { SampleStatus.from(it.muestra.estado) }.eachCount(),
+            trend = buildTrend()
         )
+    }
+
+    /** Promedio diario de calibre para los últimos siete días. */
+    private fun List<MuestraConDetalle>.buildTrend(): List<CalibrePoint> {
+        val formatter = SimpleDateFormat("dd/MM", Locale.getDefault())
+        val todayStart = startOfDayMillis()
+        val points = mutableListOf<CalibrePoint>()
+
+        for (daysAgo in 6 downTo 0) {
+            val start = todayStart - daysAgo * DAY_MILLIS
+            val end = start + DAY_MILLIS
+            val values = filter { detalle ->
+                detalle.muestra.timestamp in start until end &&
+                    detalle.muestra.averageCalibre > 0.0
+            }.map { it.muestra.averageCalibre }
+
+            if (values.isNotEmpty()) {
+                points += CalibrePoint(
+                    label = formatter.format(Date(start)),
+                    value = values.average()
+                )
+            }
+        }
+        return points
+    }
+
+    private fun startOfDayMillis(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
     }
 
     /** Dispara un intento inmediato de sincronización con el backend. */
@@ -84,5 +127,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
         return calendar.timeInMillis
+    }
+
+    private companion object {
+        const val DAY_MILLIS = 24L * 60 * 60 * 1000
     }
 }

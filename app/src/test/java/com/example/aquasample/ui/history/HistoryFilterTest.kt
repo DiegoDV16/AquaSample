@@ -15,7 +15,9 @@ class HistoryFilterTest {
         timestamp: Long = now,
         status: SampleStatus = SampleStatus.COMPLETADO,
         location: String = "Línea L-01 · Tren 01",
-        operator: String = "Francisca Rojas"
+        operator: String = "Francisca Rojas",
+        centroId: Long? = 1L,
+        tren: String = "Tren 01"
     ) = SampleSummary(
         id = id,
         location = location,
@@ -25,7 +27,9 @@ class HistoryFilterTest {
         count = 30,
         averageCalibre = 36.4,
         synced = true,
-        operator = operator
+        operator = operator,
+        centroId = centroId,
+        tren = tren
     )
 
     private fun daysAgo(days: Int): Long = HistoryFilter.startOfDayMillis(days, now) + 3_600_000
@@ -104,8 +108,34 @@ class HistoryFilterTest {
     }
 
     @Test
-    fun `usa la hora actual cuando no se inyecta`() {
+    fun `filtra por centro y tren`() {
+        val filters = HistoryFilters(centroId = 2L, tren = "Tren 03")
+
         assertTrue(
+            HistoryFilter.matches(
+                summary(centroId = 2L, tren = "Tren 03"),
+                filters,
+                now
+            )
+        )
+        assertFalse(
+            HistoryFilter.matches(
+                summary(centroId = 1L, tren = "Tren 03"),
+                filters,
+                now
+            )
+        )
+        assertFalse(
+            HistoryFilter.matches(
+                summary(centroId = 2L, tren = "Tren 01"),
+                filters,
+                now
+            )
+        )
+    }
+
+    @Test
+    fun `usa la hora actual cuando no se inyecta`() {        assertTrue(
             HistoryFilter.matches(
                 summary(timestamp = System.currentTimeMillis()),
                 HistoryFilters(period = HistoryPeriod.TODAY)

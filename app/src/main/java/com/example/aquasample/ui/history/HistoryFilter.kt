@@ -18,6 +18,8 @@ object HistoryFilter {
             summary.operator.contains(query, ignoreCase = true)
 
         val matchesStatus = filters.status == null || summary.status == filters.status
+        val matchesCentro = filters.centroId == null || summary.centroId == filters.centroId
+        val matchesTren = filters.tren == null || summary.tren == filters.tren
 
         val matchesPeriod = when (filters.period) {
             HistoryPeriod.ALL -> true
@@ -25,7 +27,7 @@ object HistoryFilter {
             else -> summary.timestamp >= startOfDayMillis(filters.period.daysBack ?: 0, now)
         }
 
-        return matchesQuery && matchesStatus && matchesPeriod
+        return matchesQuery && matchesStatus && matchesPeriod && matchesCentro && matchesTren
     }
 
     fun isSameDay(first: Long, second: Long): Boolean {

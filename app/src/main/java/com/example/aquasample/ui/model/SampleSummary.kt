@@ -16,7 +16,11 @@ data class SampleSummary(
     val count: Int?,
     val averageCalibre: Double,
     val synced: Boolean,
-    val operator: String
+    val operator: String,
+    val centroId: Long? = null,
+    val centroNombre: String = "",
+    val tren: String = "",
+    val linea: String = ""
 )
 
 fun MuestraConDetalle.toSampleSummary(): SampleSummary {
@@ -40,6 +44,10 @@ fun MuestraConDetalle.toSampleSummary(): SampleSummary {
         averageCalibre = muestra.averageCalibre,
         synced = muestra.sincronizado,
         operator = operadorNombreCompleto?.ifBlank { null }
-            ?: muestra.operatorAlias.ifBlank { "Operador" }
+            ?: muestra.operatorAlias.ifBlank { "Operador" },
+        centroId = muestra.centroId,
+        centroNombre = centroNombre.orEmpty(),
+        tren = muestra.tren,
+        linea = muestra.linea
     )
 }

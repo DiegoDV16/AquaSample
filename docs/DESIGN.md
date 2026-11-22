@@ -162,6 +162,15 @@ backend/         Spring Boot: JPA + H2 + REST + Swagger (proyecto Gradle aparte)
 - Room migra de **2 a 3** creando `tramos`, su índice y la columna
   `muestras.tramoId`, conservando los datos existentes.
 
+### Dashboard y gráficos
+
+- `TrendChart` y `StatusDistribution` (Canvas, sin dependencias) muestran la
+  evolución diaria del calibre y la distribución por estado en el inicio.
+- El historial agrega filtros por **centro** y **tren** y una tarjeta que compara
+  el período elegido contra el anterior (muestras y calibre promedio).
+- Los gráficos se alimentan de `HomeUiState`/`HistoryUiState`; las pantallas no
+  calculan nada.
+
 ### Backend
 
 - Proyecto Gradle independiente en `backend/` (Spring Boot 3.5, Java 21, H2).

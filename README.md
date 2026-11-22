@@ -13,7 +13,8 @@ offline.
 - Conteo asistido: marcar individuos sobre la foto, contador en vivo y corrección.
 - Catálogos de centros y tramos con alta, edición y baja lógica; el asistente elige el tramo en cascada y completa tren, línea y largo.
 - Exportación de un informe PDF por muestra y compartición con FileProvider.
-- Historial con búsqueda, filtros por estado y período, agrupación por día.
+- Historial con búsqueda, filtros por estado, período, centro y tren, agrupación por día y comparación con el período anterior.
+- Dashboard con gráficos de distribución por estado y evolución del calibre.
 - Detalle con trazabilidad, matriz de calibre, fotos y validación de supervisor.
 - Perfil con alias de terreno, foto y tema claro/oscuro.
 - Gestión de personal con altas, ediciones y bajas.
