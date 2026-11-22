@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.aquasample.data.local.converter.Converters
 import com.example.aquasample.data.local.dao.CentroCultivoDao
@@ -24,7 +25,7 @@ import java.util.concurrent.Executors
         UsuarioEntity::class,
         MuestraEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -46,11 +47,26 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     AquaSampleDatabase::class.java,
                     "aquasample_db"
                 )
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_1_2)
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        /**
+         * Agrega las marcas de conteo asistido sin borrar los datos existentes.
+         * Sustituye al fallback destructivo que tenía la versión 1.
+         */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE muestras ADD COLUMN marcasConteo TEXT NOT NULL DEFAULT '[]'"
+                )
+                db.execSQL(
+                    "ALTER TABLE muestras ADD COLUMN conteoAsistido INTEGER NOT NULL DEFAULT 0"
+                )
             }
         }
 

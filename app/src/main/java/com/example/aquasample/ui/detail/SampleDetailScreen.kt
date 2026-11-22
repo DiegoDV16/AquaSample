@@ -250,6 +250,14 @@ private fun DetailContent(
             DetailRow("Tramo", if (sample.tramoLongitudCm.isBlank()) "—" else "${sample.tramoLongitudCm} cm")
             DetailRow("Operador", state.operadorEmail ?: "—")
             DetailRow(
+                "Conteo asistido",
+                if (sample.conteoAsistido > 0) {
+                    "${sample.conteoAsistido} individuos marcados"
+                } else {
+                    "Sin marcas"
+                }
+            )
+            DetailRow(
                 "Fecha de registro",
                 sample.fechaHora.ifBlank { "—" }
             )

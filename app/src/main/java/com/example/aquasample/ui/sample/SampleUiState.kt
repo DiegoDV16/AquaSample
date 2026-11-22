@@ -2,6 +2,12 @@ package com.example.aquasample.ui.sample
 
 import android.graphics.Bitmap
 
+/** Marca de conteo asistido, normalizada respecto de la fotografía (0..1). */
+data class CountMark(
+    val x: Float,
+    val y: Float
+)
+
 data class SampleUiState(
     val concesion: String = "",
     val tren: String = "",
@@ -10,6 +16,7 @@ data class SampleUiState(
     val conteoManual: String = "",
     val calibreMatrix: List<String> = List(30) { "" },
     val photoBitmaps: List<Bitmap> = emptyList(),
+    val countMarks: List<CountMark> = emptyList(),
     val observaciones: String = "",
     val selectedTags: Set<String> = emptySet(),
     val isSaving: Boolean = false,
@@ -17,6 +24,9 @@ data class SampleUiState(
 ) {
     val photoCount: Int
         get() = photoBitmaps.size
+
+    val conteoAsistido: Int
+        get() = countMarks.size
 
     val averageCalibre: Double
         get() {

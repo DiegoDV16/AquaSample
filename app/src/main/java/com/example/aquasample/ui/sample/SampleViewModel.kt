@@ -8,6 +8,7 @@ import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.data.repository.ProfileRepository
 import com.example.aquasample.data.session.SessionManager
+import com.google.gson.Gson
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -81,6 +82,11 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { it.copy(observaciones = value) }
     }
 
+    /** Reemplaza las marcas de conteo asistido (0..1 respecto de la foto). */
+    fun onCountMarksChanged(marks: List<CountMark>) {
+        _uiState.update { it.copy(countMarks = marks) }
+    }
+
     fun onToggleTag(tag: String) {
         _uiState.update { state ->
             val newTags = state.selectedTags.toMutableSet()
@@ -97,7 +103,10 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { state ->
             if (index in state.photoBitmaps.indices) {
                 val newList = state.photoBitmaps.toMutableList().apply { removeAt(index) }
-                state.copy(photoBitmaps = newList)
+                state.copy(
+                    photoBitmaps = newList,
+                    countMarks = if (index == 0) emptyList() else state.countMarks
+                )
             } else {
                 state
             }
@@ -183,6 +192,8 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                     conteoManual = state.conteoManual,
                     calibreMatrix = state.calibreMatrix,
                     averageCalibre = state.averageCalibre,
+                    marcasConteo = Gson().toJson(state.countMarks),
+                    conteoAsistido = state.countMarks.size,
                     photoCount = photoPaths.size,
                     fotos = photoPaths,
                     observaciones = state.observaciones,

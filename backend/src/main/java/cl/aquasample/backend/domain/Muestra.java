@@ -36,6 +36,12 @@ public class Muestra {
 
     private Double averageCalibre;
 
+    /** Marcas de conteo asistido normalizadas (JSON). */
+    @Lob
+    private String marcasConteo;
+
+    private Integer conteoAsistido;
+
     private Integer photoCount;
 
     /** Rutas o URLs de fotografías serializadas como JSON. */
@@ -142,6 +148,22 @@ public class Muestra {
         this.averageCalibre = averageCalibre;
     }
 
+    public String getMarcasConteo() {
+        return marcasConteo;
+    }
+
+    public void setMarcasConteo(String marcasConteo) {
+        this.marcasConteo = marcasConteo;
+    }
+
+    public Integer getConteoAsistido() {
+        return conteoAsistido;
+    }
+
+    public void setConteoAsistido(Integer conteoAsistido) {
+        this.conteoAsistido = conteoAsistido;
+    }
+
     public Integer getPhotoCount() {
         return photoCount;
     }
@@ -225,6 +247,8 @@ public class Muestra {
         this.conteoManual = other.conteoManual;
         this.calibreMatrix = other.calibreMatrix;
         this.averageCalibre = other.averageCalibre;
+        this.marcasConteo = other.marcasConteo;
+        this.conteoAsistido = other.conteoAsistido;
         this.photoCount = other.photoCount;
         this.fotos = other.fotos;
         this.observaciones = other.observaciones;

@@ -54,6 +54,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -64,6 +65,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -150,6 +152,7 @@ fun NuevaMuestraScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var viewerPhoto by remember { mutableStateOf<Bitmap?>(null) }
     var showCamera by remember { mutableStateOf(false) }
+    var showCounting by remember { mutableStateOf(false) }
     val imeVisible = WindowInsets.isImeVisible
 
     // Al corregir cualquier dato, el mensaje de error deja de ser válido.
@@ -281,6 +284,8 @@ fun NuevaMuestraScreen(
                             onPickPhoto = { galleryLauncher.launch("image/*") },
                             onRemovePhoto = viewModel::onRemovePhoto,
                             onOpenPhoto = { viewerPhoto = it },
+                            onOpenCounting = { showCounting = true },
+                            onClearCounting = { viewModel.onCountMarksChanged(emptyList()) },
                             onObservacionesChanged = viewModel::onObservacionesChanged,
                             onToggleTag = viewModel::onToggleTag
                         )
@@ -308,6 +313,18 @@ fun NuevaMuestraScreen(
                     errorMessage = "Puedes adjuntar hasta ${SampleViewModel.MAX_PHOTOS} fotografías."
                 }
                 file.delete()
+            }
+        )
+    }
+
+    if (showCounting && uiState.photoBitmaps.isNotEmpty()) {
+        CountingDialog(
+            bitmap = uiState.photoBitmaps.first(),
+            initialMarks = uiState.countMarks,
+            onDismiss = { showCounting = false },
+            onConfirm = { marks ->
+                viewModel.onCountMarksChanged(marks)
+                showCounting = false
             }
         )
     }
@@ -553,6 +570,8 @@ private fun EvidenceStep(
     onPickPhoto: () -> Unit,
     onRemovePhoto: (Int) -> Unit,
     onOpenPhoto: (Bitmap) -> Unit,
+    onOpenCounting: () -> Unit,
+    onClearCounting: () -> Unit,
     onObservacionesChanged: (String) -> Unit,
     onToggleTag: (String) -> Unit
 ) {
@@ -630,6 +649,46 @@ private fun EvidenceStep(
                 modifier = Modifier.weight(1f)
             )
         }
+    }
+
+    AquaCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Rounded.TouchApp,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.width(Spacing.sm))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Conteo asistido",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (state.conteoAsistido == 0) {
+                        "Marca los individuos sobre la primera foto para contarlos."
+                    } else {
+                        "${state.conteoAsistido} individuos marcados en la foto."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (state.conteoAsistido > 0) {
+                TextButton(onClick = onClearCounting) {
+                    Text("Limpiar")
+                }
+            }
+        }
+        Spacer(Modifier.height(Spacing.md))
+        SecondaryButton(
+            text = if (state.conteoAsistido == 0) "Contar sobre la foto" else "Revisar marcas",
+            icon = Icons.Rounded.TouchApp,
+            onClick = onOpenCounting,
+            enabled = state.photoCount > 0
+        )
     }
 
     AquaCard {
@@ -775,6 +834,10 @@ private fun SampleSummaryCard(state: SampleUiState) {
         SummaryRow("Tramo", if (state.tramoLongitudCm.isBlank()) "Sin definir" else "${state.tramoLongitudCm} cm")
         SummaryRow("Conteo", state.conteoManual.ifBlank { "Sin definir" } + " individuos")
         SummaryRow("Calibre promedio", calibre)
+        SummaryRow(
+            "Conteo asistido",
+            if (state.conteoAsistido == 0) "Sin marcas" else "${state.conteoAsistido} marcas"
+        )
         SummaryRow("Fotografías", "${state.photoCount} de ${SampleViewModel.MAX_PHOTOS}")
     }
 }
