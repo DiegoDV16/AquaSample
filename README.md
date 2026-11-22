@@ -82,6 +82,13 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 | Analista | `analista@aquasample.cl` | `analista123` |
 | Administrador | `admin@aquasample.cl` | `admin123` |
 
+## APK firmada
+
+- [AquaSample-1.0.0-release.apk](dist/AquaSample-1.0.0-release.apk) (`versionName` 1.0.0).
+- SHA-256: `98804a7943681f33693e3028873ed08134d6e0adbef3b29d6e5677ed88976686`.
+- Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
+- El keystore y sus credenciales quedan fuera del repositorio.
+
 ## Verificación
 
 - `.\gradlew.bat :app:assembleDebug` y `:app:testDebugUnitTest` en verde.
@@ -95,6 +102,7 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 - CRUD de tramos del backend probado (201, 200, 204 y 404 posterior).
 - PDF generado desde el detalle (58 KB, A4) y compartido con el selector de Android;
   hay un ejemplo en [docs/ejemplos](docs/ejemplos).
+- APK release firmada (v2) instalada en el emulador y verificada con `apksigner`.
 - 39 pruebas unitarias (JUnit + MockK) y 2 instrumentadas de Compose en verde.
 - Cobertura de la lógica evaluable: 100 % en validadores, estado, mapeo de resumen,
   filtro de historial y repositorio. Reporte: `:app:createDebugUnitTestCoverageReport`.
