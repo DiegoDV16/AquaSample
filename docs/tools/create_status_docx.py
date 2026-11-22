@@ -11,7 +11,8 @@ from docx.shared import Cm, Pt, RGBColor
 
 BASE = Path(r"C:\Users\diego\OneDrive\Documents\GitHub\AquaSample")
 SHOTS = BASE / "docs" / "screenshots"
-OUTPUT = BASE / "docs" / "AquaSample-Estado-del-Sistema.docx"
+OUTPUT = BASE / "docs" / "informe" / "AquaSample-Estado-del-Sistema.docx"
+OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 OCEAN = RGBColor(0x0A, 0x57, 0x7A)
 INK = RGBColor(0x1F, 0x29, 0x37)
@@ -225,7 +226,7 @@ def cover(doc):
         ("Documento", "Estado del sistema · versión 1.0"),
         ("Fecha", "22 de noviembre de 2026"),
         ("Repositorio", "github.com/DiegoDV16/AquaSample (público)"),
-        ("Commit auditado", "main · 24734cc (integración de todas las ramas)"),
+        ("Commit auditado", "main · 81998ac (catálogos de centros y tramos incluidos)"),
         ("Plataforma", "Android · Kotlin 2.0.21 · Jetpack Compose · Material 3"),
         ("Backend", "Spring Boot 3.5.16 · H2 · springdoc 2.8.13"),
         ("Verificación", "App + backend en emulador, con sincronización offline y online"),
@@ -264,7 +265,7 @@ def summary(doc):
         "backend cuando hay conexión."
     )
     doc.add_paragraph(
-        "Frente a los 14 criterios de la pauta, 7 están completos, 6 son parciales y 1 sigue "
+        "Frente a los 14 criterios de la pauta, 8 están completos, 5 son parciales y 1 sigue "
         "pendiente. El único ítem sin implementar es el consumo de la API externa, que quedó a "
         "cargo de otro integrante. Las brechas parciales son la cobertura global de pruebas, la "
         "APK firmada, el endurecimiento del backend, la documentación colaborativa y la "
@@ -275,16 +276,17 @@ def summary(doc):
         doc,
         ["Indicador", "Valor actual"],
         [
-            ("Pantallas de usuario", "7 (Login, Inicio, Nueva muestra, Historial, Detalle, Perfil, Personal)"),
+            ("Pantallas de usuario", "8 (Login, Inicio, Nueva muestra, Historial, Detalle, Perfil, Personal, Centros y tramos)"),
             ("Código Kotlin", "65 archivos · más de 8.100 líneas en app/src/main"),
-            ("Capa de datos", "4 tablas Room · 7 ViewModels · 4 repositorios"),
+            ("Capa de datos", "5 tablas Room · 8 ViewModels · 5 repositorios"),
             ("Backend", "Spring Boot + H2 · 8 rutas REST / 14 operaciones · Swagger"),
             ("Pruebas", "39 unitarias (JUnit + MockK) + 2 instrumentadas de Compose"),
             ("Cobertura", "100 % en la lógica evaluable (validadores, filtros, mapeo y repositorio)"),
             ("Informes", "PDF A4 por muestra con FileProvider y ejemplo en docs/ejemplos"),
+            ("Catálogos", "3 centros y 8 tramos con CRUD, baja lógica y selección en cascada"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
-            ("Documentación", "README, DESIGN.md, informe y 16 capturas"),
-            ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 24734cc)"),
+            ("Documentación", "README, DESIGN.md, informe y 17 capturas"),
+            ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 81998ac)"),
         ],
         [4.6, 12.0],
     )
@@ -293,8 +295,8 @@ def summary(doc):
         doc,
         ["Estado", "Cantidad", "Ítems"],
         [
-            ("Completo", "7", "Interfaz; perfiles; fotografías; conteo asistido; reportes PDF; microservicios; persistencia offline"),
-            ("Parcial", "6", "Gestión de muestras; historial/dashboard; pruebas (cobertura global); APK firmada; documentación; modificación en tiempo real"),
+            ("Completo", "8", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; microservicios; persistencia offline; perfiles"),
+            ("Parcial", "5", "Historial/dashboard; pruebas (cobertura global); APK firmada; documentación; modificación en tiempo real"),
             ("Pendiente", "1", "API externa con Retrofit (a cargo de otro integrante)"),
         ],
         [2.4, 2.0, 12.2],
@@ -463,6 +465,7 @@ def section_2(doc):
             ("Detalle", "Trazabilidad completa, matriz de calibre, fotos y validación", "Cambio de estado a VALIDADO"),
             ("Perfil", "Foto, alias de terreno, tema y cierre de sesión", "Navegación y edición de alias"),
             ("Personal", "Alta, edición y baja de cuentas con búsqueda y filtros", "Creación de una cuenta nueva"),
+            ("Centros y tramos", "CRUD de centros y tramos, con baja lógica y estado", "Pantalla abierta con 3 centros y 8 tramos"),
         ],
         [3.0, 7.6, 6.0],
     )
@@ -475,6 +478,7 @@ def section_2(doc):
             "Pruebas: 39 unitarias y 2 instrumentadas en verde; 100 % de la lógica evaluable (validadores, filtros, mapeo y repositorio).",
             "Ejecución: login, registro por pasos, cámara, historial, validación, creación de usuario y perfil recorridos en el emulador.",
             "Sincronización: muestra pendiente enviada al backend y marcada en Room; el flujo se repitió sin túnel y al recuperarlo.",
+            "Catálogos: migración Room 2 → 3 probada con una base v2 real (conserva centros y usuarios, crea 8 tramos) y CRUD de tramos del backend (201/200/204/404).",
             "Correcciones durante la verificación: superposición en el asistente, error que no se limpiaba, filtros cortados, crash por Toast en I/O y flag -parameters en Spring.",
             "APK: se genera app-debug.apk (build debug, firmada con la clave de depuración).",
         ],
@@ -577,6 +581,21 @@ def section_2(doc):
         ],
     )
 
+    doc.add_heading("2.12 Catálogos de centros y tramos", level=2)
+    doc.add_paragraph(
+        "Los centros y tramos dejaron de ser texto libre. La pantalla Personal → Centros y tramos "
+        "permite crear, editar y desactivar ambos catálogos, y el asistente elige primero el centro "
+        "y luego uno de sus tramos activos, completando tren, línea y largo automáticamente."
+    )
+    bullets(
+        doc,
+        [
+            "Room migra de 2 a 3 con la tabla tramos, su índice y muestras.tramoId, conservando datos.",
+            "El backend expone /api/tramos con CRUD completo y las muestras guardan tramoId.",
+            "La migración se probó instalando la versión anterior y luego la nueva sobre la misma base.",
+        ],
+    )
+
     paragraph = doc.add_paragraph(
         "Capturas representativas: login, panel de inicio, historial agrupado por día, detalle "
         "con trazabilidad, gestión de personal y perfil. La galería completa está en el Anexo C "
@@ -592,8 +611,8 @@ def section_3(doc):
         "que no existe implementación en el repositorio."
     )
     rows = [
-        ("Interfaz profesional", "Completo", "Material 3, tema claro/oscuro, tokens, navegación, 7 pantallas verificadas", "Pulido menor: transiciones compartidas y skeletons de carga"),
-        ("Gestión de muestras", "Parcial", "Entidad con concesión, tren, línea, tramo, fechas, observaciones y estado; asistente de registro", "Centros solo precargados; tren y línea son texto; sin CRUD de centros ni entidad de tramo"),
+        ("Interfaz profesional", "Completo", "Material 3, tema claro/oscuro, tokens, navegación, 8 pantallas verificadas", "Pulido menor: transiciones compartidas y skeletons de carga"),
+        ("Gestión de muestras", "Completo", "Entidad con centro y tramo; asistente con selección en cascada; CRUD de centros y tramos con baja lógica", "Validar el flujo completo en un teléfono físico"),
         ("Fotografías (CameraX/Coil/Telephoto)", "Completo", "CameraX captura dentro de la app, Coil carga la galería y Telephoto aporta el zoom", "Verificar en teléfono físico y conservar la resolución completa al guardar"),
         ("Conteo asistido", "Completo", "Marcas normalizadas sobre la foto, contador en vivo, corrección y migración Room v2", "Probar el flujo de toques en un teléfono físico"),
         ("Gestión por perfiles", "Completo", "Login por rol; operador registra; analista/admin validan; CRUD de personal", "Los permisos se aplican en UI; falta reforzarlos en backend"),
@@ -777,9 +796,9 @@ def section_7(doc):
         "\n"
         "docs/\n"
         "├── DESIGN.md\n"
-        "├── AquaSample-Estado-del-Sistema.docx\n"
+        "├── informe/AquaSample-Estado-del-Sistema.docx\n"
         "├── ejemplos/  (informe PDF de ejemplo)\n"
-        "└── screenshots/  (16 capturas del sistema)",
+        "└── screenshots/  (17 capturas del sistema)",
     )
 
     doc.add_heading("B. Comandos de verificación", level=2)
