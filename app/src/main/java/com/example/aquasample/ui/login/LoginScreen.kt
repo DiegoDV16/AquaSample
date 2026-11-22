@@ -146,7 +146,7 @@ fun LoginContent(
                     value = state.email,
                     onValueChange = onEmailChanged,
                     label = "Correo electrónico",
-                    placeholder = "nombre@aldemar.cl",
+                    placeholder = "nombre@aquasample.cl",
                     leadingIcon = Icons.Rounded.Mail,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -245,7 +245,7 @@ fun LoginContent(
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = "AquaSample v2.5 · Uso interno ALDEMAR SpA",
+            text = "AquaSample 1.0.2 · Muestreo de choritos",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -315,15 +315,15 @@ private fun LoginHero(modifier: Modifier = Modifier) {
             Surface(
                 shape = RoundedCornerShape(24.dp),
                 color = Color.White,
-                modifier = Modifier.size(84.dp)
+                modifier = Modifier.size(108.dp)
             ) {
                 Box(
-                    modifier = Modifier.padding(Spacing.md),
+                    modifier = Modifier.padding(Spacing.xs),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_aldemar_logo),
-                        contentDescription = "Logo ALDEMAR SpA",
+                        painter = painterResource(id = R.drawable.ic_aquasample_logo),
+                        contentDescription = "Logo AquaSample",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )
@@ -339,7 +339,7 @@ private fun LoginHero(modifier: Modifier = Modifier) {
                 color = Color.White
             )
             Text(
-                text = "Control de muestreo · ALDEMAR SpA",
+                text = "Control de muestreo de choritos",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.80f)
             )

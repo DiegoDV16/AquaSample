@@ -304,7 +304,7 @@ fun ProfileContent(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "AquaSample v2.5 · ALDEMAR SpA",
+                text = "AquaSample 1.0.2",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
