@@ -27,3 +27,6 @@ local.properties
 /keystore.properties
 /keystore/
 
+
+# Cache de Python
+__pycache__/
