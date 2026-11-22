@@ -1,4 +1,4 @@
-# APK firmada Â· AquaSample 1.0.3
+# APK firmada Â· AquaSample 1.0.4
 
 **Equipo:** Diego AndrÃ©s Soto BarrÃ­a Â· Vicente Javier HernÃ¡ndez Pardo
 
@@ -6,13 +6,13 @@
 
 | Dato | Valor |
 |---|---|
-| Archivo | `dist/AquaSample-1.0.3-release.apk` |
+| Archivo | `dist/AquaSample-1.0.4-release.apk` |
 | TamaÃ±o | 18.934.996 bytes |
 | `versionName` | 1.0.1 |
 | `versionCode` | 2 |
-| SHA-256 | `b790eb08035f0a17496f59fe0e581c2f14fbaf558affa4f8b1a7a718d5565814` |
+| SHA-256 | `479c8ef85bd227bbb02f3895cd6be6e1a584c4968b3e04fc4c777e9102f4ebb4` |
 
-El hash tambiÃ©n estÃ¡ en `dist/AquaSample-1.0.3-release.apk.sha256`.
+El hash tambiÃ©n estÃ¡ en `dist/AquaSample-1.0.4-release.apk.sha256`.
 
 ## Firma
 
@@ -27,7 +27,7 @@ VerificaciÃ³n:
 
 ```powershell
 $env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"
-& "$env:LOCALAPPDATA\Android\Sdk\build-tools\36.0.0\apksigner.bat" verify --verbose --print-certs dist/AquaSample-1.0.3-release.apk
+& "$env:LOCALAPPDATA\Android\Sdk\build-tools\36.0.0\apksigner.bat" verify --verbose --print-certs dist/AquaSample-1.0.4-release.apk
 ```
 
 ## Keystore
@@ -69,7 +69,7 @@ desarrollo antes de instalar esta:
 
 ```powershell
 adb uninstall com.example.aquasample
-adb install dist/AquaSample-1.0.3-release.apk
+adb install dist/AquaSample-1.0.4-release.apk
 ```
 
 La versiÃ³n release no es depurable y conserva todas las funciones de la app.

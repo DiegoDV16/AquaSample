@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -106,15 +107,22 @@ fun LoginContent(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
+            .background(Brush.verticalGradient(listOf(Ocean900, Ocean700)))
     ) {
-        LoginHero()
+        LoginBackground()
 
-        Card(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .statusBarsPadding()
+        ) {
+            LoginBrand()
+
+            Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.xl),
@@ -245,96 +253,86 @@ fun LoginContent(
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = "AquaSample 1.0.3 · Muestreo de choritos",
+            text = "AquaSample 1.0.4 · Muestreo de choritos",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = Color.White.copy(alpha = 0.70f),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(Spacing.xxl))
+        }
     }
 }
 
 @Composable
-private fun LoginHero(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
+private fun LoginBackground() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawCircle(
+            color = Color.White.copy(alpha = 0.06f),
+            radius = size.width * 0.55f,
+            center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.08f)
+        )
+        drawCircle(
+            color = Color.White.copy(alpha = 0.05f),
+            radius = size.width * 0.38f,
+            center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.78f)
+        )
+
+        val wave = Path().apply {
+            moveTo(0f, size.height * 0.93f)
+            cubicTo(
+                size.width * 0.22f,
+                size.height * 0.87f,
+                size.width * 0.34f,
+                size.height * 0.99f,
+                size.width * 0.55f,
+                size.height * 0.94f
+            )
+            cubicTo(
+                size.width * 0.74f,
+                size.height * 0.89f,
+                size.width * 0.86f,
+                size.height * 0.98f,
+                size.width,
+                size.height * 0.92f
+            )
+            lineTo(size.width, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+        drawPath(path = wave, color = Color.White.copy(alpha = 0.05f))
+    }
+}
+
+@Composable
+private fun LoginBrand() {
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .padding(top = Spacing.xxl, bottom = Spacing.xl),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Ocean900, Ocean700)
-                )
-            )
-            drawCircle(
-                color = Color.White.copy(alpha = 0.06f),
-                radius = size.width * 0.55f,
-                center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.05f)
-            )
-            drawCircle(
-                color = Color.White.copy(alpha = 0.05f),
-                radius = size.width * 0.35f,
-                center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.85f)
-            )
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = "Logo AquaSample",
+            modifier = Modifier.size(128.dp),
+            contentScale = ContentScale.Fit
+        )
 
-            val wave = Path().apply {
-                moveTo(0f, size.height * 0.88f)
-                cubicTo(
-                    size.width * 0.22f,
-                    size.height * 0.80f,
-                    size.width * 0.34f,
-                    size.height * 0.98f,
-                    size.width * 0.55f,
-                    size.height * 0.90f
-                )
-                cubicTo(
-                    size.width * 0.74f,
-                    size.height * 0.83f,
-                    size.width * 0.86f,
-                    size.height * 0.95f,
-                    size.width,
-                    size.height * 0.87f
-                )
-                lineTo(size.width, size.height)
-                lineTo(0f, size.height)
-                close()
-            }
-            drawPath(path = wave, color = Color.White.copy(alpha = 0.07f))
-        }
+        Spacer(Modifier.height(Spacing.lg))
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = Spacing.xxl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color(0xFFE4E4E4),
-                modifier = Modifier.fillMaxWidth(0.58f)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_aquasample_lockup),
-                    contentDescription = "Logo AquaSample",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Spacing.xs),
-                    contentScale = ContentScale.Fit
-                )
-            }
-
-            Spacer(Modifier.height(Spacing.md))
-
-            Text(
-                text = "Control de muestreo de choritos",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.80f)
-            )
-        }
+        Text(
+            text = "AquaSample",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Text(
+            text = "Control de muestreo de choritos",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = 0.80f)
+        )
     }
 }
 
