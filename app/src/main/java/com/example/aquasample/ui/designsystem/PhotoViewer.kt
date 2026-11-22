@@ -1,9 +1,6 @@
 package com.example.aquasample.ui.designsystem
 
-import android.graphics.Bitmap
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,32 +17,30 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import com.example.aquasample.ui.theme.Spacing
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 
 /**
- * Visor de fotografías a pantalla completa con zoom por pellizco (1x a 5x)
- * y desplazamiento. Se reutiliza en el registro y en el detalle de muestras.
+ * Visor de fotografías a pantalla completa con zoom y desplazamiento.
+ *
+ * Usa Coil para cargar la imagen (Bitmap, File o ruta) y Telephoto para el
+ * gesto de zoom, con doble toque para acercar.
  */
 @Composable
 fun PhotoViewerDialog(
-    bitmap: Bitmap,
-    onDismiss: () -> Unit
+    model: Any,
+    onDismiss: () -> Unit,
+    contentDescription: String = "Fotografía ampliada"
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -56,28 +51,21 @@ fun PhotoViewerDialog(
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            var scale by remember { mutableFloatStateOf(1f) }
-            var offset by remember { mutableStateOf(Offset.Zero) }
+            val zoomState = rememberZoomableState()
 
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Fotografía ampliada",
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offset.x,
-                        translationY = offset.y
-                    )
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(1f, 5f)
-                            offset += pan
-                        }
-                    },
-                contentScale = ContentScale.Fit
-            )
+                    .zoomable(zoomState),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = model,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+            }
 
             IconButton(
                 onClick = onDismiss,

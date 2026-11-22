@@ -96,7 +96,7 @@ Todos viven en `ui/designsystem/` y consumen solo tokens del tema.
 | `StatusPill` / `SyncPill` | Estado de revisión y de sincronización |
 | `EmptyState` | Lista vacía con acción sugerida |
 | `InfoBanner` | Aviso contextual (información, éxito, error) |
-| `PhotoViewerDialog` | Visor a pantalla completa con zoom 1×–5× |
+| `PhotoViewerDialog` | Visor con Coil y zoom por pellizco (Telephoto) |
 | `SectionHeader` | Título de sección con acción "Ver todo" |
 
 ---
@@ -125,9 +125,14 @@ profundos. Las transiciones son fade + desplazamiento horizontal de 1/16 del anc
 ## 7. Arquitectura
 
 ```
-ui/            Compose: pantallas stateless + ViewModels (StateFlow)
-data/          Repositorios + Room (entidades, DAOs, base de datos)
-di/            AppContainer (inyección manual, una instancia por app)
+ui/              Compose: pantallas stateless + ViewModels (StateFlow)
+data/
+  local/         Room (entidades, DAOs, base de datos)
+  remote/        Retrofit: API, DTO y cliente
+  sync/          WorkManager: worker y planificador
+  repository/    Repositorios (Muestra, Usuario, Centro, Perfil)
+di/              AppContainer (inyección manual, una instancia por app)
+backend/         Spring Boot: JPA + H2 + REST + Swagger (proyecto Gradle aparte)
 ```
 
 - **MVVM**: cada pantalla observa un `StateFlow<UiState>` inmutable; las
@@ -139,8 +144,33 @@ di/            AppContainer (inyección manual, una instancia por app)
   ViewModels mediante `Application.appContainer`; no se usa Hilt para mantener
   el proyecto liviano y explicable en la defensa.
 - **Foto persistente**: al guardar una muestra, los bitmaps se escriben en
-  `filesDir/muestras/` y la entidad guarda las rutas; el detalle las decodifica
-  con muestreo para evitar OOM.
+  `filesDir/muestras/` y la entidad guarda las rutas; el detalle las muestra con
+  Coil y las amplía con Telephoto.
+- **Cámara**: CameraX (`Preview` + `ImageCapture`) captura un JPEG en resolución
+  completa dentro de la app ([ui/camera/CameraCaptureDialog.kt](../app/src/main/java/com/example/aquasample/ui/camera/CameraCaptureDialog.kt)).
+
+### Backend
+
+- Proyecto Gradle independiente en `backend/` (Spring Boot 3.5, Java 21, H2).
+- Entidades `Muestra`, `CentroCultivo` y `Usuario`; CRUD REST, filtros y cambio
+  de estado; validación con Bean Validation y respuestas 400/404/409.
+- Swagger/OpenAPI en `/swagger-ui.html` y datos de demostración al arrancar.
+- La app se conecta por Retrofit a `http://127.0.0.1:8080/`; para el emulador o
+  un teléfono por USB se usa `adb reverse tcp:8080 tcp:8080`.
+
+### Sincronización offline
+
+```
+Guardar muestra (Room)  →  WorkManager (red disponible)
+        →  POST /api/muestras
+        →  201: marcar sincronizado = 1
+        →  409: PUT /api/muestras/{id} y marcar
+        →  error de red/5xx: reintento con backoff
+```
+
+Se dispara al guardar una muestra, al abrir la app y cada 15 minutos con
+restricción de red. El inicio muestra cuántas muestras quedan pendientes y
+permite forzar la sincronización.
 
 ### Modelo de datos
 
@@ -175,9 +205,11 @@ Capturas en `docs/screenshots/`.
   destinos y evita un plugin adicional.
 - **Perfil en memoria**: alias y foto se mantienen durante la sesión; persistirlos
   en DataStore queda como paso siguiente.
-- **Sin backend todavía**: la muestra se guarda como `PENDIENTE` y
-  `sincronizado = false`; la sincronización con WorkManager está pendiente.
-- **Cámara**: se usa `TakePicturePreview` (cámara del sistema). Migrar a CameraX
-  con archivo en resolución completa es el siguiente hito.
+- **Backend sin autenticación**: la API es abierta y no valida roles; debe
+  agregarse Spring Security/JWT antes de producción.
+- **Migraciones**: la app todavía usa `fallbackToDestructiveMigration`; cualquier
+  cambio de esquema borra los datos. Debe reemplazarse por migraciones explícitas.
+- **Conteo asistido**: el conteo sigue siendo manual; aún no se marcan individuos
+  sobre la fotografía.
 - **Contraseñas**: se comparan en texto plano por compatibilidad con los datos
   existentes; debe migrarse a hash (BCrypt/Argon2) antes de producción.

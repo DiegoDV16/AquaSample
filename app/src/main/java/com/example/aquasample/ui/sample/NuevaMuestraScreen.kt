@@ -1,4 +1,4 @@
-﻿package com.example.aquasample.ui.sample
+package com.example.aquasample.ui.sample
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -98,6 +98,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aquasample.ui.camera.CameraCaptureDialog
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.AquaDropdownField
 import com.example.aquasample.ui.designsystem.AquaScaffold
@@ -113,6 +114,7 @@ import com.example.aquasample.ui.theme.AquaSampleTheme
 import com.example.aquasample.ui.theme.Dimens
 import com.example.aquasample.ui.theme.Spacing
 import java.util.Locale
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -147,6 +149,7 @@ fun NuevaMuestraScreen(
     var step by rememberSaveable { mutableIntStateOf(SampleViewModel.STEP_LOCATION) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var viewerPhoto by remember { mutableStateOf<Bitmap?>(null) }
+    var showCamera by remember { mutableStateOf(false) }
     val imeVisible = WindowInsets.isImeVisible
 
     // Al corregir cualquier dato, el mensaje de error deja de ser válido.
@@ -171,16 +174,6 @@ fun NuevaMuestraScreen(
     }
 
     BackHandler(enabled = step > SampleViewModel.STEP_LOCATION && !imeVisible) { step-- }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) {
-            if (!viewModel.onPhotoCaptured(bitmap)) {
-                errorMessage = "Puedes adjuntar hasta ${SampleViewModel.MAX_PHOTOS} fotografías."
-            }
-        }
-    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -284,7 +277,7 @@ fun NuevaMuestraScreen(
 
                         else -> EvidenceStep(
                             state = uiState,
-                            onTakePhoto = { cameraLauncher.launch(null) },
+                            onTakePhoto = { showCamera = true },
                             onPickPhoto = { galleryLauncher.launch("image/*") },
                             onRemovePhoto = viewModel::onRemovePhoto,
                             onOpenPhoto = { viewerPhoto = it },
@@ -300,8 +293,41 @@ fun NuevaMuestraScreen(
     }
 
     viewerPhoto?.let { bitmap ->
-        PhotoViewerDialog(bitmap = bitmap, onDismiss = { viewerPhoto = null })
+        PhotoViewerDialog(model = bitmap, onDismiss = { viewerPhoto = null })
     }
+
+    if (showCamera) {
+        CameraCaptureDialog(
+            onDismiss = { showCamera = false },
+            onCaptured = { file ->
+                showCamera = false
+                val bitmap = decodeSampledBitmap(file, maxDimension = 1600)
+                if (bitmap == null) {
+                    errorMessage = "No se pudo procesar la fotografía."
+                } else if (!viewModel.onPhotoCaptured(bitmap)) {
+                    errorMessage = "Puedes adjuntar hasta ${SampleViewModel.MAX_PHOTOS} fotografías."
+                }
+                file.delete()
+            }
+        )
+    }
+}
+
+/** Decodifica la foto de CameraX con muestreo para no cargar el archivo completo en memoria. */
+private fun decodeSampledBitmap(file: File, maxDimension: Int): Bitmap? {
+    if (!file.exists()) return null
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeFile(file.absolutePath, bounds)
+    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+
+    var sampleSize = 1
+    while (bounds.outWidth / sampleSize > maxDimension || bounds.outHeight / sampleSize > maxDimension) {
+        sampleSize *= 2
+    }
+    return BitmapFactory.decodeFile(
+        file.absolutePath,
+        BitmapFactory.Options().apply { inSampleSize = sampleSize }
+    )
 }
 
 @Composable

@@ -225,9 +225,10 @@ def cover(doc):
         ("Documento", "Estado del sistema · versión 1.0"),
         ("Fecha", "22 de noviembre de 2026"),
         ("Repositorio", "github.com/DiegoDV16/AquaSample (público)"),
-        ("Commit auditado", "758b10b · feat(ui): rediseño completo con Material 3"),
+        ("Commit auditado", "rama feature/backend-spring-boot · 6f40f2c"),
         ("Plataforma", "Android · Kotlin 2.0.21 · Jetpack Compose · Material 3"),
-        ("Verificación", "Gradle assembleDebug + pruebas en emulador Pixel 7 Pro (Android 37)"),
+        ("Backend", "Spring Boot 3.5.16 · H2 · springdoc 2.8.13"),
+        ("Verificación", "App + backend en emulador, con sincronización offline y online"),
     ]
     table = doc.add_table(rows=len(metadata), cols=2)
     table.autofit = False
@@ -256,16 +257,17 @@ def cover(doc):
 def summary(doc):
     doc.add_heading("Resumen ejecutivo", level=1)
     doc.add_paragraph(
-        "AquaSample es hoy una aplicación Android funcional y con una interfaz profesional: "
-        "permite iniciar sesión por rol, registrar una muestra en tres pasos, consultarla, "
-        "filtrarla, validarla como supervisor y administrar las cuentas del equipo. Toda la "
-        "información se guarda en Room, en el dispositivo, y el proyecto compila sin errores."
+        "AquaSample es hoy una aplicación Android funcional, con backend propio y "
+        "sincronización offline: permite iniciar sesión por rol, registrar una muestra en "
+        "tres pasos con cámara integrada, consultarla, filtrarla, validarla como supervisor "
+        "y administrar las cuentas del equipo. Los datos viven en Room y se envían solos al "
+        "backend cuando hay conexión."
     )
     doc.add_paragraph(
-        "Frente a los 14 criterios de la pauta, 2 están completos, 5 son parciales y 7 siguen "
-        "pendientes. Las brechas críticas son el backend, el consumo de API externa, la "
-        "sincronización offline, la cámara con CameraX y las pruebas con cobertura. Sin esas "
-        "piezas, varios ítems quedan en cero aunque la aplicación se vea terminada."
+        "Frente a los 14 criterios de la pauta, 5 están completos, 5 son parciales y 4 siguen "
+        "pendientes. Las brechas que quedan son el conteo asistido sobre la foto, los reportes "
+        "PDF/Excel, el consumo de una API externa y las pruebas con cobertura. El backend y la "
+        "sincronización offline ya se demostraron en el emulador."
     )
     doc.add_heading("Cifras clave del sistema", level=2)
     add_table(
@@ -273,12 +275,13 @@ def summary(doc):
         ["Indicador", "Valor actual"],
         [
             ("Pantallas de usuario", "7 (Login, Inicio, Nueva muestra, Historial, Detalle, Perfil, Personal)"),
-            ("Código Kotlin", "54 archivos · 6.982 líneas en app/src/main"),
+            ("Código Kotlin", "60 archivos · más de 7.500 líneas en app/src/main"),
             ("Capa de datos", "4 tablas Room · 7 ViewModels · 4 repositorios"),
-            ("Backend y endpoints", "0 (el repositorio solo contiene el módulo :app)"),
-            ("Pruebas automatizadas", "2 de plantilla (1 unitaria, 1 instrumentada); cobertura no medida"),
-            ("Documentación", "docs/DESIGN.md + 15 capturas en docs/screenshots"),
-            ("Build verificado", "assembleDebug y testDebugUnitTest en verde (commit 758b10b)"),
+            ("Backend", "Spring Boot + H2 · 8 rutas REST / 14 operaciones · Swagger"),
+            ("Pruebas", "14 casos de humo del backend + 2 pruebas de plantilla en la app"),
+            ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
+            ("Documentación", "README, DESIGN.md, informe y 15 capturas"),
+            ("Build verificado", "app y backend en verde (rama feature/backend-spring-boot)"),
         ],
         [4.6, 12.0],
     )
@@ -287,9 +290,9 @@ def summary(doc):
         doc,
         ["Estado", "Cantidad", "Ítems"],
         [
-            ("Completo", "2", "Interfaz profesional; gestión por perfiles"),
+            ("Completo", "5", "Interfaz; perfiles; fotografías con CameraX/Coil/Telephoto; microservicios; persistencia offline"),
             ("Parcial", "5", "Gestión de muestras; historial/dashboard; APK firmada; documentación y colaboración; modificación en tiempo real"),
-            ("Pendiente", "7", "Fotografías con CameraX/Coil/Telephoto; conteo asistido; reportabilidad; backend Spring Boot; API externa; offline con WorkManager; pruebas y cobertura"),
+            ("Pendiente", "4", "Conteo asistido; reportabilidad PDF/Excel; API externa con Retrofit; pruebas y cobertura"),
         ],
         [2.4, 2.0, 12.2],
         status_column=0,
@@ -311,16 +314,17 @@ def section_1(doc):
     bullets(
         doc,
         [
-            "Fuente de verdad: código en la rama main, commit 758b10b.",
-            "Compilación: :app:assembleDebug y :app:testDebugUnitTest con Gradle.",
-            "Ejecución: emulador Pixel 7 Pro (1440 × 3120, Android 37), app instalada por ADB.",
+            "Fuente de verdad: código en la rama feature/backend-spring-boot, commit 6f40f2c.",
+            "Compilación: :app:assembleDebug, :app:testDebugUnitTest y :backend compileJava/run con Gradle.",
+            "Ejecución: emulador Pixel 7 Pro (1440 × 3120, Android 37), backend local en el puerto 8080 y túnel adb reverse.",
+            "Backend: Spring Boot + H2, CRUD documentado en Swagger y 14 casos de humo ejecutados con curl.",
             "Evidencia visual: 15 capturas en docs/screenshots/ incluidas en este informe.",
-            "Documentación de diseño: docs/DESIGN.md (tokens, componentes, navegación y arquitectura).",
+            "Documentación: README, docs/DESIGN.md y backend/README.md.",
         ],
     )
     paragraph = doc.add_paragraph(
         "Lo que este informe no cubre: rendimiento en un teléfono físico, pruebas de "
-        "aceptación con usuarios reales, backend (no existe en el repositorio), tablero de "
+        "aceptación con usuarios reales, despliegue del backend en un servidor, tablero de "
         "Trello y credenciales de servicios externos."
     )
     paragraph.paragraph_format.space_before = Pt(6)
@@ -347,6 +351,10 @@ def section_2(doc):
             ("Room", "2.8.5", "Base de datos local (SQLite) con DAOs y convertidores"),
             ("KSP", "2.0.21-1.0.27", "Generación de código de Room"),
             ("Gson", "2.10.1", "Serialización de listas y etiquetas en Room"),
+            ("Retrofit / OkHttp", "2.12.0", "Consumo del backend y de APIs externas"),
+            ("WorkManager", "2.12.0", "Sincronización offline de muestras"),
+            ("CameraX / Coil / Telephoto", "1.7.0 / 2.7.0 / 0.19.0", "Cámara, carga y zoom de imágenes"),
+            ("Spring Boot / H2", "3.5.16 · springdoc 2.8.13", "Backend REST, base de datos y Swagger"),
             ("Android Gradle Plugin", "9.3.3", "compileSdk 37, minSdk 24, targetSdk 37"),
         ],
         [5.4, 3.2, 8.0],
@@ -460,10 +468,11 @@ def section_2(doc):
     bullets(
         doc,
         [
-            "Build: :app:assembleDebug finaliza con BUILD SUCCESSFUL en todas las fases del rediseño.",
-            "Pruebas: :app:testDebugUnitTest en verde; existe una prueba unitaria de plantilla y una instrumentada, ambas sin cobertura de lógica real.",
-            "Ejecución: flujos de login, registro por pasos, historial, validación de supervisor, creación de usuario y perfil recorridos en el emulador.",
-            "Correcciones durante la verificación: superposición de contenido en el asistente, error que no se limpiaba al editar, filtros de historial cortados y un crash por Toast lanzado desde el hilo de I/O.",
+            "Build: :app:assembleDebug y :backend compileJava/run finalizan en verde.",
+            "Pruebas: 14 casos de humo del backend (CRUD, 409, 400, filtros y Swagger) y dos pruebas de plantilla en la app, sin cobertura de lógica.",
+            "Ejecución: login, registro por pasos, cámara, historial, validación, creación de usuario y perfil recorridos en el emulador.",
+            "Sincronización: muestra pendiente enviada al backend y marcada en Room; el flujo se repitió sin túnel y al recuperarlo.",
+            "Correcciones durante la verificación: superposición en el asistente, error que no se limpiaba, filtros cortados, crash por Toast en I/O y flag -parameters en Spring.",
             "APK: se genera app-debug.apk (build debug, firmada con la clave de depuración).",
         ],
     )
@@ -473,6 +482,59 @@ def section_2(doc):
         "y los archivos originales en docs/screenshots/."
     )
     paragraph.paragraph_format.space_before = Pt(6)
+
+    doc.add_heading("2.7 Backend y API REST", level=2)
+    doc.add_paragraph(
+        "El repositorio incorpora un proyecto Spring Boot independiente en backend/. Expone "
+        "un CRUD completo sobre H2 con validaciones, filtros, cambio de estado y documentación "
+        "OpenAPI. La app lo consume con Retrofit y comparte el mismo modelo de muestra que Room."
+    )
+    add_table(
+        doc,
+        ["Método", "Ruta", "Uso"],
+        [
+            ("GET", "/api/muestras?estado=&q=", "Listar con filtros"),
+            ("GET", "/api/muestras/{id}", "Consultar una muestra"),
+            ("POST", "/api/muestras", "Crear muestra"),
+            ("PUT", "/api/muestras/{id}", "Actualizar datos"),
+            ("PATCH", "/api/muestras/{id}/estado", "Validar o cambiar estado"),
+            ("DELETE", "/api/muestras/{id}", "Eliminar"),
+            ("GET/POST", "/api/centros y /api/usuarios", "Catálogos y cuentas"),
+        ],
+        [2.0, 7.6, 7.0],
+    )
+    bullets(
+        doc,
+        [
+            "Swagger UI en /swagger-ui.html y OpenAPI en /v3/api-docs.",
+            "Datos de demostración: 3 centros, 3 usuarios y 8 muestras.",
+            "14 casos de humo ejecutados: CRUD, duplicados (409), validación (400), filtros y Swagger.",
+        ],
+    )
+
+    doc.add_heading("2.8 Sincronización offline", level=2)
+    doc.add_paragraph(
+        "Room sigue siendo la fuente de verdad local. WorkManager detecta las muestras con "
+        "sincronizado = false y las envía al backend con Retrofit; si el backend ya las tiene "
+        "responde 409 y se actualizan con PUT. Los errores de red se reintentan sin bloquear al operador."
+    )
+    code_block(
+        doc,
+        "Guardar muestra (Room)  →  WorkManager (red disponible)\n"
+        "        →  POST /api/muestras\n"
+        "        →  201: marcar sincronizado = 1\n"
+        "        →  409: PUT /api/muestras/{id} y marcar\n"
+        "        →  error de red/5xx: reintento con backoff",
+    )
+    bullets(
+        doc,
+        [
+            "Se dispara al guardar, al abrir la app y cada 15 minutos.",
+            "El inicio muestra las muestras pendientes y permite forzar la sincronización.",
+            "Prueba real: muestra #M-9301 registrada sin túnel (backend 404) y sincronizada al recuperarlo (200 y sincronizado = 1).",
+            "En emulador o teléfono por USB se usa adb reverse tcp:8080 tcp:8080.",
+        ],
+    )
 
 
 def section_3(doc):
@@ -485,17 +547,17 @@ def section_3(doc):
     rows = [
         ("Interfaz profesional", "Completo", "Material 3, tema claro/oscuro, tokens, navegación, 7 pantallas verificadas", "Pulido menor: transiciones compartidas y skeletons de carga"),
         ("Gestión de muestras", "Parcial", "Entidad con concesión, tren, línea, tramo, fechas, observaciones y estado; asistente de registro", "Centros solo precargados; tren y línea son texto; sin CRUD de centros ni entidad de tramo"),
-        ("Fotografías (CameraX/Coil/Telephoto)", "Pendiente", "Cámara del sistema y visor con zoom; las rutas se guardan en disco", "CameraX, archivo en resolución completa, Coil, Telephoto y permisos"),
+        ("Fotografías (CameraX/Coil/Telephoto)", "Completo", "CameraX captura dentro de la app, Coil carga la galería y Telephoto aporta el zoom", "Verificar en teléfono físico y conservar la resolución completa al guardar"),
         ("Conteo asistido", "Pendiente", "Conteo manual y matriz de calibre 6×5 con promedio automático", "Marcar choritos sobre la foto, contar, corregir y persistir las marcas"),
         ("Gestión por perfiles", "Completo", "Login por rol; operador registra; analista/admin validan; CRUD de personal", "Los permisos se aplican en UI; falta reforzarlos en backend"),
         ("Historial y dashboard", "Parcial", "Búsqueda, filtros por estado y período, agrupación por día, detalle y KPIs", "Gráficos, comparación de períodos y filtros por centro/tren"),
         ("Reportabilidad (PDF/Excel)", "Pendiente", "—", "Generación y exportación de informes, plantilla y compartir"),
-        ("Microservicios Spring Boot", "Pendiente", "—", "Entidades, endpoints CRUD, base de datos y Swagger/OpenAPI"),
+        ("Microservicios Spring Boot", "Completo", "API Spring Boot con JPA, H2, CRUD, filtros, validación, Swagger y datos demo", "Autenticación por rol, migraciones versionadas y despliegue"),
         ("Consumo de APIs externas", "Pendiente", "—", "Retrofit/OkHttp, permiso INTERNET y Open-Meteo Marine con manejo de errores"),
-        ("Persistencia offline + sync", "Pendiente", "Room local funciona; la muestra nace PENDIENTE y sin sincronizar", "WorkManager, cola de pendientes, reintentos, conflictos y endpoint"),
+        ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Pendiente", "Build y pruebas de plantilla en verde", "MockK, Compose UI Test, JaCoCo/Kover y cobertura superior al 90 % de la lógica"),
         ("APK firmada", "Parcial", "APK debug generada e instalada en el emulador", "Keystore, signingConfig de release, versionCode y APK firmada en teléfono"),
-        ("Documentación y colaboración", "Parcial", "Repositorio público, historial de ramas/PRs, DESIGN.md y 15 capturas", "README, Swagger publicado, tablero Trello y guía de instalación"),
+        ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, informe, backend README y 15 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
     add_table(
@@ -511,77 +573,92 @@ def section_3(doc):
 def section_4(doc):
     doc.add_heading("4. Lo que falta por implementar", level=1)
     doc.add_paragraph(
-        "Las brechas se ordenan por impacto en la evaluación: primero lo que hoy deja ítems "
-        "en cero, después lo que mejora la experiencia y finalmente la entrega."
+        "Con el backend y la sincronización ya operativos, las brechas restantes se concentran "
+        "en la captura asistida, la analítica, la calidad de entrega y el endurecimiento del backend."
     )
     gaps = [
         (
-            "4.1 Backend Spring Boot y Swagger",
-            "El repositorio solo contiene el módulo :app; no existe backend, endpoints, base de datos remota ni documentación OpenAPI.",
-            "Crear un proyecto Spring Boot (Gradle o Maven) con entidades Muestra, Centro y Usuario, repositorios JPA, servicios y controladores REST para el CRUD. Agregar springdoc-openapi para Swagger UI, una base PostgreSQL o H2 y datos iniciales coherentes con la app.",
-            ["Endpoints documentados y probables desde Swagger UI.", "El CRUD responde con códigos HTTP correctos y validaciones.", "La app puede leer la misma estructura que hoy guarda Room."],
+            "4.1 Conteo asistido sobre la fotografía",
+            "El conteo sigue siendo manual (campo numérico) y el calibre se ingresa en una matriz; no se marcan individuos sobre la imagen.",
+            "Agregar un lienzo sobre la foto para marcar y desmarcar puntos, un contador derivado de las marcas, corrección manual y persistencia de las coordenadas en Room y en el backend.",
+            [
+                "Marcar N individuos actualiza el contador en vivo.",
+                "Se puede eliminar una marca y corregir el total.",
+                "Las marcas se recuperan al abrir el detalle y viajan al backend.",
+            ],
         ),
         (
             "4.2 Consumo de API externa con Retrofit",
-            "No hay Retrofit, OkHttp ni permiso INTERNET en el manifiesto. La app no consulta condiciones marinas.",
-            "Incorporar Retrofit + converter de Kotlinx Serialization o Gson, declarar android.permission.INTERNET y consumir Open-Meteo Marine (oleaje, temperatura del mar, viento). Mostrar el resultado en el panel de inicio con estado de carga, error y reintento.",
-            ["La app muestra datos marinos reales y su hora de actualización.", "Si no hay red, se informa el error y no se bloquea el registro.", "La llamada está separada en un repositorio y es testeable con MockWebServer."],
+            "Retrofit ya se usa para el backend propio, pero no hay integración con Open-Meteo Marine ni una pantalla que muestre condiciones marinas.",
+            "Agregar un servicio Retrofit para Open-Meteo Marine (oleaje, temperatura del mar y viento), mostrarlo en el inicio con estado de carga, error y reintento, y cachear la última consulta.",
+            [
+                "El inicio muestra oleaje y temperatura con hora de actualización.",
+                "Si no hay red, se informa el error y se usa el último dato disponible.",
+                "La llamada está aislada en un repositorio y es testeable con MockWebServer.",
+            ],
         ),
         (
-            "4.3 Persistencia offline real y WorkManager",
-            "Room guarda localmente y el registro funciona sin red, pero no existe sincronización: la bandera sincronizado queda en false y no hay cola de envío.",
-            "Definir un estado de sincronización (pendiente, en curso, sincronizada, error), una tabla o consulta de pendientes y un Worker periódico con restricción de red. Al recuperar conectividad, enviar las muestras al backend, reintentar con backoff y resolver duplicados por id.",
-            ["Registrar una muestra en modo avión y verla como pendiente.", "Al volver la red, el Worker la envía y el estado cambia sin intervención.", "Los fallos se reintentan y quedan visibles para el operador."],
-        ),
-        (
-            "4.4 Cámara, Coil y zoom Telephoto",
-            "Se usa TakePicturePreview, que entrega una miniatura y delega en la cámara del sistema. No hay CameraX, Coil ni Telephoto; las imágenes se muestran con BitmapFactory.",
-            "Migrar a CameraX (Preview + ImageCapture) guardando un archivo JPEG en resolución completa, mostrar las fotos con Coil desde su ruta y habilitar zoom de imagen con Telephoto. Declarar el permiso CAMERA y manejar la denegación.",
-            ["Captura dentro de la app con vista previa y archivo persistente.", "Galería del detalle carga con Coil y soporta zoom fluido.", "La foto sobrevive al cierre y se ve en el detalle."],
-        ),
-        (
-            "4.5 Conteo asistido sobre la fotografía",
-            "El conteo es manual (campo numérico) y el calibre se ingresa en una matriz; no se marcan individuos sobre la imagen.",
-            "Agregar un lienzo sobre la foto para marcar y desmarcar puntos, un contador derivado de las marcas, corrección manual y persistencia de las coordenadas (por ejemplo, JSON en la muestra o tabla hija).",
-            ["Marcar N individuos actualiza el contador en vivo.", "Se puede eliminar una marca y corregir el total.", "Las marcas se recuperan al abrir el detalle."],
-        ),
-        (
-            "4.6 Reportabilidad en PDF o Excel",
+            "4.3 Reportabilidad en PDF o Excel",
             "No existen dependencias ni pantallas de exportación.",
-            "Generar un informe de muestra o de jornada con encabezado ALDEMAR, datos de ubicación, conteo, calibre y fotografías. Usar PdfDocument/iText para PDF o Apache POI para Excel, guardar en almacenamiento de la app y compartir con FileProvider.",
-            ["Un botón exporta y abre el compartir del sistema.", "El archivo incluye los datos y al menos una foto.", "El nombre del archivo identifica muestra y fecha."],
+            "Generar un informe de muestra o de jornada con PdfDocument/iText o Apache POI, guardarlo en el almacenamiento de la app y compartirlo con FileProvider.",
+            [
+                "Un botón exporta y abre el compartir del sistema.",
+                "El archivo incluye datos, calibre y al menos una foto.",
+                "El nombre identifica muestra y fecha.",
+            ],
         ),
         (
-            "4.7 Analítica: gráficos y comparación de períodos",
-            "El historial filtra y agrupa, y el inicio muestra KPIs, pero no hay gráficos ni comparación entre semanas o centros.",
-            "Incorporar una librería de gráficos (Vico, MPAndroidChart o Canvas propio) para evolución de calibre y conteo, y un selector de período que compare dos rangos. Mantener el cálculo en el ViewModel para poder testearlo.",
-            ["Un gráfico de evolución por fecha con datos reales.", "Comparación de dos períodos con variación porcentual.", "Filtros por centro y tren además de estado y fecha."],
+            "4.4 Pruebas unitarias, instrumentadas y cobertura",
+            "Hay 14 casos de humo manuales del backend y dos pruebas de plantilla en la app; no existe cobertura medida.",
+            "Pruebas de ViewModels y validaciones con JUnit y MockK, pruebas de Compose para los flujos críticos, pruebas MockMvc para el backend y JaCoCo o Kover con umbral.",
+            [
+                "Cobertura superior al 90 % de la lógica evaluable.",
+                "Reporte de cobertura generado y adjunto a la entrega.",
+                "Pruebas de UI para login, registro y filtro de historial.",
+            ],
         ),
         (
-            "4.8 Pruebas unitarias, instrumentadas y cobertura",
-            "Solo hay pruebas de plantilla (una unitaria y una instrumentada) y no se mide cobertura.",
-            "Tests de ViewModels y validaciones con JUnit y MockK, pruebas de Compose para los flujos críticos, y JaCoCo o Kover con umbral. Priorizar lógica evaluable: validación por pasos, filtros, promedio de calibre y mapeos.",
-            ["Cobertura superior al 90 % de la lógica evaluable.", "Reporte de cobertura generado y adjunto a la entrega.", "Pruebas de UI para login, registro y filtro de historial."],
+            "4.5 APK firmada",
+            "Solo se genera el APK de depuración, firmado con la clave debug; no hay signingConfig de release.",
+            "Crear un keystore, configurar signingConfigs, definir versionCode/versionName y verificar la firma con apksigner antes de instalarla en el teléfono.",
+            [
+                "APK release instalada y funcionando en el teléfono de la defensa.",
+                "Firma verificable y documentada (sin publicar la contraseña).",
+                "Versión y nombre coherentes con la entrega.",
+            ],
         ),
         (
-            "4.9 APK firmada",
-            "Solo se genera el APK de depuración, firmado con la clave debug; no hay signingConfig ni build release.",
-            "Crear un keystore, configurar signingConfigs para release, definir versionCode/versionName y generar el APK firmado. Instalarlo en un teléfono físico y verificar la firma con apksigner.",
-            ["APK release instalada y funcionando en el teléfono de la defensa.", "Firma verificable y documentada (sin publicar la contraseña).", "Versión y nombre coherentes con la entrega."],
+            "4.6 Autenticación y migraciones",
+            "La API es abierta, no valida roles y usa ddl-auto=update; la app todavía usa fallbackToDestructiveMigration.",
+            "Agregar Spring Security o JWT con roles, migraciones Flyway en el backend y migraciones explícitas de Room en la app.",
+            [
+                "Un operador no puede validar muestras desde la API.",
+                "Un cambio de esquema conserva los datos existentes.",
+                "Las migraciones están versionadas y probadas.",
+            ],
         ),
         (
-            "4.10 Documentación y colaboración",
-            "Existe DESIGN.md y capturas, y el repositorio es público con ramas y PRs. Faltan README, Swagger publicado y evidencia de Trello.",
-            "Escribir un README con arquitectura, requisitos, instalación y credenciales de prueba; publicar Swagger del backend; mantener el tablero Trello con historias y responsables; documentar commits por integrante.",
-            ["README que permita levantar app y backend desde cero.", "Swagger accesible y enlazado desde el README.", "Trello con planificación y estados reales."],
+            "4.7 Documentación y colaboración",
+            "Existen README, DESIGN.md, informe, backend README y capturas; faltan Swagger publicado y evidencia de Trello.",
+            "Publicar Swagger, mantener el tablero Trello con historias y responsables, y documentar el despliegue del backend.",
+            [
+                "README que permita levantar app y backend desde cero.",
+                "Swagger accesible y enlazado desde el README.",
+                "Trello con planificación y estados reales.",
+            ],
         ),
         (
-            "4.11 Modificación en tiempo real (ensayo)",
-            "La arquitectura permite agregar un campo y propagarlo, pero no hay backend y la base usa fallbackToDestructiveMigration, lo que borra datos al cambiar el esquema.",
-            "Preparar un cambio de ejemplo (por ejemplo, peso de muestra o calibre promedio): columna nueva con migración de Room, DTO y endpoint en backend, campo en el formulario y en el detalle. Ensayarlo cronometrado para la defensa.",
-            ["Cambio aplicado sin perder datos existentes.", "Backend y app actualizados en menos de 10 minutos.", "Prueba del flujo completo tras el cambio."],
+            "4.8 Modificación en tiempo real (ensayo)",
+            "La arquitectura permite agregar un campo y propagarlo hasta el backend, pero la base local aún es destructiva al cambiar el esquema.",
+            "Preparar un cambio de ejemplo (peso de muestra): columna con migración de Room, campo en DTO y backend, formulario y detalle. Ensayarlo cronometrado para la defensa.",
+            [
+                "Cambio aplicado sin perder datos existentes.",
+                "Backend y app actualizados en menos de 10 minutos.",
+                "Prueba del flujo completo tras el cambio.",
+            ],
         ),
     ]
+
     for title, current, requirement, criteria in gaps:
         doc.add_heading(title, level=2)
         labeled(doc, "Estado actual.", current)
@@ -589,16 +666,16 @@ def section_4(doc):
         labeled(doc, "Criterio de aceptación.", "")
         bullets(doc, criteria)
 
-    doc.add_heading("4.12 Deuda técnica y riesgos detectados", level=2)
+    doc.add_heading("4.9 Deuda técnica y riesgos detectados", level=2)
     bullets(
         doc,
         [
-            "fallbackToDestructiveMigration: cualquier cambio de esquema borra las muestras; debe reemplazarse por migraciones explícitas antes de la defensa.",
+            "fallbackToDestructiveMigration: cualquier cambio de esquema borra las muestras; debe reemplazarse por migraciones explícitas.",
             "Contraseñas en texto plano: el campo se llama passwordHash pero almacena la clave; migrar a BCrypt o Argon2.",
             "Perfil solo en memoria: alias y foto se pierden al cerrar la app; persistirlos en DataStore.",
-            "Fotografías: la persistencia está implementada, pero no se verificó de punta a punta guardar una muestra con foto real.",
-            "Sin permiso INTERNET: cualquier integración de red requiere modificar el manifiesto y, si se usa HTTP local, una configuración de seguridad de red.",
-            "Estados de sincronización: hoy la muestra nueva queda PENDIENTE y sincronizado = false, pero no hay proceso que la envíe.",
+            "Backend sin autenticación: cualquier cliente puede modificar o validar muestras.",
+            "Cámara: CameraX quedó implementado y compila, pero falta verificarlo en un teléfono físico.",
+            "Resolución de conflictos: la sincronización asume un solo dispositivo por muestra.",
         ],
     )
 
@@ -606,25 +683,25 @@ def section_4(doc):
 def section_5(doc):
     doc.add_heading("5. Roadmap sugerido", level=1)
     doc.add_paragraph(
-        "La secuencia prioriza desbloquear ítems de la pauta antes de pulir. Los esfuerzos son "
-        "estimaciones de trabajo efectivo y suponen dedicación parcial del equipo."
+        "Con el backend, la cámara y la sincronización cerrados, la secuencia apunta a completar "
+        "los ítems que aún están en cero y a endurecer la entrega."
     )
     add_table(
         doc,
         ["Fase", "Alcance", "Esfuerzo", "Habilita"],
         [
-            ("1", "Backend Spring Boot: entidades, CRUD, base de datos y Swagger", "3–4 días", "Microservicios + base para sync"),
-            ("2", "Retrofit + Open-Meteo + permiso INTERNET", "1–2 días", "Consumo de API externa"),
-            ("3", "WorkManager, cola de pendientes y sincronización con backend", "2–3 días", "Persistencia offline real"),
-            ("4", "CameraX + Coil + Telephoto y conteo asistido sobre foto", "3–4 días", "Fotografías y conteo asistido"),
-            ("5", "Gráficos, comparación de períodos y exportación PDF/Excel", "2–3 días", "Dashboard y reportabilidad"),
-            ("6", "MockK, Compose UI Test, cobertura, APK release firmada y README", "2–3 días", "Pruebas, firma y documentación"),
+            ("1", "Conteo asistido: marcas sobre la foto, contador y persistencia", "2–3 días", "Conteo asistido"),
+            ("2", "Open-Meteo Marine con Retrofit y panel de condiciones", "1–2 días", "Consumo de API externa"),
+            ("3", "Reportes PDF/Excel y gráficos de evolución", "2–3 días", "Reportabilidad y dashboard"),
+            ("4", "MockK, Compose UI Test, MockMvc y cobertura", "2–3 días", "Pruebas y cobertura"),
+            ("5", "APK release firmada, README final y Trello", "1–2 días", "Entrega y documentación"),
+            ("6", "Spring Security/JWT, Flyway y migraciones de Room", "2 días", "Backend endurecido"),
         ],
         [1.4, 8.2, 2.4, 4.6],
     )
     doc.add_paragraph(
-        "Total estimado: 13 a 19 días de trabajo efectivo. La ruta crítica es backend → "
-        "sincronización; cámara y reportes pueden avanzar en paralelo si hay dos integrantes."
+        "Total estimado: 10 a 15 días de trabajo efectivo. La ruta crítica es conteo asistido → "
+        "pruebas; reportes y API externa pueden avanzar en paralelo si hay dos integrantes."
     )
 
 
@@ -633,12 +710,12 @@ def section_6(doc):
     bullets(
         doc,
         [
+            "Sin conteo asistido ni reportes, dos ítems de la pauta siguen en cero aunque la app se vea completa.",
             "Si el docente pide un cambio de campo y no hay migración de Room, se pierden las muestras delante de él.",
-            "Sin backend, los ítems de microservicios, API externa y sincronización quedan en cero aunque la app se vea completa.",
-            "La demo offline actual solo prueba que Room escribe; no demuestra sincronización, que es lo que exige la pauta.",
-            "Las capturas y los datos de demo usan nombres ficticios; revisar que no haya datos personales reales en el repositorio público.",
-            "El APK de depuración no sirve como entrega firmada; instalar el release en el teléfono antes de la presentación.",
-            "El repositorio debe estar público y el enlace enviado antes de la defensa; el commit auditado es 758b10b.",
+            "El backend no tiene autenticación: no se puede demostrar que un operador no valide muestras.",
+            "La cámara y el zoom están implementados y compilan, pero la verificación en teléfono físico sigue pendiente.",
+            "El APK de depuración no sirve como entrega firmada; instalar el release antes de la presentación.",
+            "El repositorio debe estar público y el enlace enviado antes de la defensa; la rama de trabajo es feature/backend-spring-boot.",
         ],
     )
 
@@ -653,17 +730,26 @@ def section_7(doc):
         "├── di/AppContainer.kt\n"
         "├── data/\n"
         "│   ├── local/{dao, entity, database, converter}\n"
+        "│   ├── remote/{ApiClient, AquaSampleApi, MuestraDto}\n"
+        "│   ├── sync/{SampleSyncWorker, SyncScheduler}\n"
         "│   ├── repository/{Muestra, Usuario, CentroCultivo, Profile}Repository.kt\n"
         "│   └── session/{SessionManager, UserSession}.kt\n"
         "└── ui/\n"
         "    ├── designsystem/   (componentes y tokens visuales)\n"
         "    ├── theme/          (color, tipografía, formas, tema)\n"
+        "    ├── camera/         (CameraX)\n"
         "    ├── login/ home/ sample/ history/ detail/ profile/ admin/\n"
         "    ├── navigation/     (MainScreen y destinos)\n"
         "    └── model/          (SampleSummary compartido)\n"
         "\n"
+        "backend/\n"
+        "├── src/main/java/cl/aquasample/backend/{api, config, domain, repository, service}\n"
+        "├── src/main/resources/application.properties\n"
+        "└── README.md\n"
+        "\n"
         "docs/\n"
         "├── DESIGN.md\n"
+        "├── AquaSample-Estado-del-Sistema.docx\n"
         "└── screenshots/  (15 capturas del sistema)",
     )
 

@@ -1,13 +1,10 @@
 package com.example.aquasample.ui.detail
 
 import android.app.Application
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.MuestraEntity
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +21,7 @@ data class SampleDetailUiState(
     val centroCodigo: String? = null,
     val operadorNombre: String? = null,
     val operadorEmail: String? = null,
-    val photos: List<Bitmap> = emptyList(),
+    val photos: List<String> = emptyList(),
     val isUpdating: Boolean = false,
     val error: String? = null
 )
@@ -55,7 +52,7 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
                         }
                         return@onSuccess
                     }
-                    val photos = detalle.muestra.fotos.mapNotNull { path -> decodePhoto(path) }
+                    val photos = detalle.muestra.fotos
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -99,23 +96,5 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
                     }
                 }
         }
-    }
-
-    private fun decodePhoto(path: String): Bitmap? {
-        val file = File(path)
-        if (!file.exists()) return null
-
-        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeFile(path, bounds)
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
-
-        var sampleSize = 1
-        while (bounds.outWidth / sampleSize > 1400 || bounds.outHeight / sampleSize > 1400) {
-            sampleSize *= 2
-        }
-
-        return runCatching {
-            BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sampleSize })
-        }.getOrNull()
     }
 }

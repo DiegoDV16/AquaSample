@@ -1,8 +1,6 @@
 package com.example.aquasample.ui.detail
 
-import android.graphics.Bitmap
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.AquaScaffold
@@ -70,6 +68,7 @@ import com.example.aquasample.ui.designsystem.SyncPill
 import com.example.aquasample.ui.theme.AquaSampleTheme
 import com.example.aquasample.ui.theme.Spacing
 import com.example.aquasample.ui.theme.statusColors
+import java.io.File
 import java.util.Locale
 
 /**
@@ -86,7 +85,7 @@ fun SampleDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var viewerPhoto by remember { mutableStateOf<Bitmap?>(null) }
+    var viewerPhoto by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(sampleId) { viewModel.load(sampleId) }
 
@@ -130,8 +129,8 @@ fun SampleDetailScreen(
         }
     }
 
-    viewerPhoto?.let { bitmap ->
-        PhotoViewerDialog(bitmap = bitmap, onDismiss = { viewerPhoto = null })
+    viewerPhoto?.let { path ->
+        PhotoViewerDialog(model = File(path), onDismiss = { viewerPhoto = null })
     }
 }
 
@@ -140,7 +139,7 @@ fun SampleDetailScreen(
 private fun DetailContent(
     state: SampleDetailUiState,
     canValidate: Boolean,
-    onOpenPhoto: (Bitmap) -> Unit,
+    onOpenPhoto: (String) -> Unit,
     onValidate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -223,16 +222,16 @@ private fun DetailContent(
                 subtitle = "${state.photos.size} de ${sample.photoCount} fotografías disponibles"
             )
             LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                itemsIndexed(state.photos) { index, bitmap ->
+                itemsIndexed(state.photos) { index, path ->
                     Box(
                         modifier = Modifier
                             .size(120.dp)
                             .clip(MaterialTheme.shapes.medium)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { onOpenPhoto(bitmap) }
+                            .clickable { onOpenPhoto(path) }
                     ) {
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
+                        AsyncImage(
+                            model = File(path),
                             contentDescription = "Fotografía ${index + 1}",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
