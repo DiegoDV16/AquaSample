@@ -29,6 +29,7 @@ import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.PendingActions
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Card
@@ -126,6 +127,12 @@ fun HomeContent(
                 title = "AquaSample",
                 subtitle = "Panel de terreno · ${userSession.role.displayName}",
                 actions = {
+                    IconButton(onClick = onSyncNow) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = "Sincronizar ahora"
+                        )
+                    }
                     IconButton(onClick = { ThemeManager.setDarkMode(!isDarkMode) }) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Rounded.LightMode else Icons.Rounded.DarkMode,

@@ -41,6 +41,11 @@ class MuestraRepository(private val muestraDao: MuestraDao) {
         muestraDao.getPendingSync()
     }
 
+    /** Inserta o reemplaza una muestra descargada del backend. */
+    suspend fun upsertFromServer(muestra: MuestraEntity) = withContext(Dispatchers.IO) {
+        muestraDao.insertSample(muestra)
+    }
+
     suspend fun markSynced(id: String): Int = withContext(Dispatchers.IO) {
         muestraDao.markSynced(id)
     }

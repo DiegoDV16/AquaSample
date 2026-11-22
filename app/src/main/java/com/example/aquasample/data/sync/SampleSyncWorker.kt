@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.remote.ApiClient
 import com.example.aquasample.data.remote.toDto
+import com.example.aquasample.data.remote.toEntity
 import java.io.IOException
 
 /**
@@ -27,8 +28,6 @@ class SampleSyncWorker(
         val repository = application.appContainer.muestraRepository
 
         val pending = repository.getPendingSync()
-        if (pending.isEmpty()) return Result.success()
-
         var shouldRetry = false
 
         for (sample in pending) {
@@ -63,6 +62,34 @@ class SampleSyncWorker(
             } catch (exception: Exception) {
                 Log.e(TAG, "Error al sincronizar ${sample.id}", exception)
                 shouldRetry = true
+            }
+        }
+
+        val remoteSamples = try {
+            ApiClient.api.list()
+        } catch (io: IOException) {
+            Log.e(TAG, "No se pudo descargar muestras del backend", io)
+            shouldRetry = true
+            null
+        } catch (exception: Exception) {
+            Log.e(TAG, "Error al descargar muestras", exception)
+            shouldRetry = true
+            null
+        }
+
+        remoteSamples?.forEach { dto ->
+            try {
+                val local = repository.getSampleById(dto.id)
+                // Una muestra pendiente local siempre gana sobre la copia del servidor.
+                if (local != null && !local.sincronizado) return@forEach
+
+                val entity = dto.toEntity().copy(
+                    fotos = local?.fotos ?: emptyList(),
+                    photoCount = local?.photoCount ?: 0
+                )
+                repository.upsertFromServer(entity)
+            } catch (exception: Exception) {
+                Log.w(TAG, "No se pudo importar ${dto.id}: ${exception.localizedMessage}")
             }
         }
 

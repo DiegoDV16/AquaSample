@@ -72,9 +72,9 @@ Con HTTPS no hace falta tocar la configuración de tráfico claro.
 - Al recuperar WiFi o datos móviles se dispara un intento inmediato.
 - El inicio muestra las muestras pendientes y permite forzar la sincronización.
 
-## Limitación importante
+## Sincronización bidireccional
 
-La app **solo envía** muestras al backend; no las descarga. Cada teléfono tiene
-su propia base Room, por eso el operador, el analista y el administrador ven las
-muestras del mismo dispositivo, pero no las de otro teléfono. Para trabajo
-multidispositivo falta implementar la descarga/sincronización bidireccional.
+- Al sincronizar, la app sube las pendientes y descarga las muestras del backend.
+- Las muestras descargadas se guardan en Room y se ven con cualquier rol en ese teléfono.
+- Una muestra pendiente local no se sobrescribe con la copia del servidor.
+- Las fotos no se descargan: cada teléfono conserva las suyas.

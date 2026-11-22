@@ -2,6 +2,7 @@ package com.example.aquasample.data.remote
 
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 
 /**
  * Contrato JSON de una muestra en el backend Spring Boot.
@@ -60,3 +61,39 @@ fun MuestraEntity.toDto(): MuestraDto = MuestraDto(
     sincronizado = true,
     operatorAlias = operatorAlias
 )
+
+/**
+ * Convierte una muestra descargada del backend en entidad local.
+ * Las fotos no se descargan: se conservan las del dispositivo al hacer merge.
+ */
+fun MuestraDto.toEntity(): MuestraEntity = MuestraEntity(
+    id = id,
+    centroId = centroId,
+    tramoId = tramoId,
+    operadorId = operadorId,
+    concesion = concesion,
+    tren = tren.orEmpty(),
+    linea = linea.orEmpty(),
+    tramoLongitudCm = tramoLongitudCm.orEmpty(),
+    conteoManual = conteoManual?.toString().orEmpty(),
+    calibreMatrix = parseStringList(calibreMatrix),
+    averageCalibre = averageCalibre ?: 0.0,
+    marcasConteo = marcasConteo ?: "[]",
+    conteoAsistido = conteoAsistido ?: 0,
+    photoCount = 0,
+    fotos = emptyList(),
+    observaciones = observaciones.orEmpty(),
+    tags = parseStringList(tags),
+    fechaHora = fechaHora.orEmpty(),
+    timestamp = timestamp ?: 0L,
+    estado = estado ?: "PENDIENTE",
+    sincronizado = true,
+    operatorAlias = operatorAlias.orEmpty()
+)
+
+private fun parseStringList(raw: String?): List<String> {
+    if (raw.isNullOrBlank()) return emptyList()
+    return runCatching {
+        JsonParser.parseString(raw).asJsonArray.map { it.asString }
+    }.getOrDefault(emptyList())
+}
