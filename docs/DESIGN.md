@@ -190,6 +190,17 @@ permite forzar la sincronización.
 - El detalle lo genera en `Dispatchers.IO`, lo guarda en `cacheDir/reportes/` y lo
   comparte con `FileProvider` mediante un `Intent.ACTION_SEND`.
 
+### Pruebas
+
+- La lógica de validación y filtrado se extrajo a objetos puros
+  (`SampleValidator`, `HistoryFilter`, `LoginValidator`) para probarla sin Android.
+- **JUnit 4 + MockK** en `app/src/test`: 39 pruebas de validadores, estado,
+  mapeo de resumen, filtros, repositorio y serialización de marcas.
+- **Compose UI Test** en `app/src/androidTest`: 2 pruebas instrumentadas.
+- Cobertura con `enableUnitTestCoverage` y la tarea
+  `createDebugUnitTestCoverageReport`. La métrica global incluye UI y código
+  generado por Room; la lógica evaluable se mide por clase.
+
 ### Modelo de datos
 
 - `roles` (1:N) `usuarios`

@@ -42,12 +42,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val inputEmail = currentState.email.trim()
         val inputPass = currentState.password.trim()
 
-        if (inputEmail.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Por favor ingrese su correo electrónico.") }
-            return
-        }
-        if (inputPass.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Por favor ingrese su contraseña.") }
+        LoginValidator.validate(inputEmail, inputPass)?.let { message ->
+            _uiState.update { it.copy(errorMessage = message) }
             return
         }
 

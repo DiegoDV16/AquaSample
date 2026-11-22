@@ -90,6 +90,9 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
   las 10 muestras anteriores intactas.
 - PDF generado desde el detalle (58 KB, A4) y compartido con el selector de Android;
   hay un ejemplo en [docs/ejemplos](docs/ejemplos).
+- 39 pruebas unitarias (JUnit + MockK) y 2 instrumentadas de Compose en verde.
+- Cobertura de la lógica evaluable: 100 % en validadores, estado, mapeo de resumen,
+  filtro de historial y repositorio. Reporte: `:app:createDebugUnitTestCoverageReport`.
 
 ## Documentación
 

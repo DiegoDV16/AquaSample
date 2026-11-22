@@ -61,7 +61,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         HistoryUiState(
             isLoading = false,
             filters = currentFilters,
-            items = all.filter { it.matches(currentFilters) },
+            items = all.filter { HistoryFilter.matches(it, currentFilters) },
             totalCount = all.size,
             statusCounts = all.groupingBy { it.status }.eachCount()
         )
@@ -94,41 +94,5 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     fun clearFilters() {
         filters.value = HistoryFilters()
-    }
-
-    private fun SampleSummary.matches(filters: HistoryFilters): Boolean {
-        val query = filters.query.trim()
-        val matchesQuery = query.isEmpty() ||
-            id.contains(query, ignoreCase = true) ||
-            location.contains(query, ignoreCase = true) ||
-            operator.contains(query, ignoreCase = true)
-
-        val matchesStatus = filters.status == null || status == filters.status
-
-        val matchesPeriod = when (filters.period) {
-            HistoryPeriod.ALL -> true
-            HistoryPeriod.TODAY -> isSameDay(timestamp, System.currentTimeMillis())
-            else -> timestamp >= startOfDayMillis(daysBack = filters.period.daysBack ?: 0)
-        }
-
-        return matchesQuery && matchesStatus && matchesPeriod
-    }
-
-    private fun isSameDay(first: Long, second: Long): Boolean {
-        val firstCalendar = Calendar.getInstance().apply { timeInMillis = first }
-        val secondCalendar = Calendar.getInstance().apply { timeInMillis = second }
-        return firstCalendar.get(Calendar.YEAR) == secondCalendar.get(Calendar.YEAR) &&
-            firstCalendar.get(Calendar.DAY_OF_YEAR) == secondCalendar.get(Calendar.DAY_OF_YEAR)
-    }
-
-    private fun startOfDayMillis(daysBack: Int): Long {
-        val calendar = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_YEAR, -daysBack)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return calendar.timeInMillis
     }
 }

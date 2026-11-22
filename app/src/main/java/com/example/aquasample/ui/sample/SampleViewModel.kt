@@ -127,31 +127,7 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
      * Valida la etapa actual y devuelve el primer error encontrado, o null si
      * el paso está completo. La misma función alimenta la UI y los tests.
      */
-    fun validateStep(step: Int): String? {
-        val state = _uiState.value
-        return when (step) {
-            STEP_LOCATION -> when {
-                state.concesion.isBlank() -> "Selecciona la concesión o centro de cultivo."
-                state.tren.isBlank() -> "Selecciona el tren."
-                state.linea.isBlank() -> "Selecciona la línea de cultivo."
-                !isPositiveNumber(state.tramoLongitudCm) -> "Ingresa el largo del tramo en cm (mayor que 0)."
-                else -> null
-            }
-
-            STEP_MEASUREMENT -> when {
-                !isPositiveNumber(state.conteoManual) -> "Ingresa un conteo de individuos mayor que 0."
-                state.calibreMatrix.count { it.toDoubleOrNull() != null } == 0 ->
-                    "Registra al menos una medición de calibre."
-                else -> null
-            }
-
-            else -> if (state.photoBitmaps.isEmpty()) {
-                "Adjunta al menos una fotografía como evidencia."
-            } else {
-                null
-            }
-        }
-    }
+    fun validateStep(step: Int): String? = SampleValidator.validate(_uiState.value, step)
 
     /**
      * Guarda la muestra. Las fotos se escriben primero en disco y se guardan
@@ -250,13 +226,10 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun isPositiveNumber(raw: String): Boolean =
-        raw.trim().replace(',', '.').toDoubleOrNull()?.let { it > 0.0 } == true
-
     companion object {
-        const val STEP_LOCATION = 0
-        const val STEP_MEASUREMENT = 1
-        const val STEP_EVIDENCE = 2
+        const val STEP_LOCATION = SampleValidator.STEP_LOCATION
+        const val STEP_MEASUREMENT = SampleValidator.STEP_MEASUREMENT
+        const val STEP_EVIDENCE = SampleValidator.STEP_EVIDENCE
         const val STEP_COUNT = 3
         const val CALIBRE_CELLS = 30
         const val MAX_PHOTOS = 5
