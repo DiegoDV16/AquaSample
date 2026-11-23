@@ -133,16 +133,11 @@ fun EditSampleDialog(
                     PrimaryButton(
                         text = "Guardar",
                         onClick = {
-                            val count = conteo.toIntOrNull()
-                            val values = calibres.mapNotNull {
-                                it.replace(',', '.').toDoubleOrNull()
+                            val validationError = SampleEditValidator.validate(conteo, calibres)
+                            error = validationError
+                            if (validationError == null) {
+                                onSave(conteo, calibres, observaciones)
                             }
-                            error = when {
-                                count == null || count <= 0 -> "Ingresa un conteo mayor que 0."
-                                values.isEmpty() -> "Registra al menos una medición de calibre."
-                                else -> null
-                            }
-                            if (error == null) onSave(conteo, calibres, observaciones)
                         },
                         modifier = Modifier.weight(1f)
                     )

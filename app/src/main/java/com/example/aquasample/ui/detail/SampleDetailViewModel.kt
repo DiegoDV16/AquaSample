@@ -110,15 +110,9 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
         onResult: (String?) -> Unit
     ) {
         val sample = _uiState.value.sample ?: return
-        val count = conteo.toIntOrNull()
-        val values = calibres.mapNotNull { it.replace(',', '.').toDoubleOrNull() }
-
-        if (count == null || count <= 0) {
-            onResult("Ingresa un conteo mayor que 0.")
-            return
-        }
-        if (values.isEmpty()) {
-            onResult("Registra al menos una medición de calibre.")
+        val validationError = SampleEditValidator.validate(conteo, calibres)
+        if (validationError != null) {
+            onResult(validationError)
             return
         }
 
@@ -127,9 +121,9 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
             runCatching {
                 repository.updateSample(
                     sample.copy(
-                        conteoManual = count.toString(),
+                        conteoManual = conteo.toIntOrNull()?.toString().orEmpty(),
                         calibreMatrix = calibres,
-                        averageCalibre = values.average(),
+                        averageCalibre = SampleEditValidator.average(calibres) ?: 0.0,
                         observaciones = observaciones,
                         sincronizado = false
                     )

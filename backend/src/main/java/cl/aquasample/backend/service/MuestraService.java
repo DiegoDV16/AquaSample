@@ -55,6 +55,7 @@ public class MuestraService {
             throw new ConflictException("Ya existe una muestra con id " + muestra.getId());
         }
         aplicarValoresPorDefecto(muestra);
+        muestra.setSincronizado(Boolean.TRUE);
         muestra.setEliminado(Boolean.FALSE);
         muestra.setUpdatedAt(System.currentTimeMillis());
         return repository.save(muestra);
