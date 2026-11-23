@@ -16,7 +16,7 @@ import com.example.aquasample.data.repository.UsuarioRepository
  */
 class AppContainer(context: Context) {
 
-    private val database: AquaSampleDatabase = AquaSampleDatabase.getInstance(context)
+    val database: AquaSampleDatabase = AquaSampleDatabase.getInstance(context)
 
     val muestraRepository: MuestraRepository by lazy {
         MuestraRepository(database.muestraDao())

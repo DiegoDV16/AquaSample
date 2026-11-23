@@ -18,6 +18,9 @@ interface TramoDao {
     @Query("SELECT * FROM tramos ORDER BY tren ASC, linea ASC")
     fun getAllTramos(): Flow<List<TramoEntity>>
 
+    @Query("SELECT * FROM tramos ORDER BY id ASC")
+    suspend fun getAllTramosOnce(): List<TramoEntity>
+
     @Query("SELECT * FROM tramos WHERE estado = 'ACTIVO' ORDER BY tren ASC, linea ASC")
     fun getTramosActivos(): Flow<List<TramoEntity>>
 

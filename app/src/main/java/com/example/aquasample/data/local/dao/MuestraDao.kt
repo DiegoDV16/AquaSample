@@ -92,4 +92,7 @@ interface MuestraDao {
 
     @Query("UPDATE muestras SET eliminado = 1, sincronizado = 0, updatedAt = :updatedAt WHERE id = :id")
     suspend fun markDeleted(id: String, updatedAt: Long): Int
+
+    @Query("SELECT * FROM muestras WHERE eliminado = 0 ORDER BY timestamp ASC")
+    suspend fun getAllSamplesForBackup(): List<MuestraEntity>
 }

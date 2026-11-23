@@ -18,6 +18,9 @@ interface CentroCultivoDao {
     @Query("SELECT * FROM centros_cultivo ORDER BY nombre ASC")
     fun getAllCentros(): Flow<List<CentroCultivoEntity>>
 
+    @Query("SELECT * FROM centros_cultivo ORDER BY id ASC")
+    suspend fun getAllCentrosOnce(): List<CentroCultivoEntity>
+
     @Query("SELECT * FROM centros_cultivo WHERE estado = 'ACTIVO' ORDER BY nombre ASC")
     fun getAllCentrosActivos(): Flow<List<CentroCultivoEntity>>
 

@@ -1,6 +1,8 @@
 package com.example.aquasample.ui.profile
 
 import android.graphics.Bitmap
+import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
@@ -27,6 +29,8 @@ import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Dns
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
@@ -55,8 +59,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aquasample.AquaApplication
+import com.example.aquasample.appContainer
+import com.example.aquasample.data.backup.BackupManager
 import com.example.aquasample.data.remote.ServerConfig
 import com.example.aquasample.data.sync.SyncScheduler
 import com.example.aquasample.ui.designsystem.AquaCard
@@ -70,6 +78,7 @@ import com.example.aquasample.ui.designsystem.SectionHeader
 import com.example.aquasample.ui.theme.AquaSampleTheme
 import com.example.aquasample.ui.theme.Spacing
 import com.example.aquasample.ui.theme.ThemeManager
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,6 +129,40 @@ fun ProfileScreen(
         }
     }
 
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                val result = withContext(Dispatchers.IO) {
+                    BackupManager(context, (context.applicationContext as AquaApplication).container).import(uri)
+                }
+                val message = result.error
+                    ?: "Respaldo importado: ${result.imported} muestras, " +
+                    "${result.skipped} omitidas, ${result.photos} fotos."
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    val exportBackup: () -> Unit = {
+        scope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    BackupManager(context, (context.applicationContext as AquaApplication).container).export()
+                }
+            }.onSuccess { file ->
+                shareBackup(context, file)
+            }.onFailure { error ->
+                Toast.makeText(
+                    context,
+                    "No se pudo crear el respaldo: ${error.localizedMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     ProfileContent(
         state = state,
         onAliasChanged = viewModel::onAliasChanged,
@@ -127,6 +170,10 @@ fun ProfileScreen(
         onPickPhoto = { galleryLauncher.launch("image/*") },
         onTakePhoto = { cameraLauncher.launch(null) },
         onRemovePhoto = viewModel::removePhoto,
+        onExportBackup = exportBackup,
+        onImportBackup = {
+            importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
+        },
         onBack = onBack,
         onLogout = onLogout,
         modifier = modifier
@@ -141,12 +188,15 @@ fun ProfileContent(
     onPickPhoto: () -> Unit,
     onTakePhoto: () -> Unit,
     onRemovePhoto: () -> Unit,
+    onExportBackup: () -> Unit,
+    onImportBackup: () -> Unit,
     onBack: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isDarkMode by ThemeManager.isDarkMode.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showServerDialog by remember { mutableStateOf(false) }
     var serverUrl by remember { mutableStateOf(ServerConfig.baseUrl) }
 
@@ -333,6 +383,30 @@ fun ProfileContent(
                 }
             }
 
+            SectionHeader(title = "Respaldo")
+            AquaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    Text(
+                        text = "Guarda tus muestras, catálogos y fotos en un archivo .aquabackup. " +
+                            "Al importarlo no se pisan las muestras existentes.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    SecondaryButton(
+                        text = "Exportar respaldo",
+                        icon = Icons.Rounded.FileDownload,
+                        onClick = onExportBackup
+                    )
+                    Spacer(Modifier.height(Spacing.xs))
+                    SecondaryButton(
+                        text = "Importar respaldo",
+                        icon = Icons.Rounded.FileUpload,
+                        onClick = onImportBackup
+                    )
+                }
+            }
+
             SectionHeader(title = "Sesión")
             AquaCard {
                 ProfileInfoRow(label = "Rol", value = state.roleLabel.ifBlank { "—" })
@@ -347,7 +421,7 @@ fun ProfileContent(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "AquaSample 1.0.13",
+                text = "AquaSample 1.0.14",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -455,8 +529,25 @@ private fun ProfileContentPreview() {
             onPickPhoto = {},
             onTakePhoto = {},
             onRemovePhoto = {},
+            onExportBackup = {},
+            onImportBackup = {},
             onBack = {},
             onLogout = {}
         )
     }
+}
+
+private fun shareBackup(context: Context, file: File) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/octet-stream"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "Respaldo AquaSample")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Compartir respaldo"))
 }
