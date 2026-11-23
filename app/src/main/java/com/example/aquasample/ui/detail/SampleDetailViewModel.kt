@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.data.report.PdfReportGenerator
+import com.example.aquasample.data.sync.SyncScheduler
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -98,6 +99,52 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
                         onResult("No se pudo validar la muestra: ${exception.localizedMessage}")
                     }
                 }
+        }
+    }
+
+    /** Actualiza conteo, calibre y observaciones; deja la muestra pendiente de resincronizar. */
+    fun updateSample(
+        conteo: String,
+        calibres: List<String>,
+        observaciones: String,
+        onResult: (String?) -> Unit
+    ) {
+        val sample = _uiState.value.sample ?: return
+        val count = conteo.toIntOrNull()
+        val values = calibres.mapNotNull { it.replace(',', '.').toDoubleOrNull() }
+
+        if (count == null || count <= 0) {
+            onResult("Ingresa un conteo mayor que 0.")
+            return
+        }
+        if (values.isEmpty()) {
+            onResult("Registra al menos una medición de calibre.")
+            return
+        }
+
+        _uiState.update { it.copy(isUpdating = true) }
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                repository.updateSample(
+                    sample.copy(
+                        conteoManual = count.toString(),
+                        calibreMatrix = calibres,
+                        averageCalibre = values.average(),
+                        observaciones = observaciones,
+                        sincronizado = false
+                    )
+                )
+                SyncScheduler.syncNow(getApplication())
+            }.onSuccess {
+                _uiState.update { it.copy(isUpdating = false) }
+                load(sample.id, force = true)
+                withContext(Dispatchers.Main) { onResult(null) }
+            }.onFailure { exception ->
+                _uiState.update { it.copy(isUpdating = false) }
+                withContext(Dispatchers.Main) {
+                    onResult("No se pudo actualizar la muestra: ${exception.localizedMessage}")
+                }
+            }
         }
     }
 

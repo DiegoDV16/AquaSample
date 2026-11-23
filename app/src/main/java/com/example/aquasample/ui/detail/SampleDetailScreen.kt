@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -90,6 +92,7 @@ fun SampleDetailScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var viewerPhoto by remember { mutableStateOf<String?>(null) }
+    var showEdit by remember { mutableStateOf(false) }
 
     LaunchedEffect(sampleId) { viewModel.load(sampleId) }
 
@@ -113,7 +116,17 @@ fun SampleDetailScreen(
             AquaTopBar(
                 title = "Detalle de muestra",
                 subtitle = sampleId,
-                onBack = onBack
+                onBack = onBack,
+                actions = {
+                    if (state.sample != null) {
+                        IconButton(onClick = { showEdit = true }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = "Editar muestra"
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -150,6 +163,25 @@ fun SampleDetailScreen(
 
     viewerPhoto?.let { path ->
         PhotoViewerDialog(model = File(path), onDismiss = { viewerPhoto = null })
+    }
+
+    if (showEdit) {
+        state.sample?.let { sample ->
+            EditSampleDialog(
+                sample = sample,
+                onDismiss = { showEdit = false },
+                onSave = { conteo, calibres, observaciones ->
+                    viewModel.updateSample(conteo, calibres, observaciones) { error ->
+                        Toast.makeText(
+                            context,
+                            error ?: "Muestra actualizada. Sincronizando…",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        if (error == null) showEdit = false
+                    }
+                }
+            )
+        }
     }
 }
 
