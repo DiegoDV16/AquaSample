@@ -266,10 +266,10 @@ def summary(doc):
         "backend cuando hay conexión."
     )
     doc.add_paragraph(
-        "Frente a los 14 criterios de la pauta, 10 están completos, 3 son parciales y 1 sigue "
-        "pendiente. El único ítem sin implementar es el consumo de la API externa, que quedó a "
-        "cargo de otro integrante. Las brechas parciales son la cobertura global de pruebas, la "
-        "documentación colaborativa y la modificación en tiempo real."
+        "Frente a los 14 criterios de la pauta, 11 están completos, 3 son parciales y 0 siguen "
+        "pendientes. La API externa Open-Meteo Marine ya está integrada y demostrada; las "
+        "brechas restantes son la cobertura global de pruebas, la documentación colaborativa "
+        "y la modificación en tiempo real."
     )
     doc.add_heading("Cifras clave del sistema", level=2)
     add_table(
@@ -287,7 +287,7 @@ def summary(doc):
             ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
             ("Documentación", "README, DESIGN.md, informe y 23 capturas"),
-            ("APK", "Release 1.0.6 firmada (v2), 18 MB, instalada y verificada"),
+            ("APK", "Release 1.0.7 firmada (v2), 18 MB, instalada y verificada"),
             ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 81998ac)"),
         ],
         [4.6, 12.0],
@@ -297,9 +297,9 @@ def summary(doc):
         doc,
         ["Estado", "Cantidad", "Ítems"],
         [
-            ("Completo", "10", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; historial y dashboard; microservicios; offline; perfiles; APK firmada"),
+            ("Completo", "11", "Interfaz; gestión de muestras; fotografías; conteo asistido; reportes PDF; historial y dashboard; microservicios; offline; perfiles; APK firmada; API externa Open-Meteo"),
             ("Parcial", "3", "Pruebas (cobertura global); documentación; modificación en tiempo real"),
-            ("Pendiente", "1", "API externa con Retrofit (a cargo de otro integrante)"),
+            ("Pendiente", "0", "Ninguno"),
         ],
         [2.4, 2.0, 12.2],
         status_column=0,
@@ -618,15 +618,15 @@ def section_2(doc):
 
     doc.add_heading("2.14 APK firmada", level=2)
     doc.add_paragraph(
-        "La entrega incluye un APK release 1.0.6 firmado con un keystore propio, versionName 1.0.6 "
-        "y versionCode 7. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
+        "La entrega incluye un APK release 1.0.7 firmado con un keystore propio, versionName 1.0.7 "
+        "y versionCode 8. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
         "se verificó con apksigner antes de instalar el APK en el emulador."
     )
     bullets(
         doc,
         [
             "Firma APK Signature Scheme v2 con clave RSA de 2048 bits.",
-            "SHA-256 del APK: 295bf9d3df1aade3897d611de091e461696f248976df4264d879da8ca1bd816c.",
+            "SHA-256 del APK: d74ba3b9239a20468867031132ed5062a0017e9bec3cd7e7c46dac10db1b1f13.",
             "Instalado y abierto en el emulador; el build release no es depurable.",
             "Incluye las cuentas demo de operador, analista y administrador en una instalación limpia.",
             "Nuevo logo AquaSample en el login y como icono adaptativo de la app.",
@@ -657,10 +657,10 @@ def section_3(doc):
         ("Historial y dashboard", "Completo", "Búsqueda; filtros por estado, período, centro y tren; agrupación por día; tarjeta de comparación y gráficos en el inicio", "Validar los gráficos en un teléfono físico"),
         ("Reportabilidad (PDF/Excel)", "Completo", "PDF A4 por muestra con datos, calibre y foto, compartido con FileProvider", "Exportación a Excel opcional y reporte de jornada"),
         ("Microservicios Spring Boot", "Completo", "API Spring Boot con JPA, H2, CRUD, filtros, validación, Swagger y datos demo", "Autenticación por rol, migraciones versionadas y despliegue"),
-        ("Consumo de APIs externas", "Pendiente", "—", "Retrofit/OkHttp, permiso INTERNET y Open-Meteo Marine con manejo de errores"),
+        ("Consumo de APIs externas", "Completo", "Open-Meteo Marine con Retrofit: oleaje y temperatura en el formulario, guardados en Room", "El viento no lo entrega la API marina y las coordenadas son fijas"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Parcial", "39 unitarias y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
-        ("APK firmada", "Completo", "Release 1.0.6 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
+        ("APK firmada", "Completo", "Release 1.0.7 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
@@ -677,18 +677,18 @@ def section_3(doc):
 def section_4(doc):
     doc.add_heading("4. Lo que falta por implementar", level=1)
     doc.add_paragraph(
-        "Con conteo asistido, reportes y pruebas ya integrados en main, las brechas restantes se "
-        "concentran en el ítem que asumió otro integrante, la cobertura global y el cierre de entrega."
+        "Con la API externa ya integrada, las brechas restantes se concentran en la cobertura, "
+        "el despliegue multidispositivo y el cierre de entrega."
     )
     gaps = [
         (
-            "4.1 Consumo de API externa (Open-Meteo Marine)",
-            "El ítem quedó a cargo de otro integrante del equipo; Retrofit ya está integrado para el backend propio.",
-            "Agregar el servicio Retrofit de Open-Meteo Marine (oleaje, temperatura y viento), mostrarlo en el inicio con estado de carga y error, y cachear la última consulta.",
+            "4.1 Despliegue público y fotos multidispositivo",
+            "El backend corre en el PC y el APK apunta a localhost por defecto; además las fotos no se suben al servidor.",
+            "Desplegar el backend con HTTPS, configurar la URL desde Perfil y subir las fotos a un almacenamiento para que otro dispositivo pueda verlas.",
             [
-                "El inicio muestra oleaje y temperatura con hora de actualización.",
-                "Si no hay red, informa el error y usa el último dato disponible.",
-                "La llamada está aislada en un repositorio y es testeable con MockWebServer.",
+                "La app sincroniza por datos móviles con una URL pública.",
+                "El analista ve en su teléfono las muestras y fotos creadas por el operador.",
+                "El backend conserva los datos tras reiniciarse.",
             ],
         ),
         (
@@ -703,7 +703,7 @@ def section_4(doc):
         ),
         (
             "4.3 Publicación en tienda (opcional)",
-            "El APK release 1.0.0 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
+            "El APK release 1.0.7 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
             "Si se solicita publicar, crear la ficha, la política de privacidad y la cuenta de Google Play, y subir el APK o AAB firmado.",
             [
                 "Ficha con capturas, descripción y política de privacidad.",
@@ -774,7 +774,7 @@ def section_5(doc):
         doc,
         ["Fase", "Alcance", "Esfuerzo", "Habilita"],
         [
-            ("1", "Open-Meteo Marine con Retrofit y panel de condiciones (otro integrante)", "1–2 días", "API externa"),
+            ("1", "Despliegue público del backend y fotos multidispositivo", "2–3 días", "Operación real"),
             ("2", "Pruebas de ViewModels y Compose + umbral de cobertura", "2–3 días", "Cobertura global"),
             ("3", "Trello, Swagger publicado y guía de despliegue", "1–2 días", "Entrega y documentación"),
             ("4", "Spring Security/JWT y Flyway", "2 días", "Backend endurecido"),
@@ -791,7 +791,7 @@ def section_6(doc):
     bullets(
         doc,
         [
-            "El único ítem sin implementar es la API externa y está a cargo de otro integrante: coordinar la entrega antes de la presentación.",
+            "La API externa ya está integrada; el viento queda nulo porque la API marina no lo entrega y las coordenadas son fijas.",
             "La cobertura global es 2,9 %; si el docente exige 90 % global, habrá que instrumentar ViewModels y pantallas o acordar la métrica por lógica evaluable.",
             "La APK release ya está firmada y verificada; si se pide publicación, crear la cuenta de tienda y la ficha.",
             "El backend no tiene autenticación: no se puede demostrar que un operador no valide muestras.",

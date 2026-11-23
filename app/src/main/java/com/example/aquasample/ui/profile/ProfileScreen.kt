@@ -347,7 +347,7 @@ fun ProfileContent(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "AquaSample 1.0.6",
+                text = "AquaSample 1.0.7",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -452,9 +452,20 @@ private fun MarineConditionsCard(state: SampleUiState) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else if (state.marineCurrent != null) {
-                Text("Oleaje (m): ${state.marineCurrent.waveHeight ?: 0.0}")
-                Text("Temperatura del mar: ${state.marineCurrent.seaSurfaceTemperature ?: 0.0} °C")
-                Text("Viento: ${state.marineCurrent.windSpeed10m ?: 0.0} m/s")
+                val marine = state.marineCurrent
+                marine.waveHeight?.let { Text("Oleaje: $it m") }
+                marine.seaSurfaceTemperature?.let { Text("Temperatura del mar: $it °C") }
+                marine.windSpeed10m?.let { Text("Viento: $it m/s") }
+                if (marine.waveHeight == null &&
+                    marine.seaSurfaceTemperature == null &&
+                    marine.windSpeed10m == null
+                ) {
+                    Text(
+                        text = "Sin datos marinos disponibles para esta ubicación.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             state.marineError?.let { error ->

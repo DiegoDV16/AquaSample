@@ -24,7 +24,7 @@ android {
         applicationId = "com.example.aquasample"
         minSdk = 24
         targetSdk = 37
-        versionCode = 7
+        versionCode = 8
         versionName = "1.0.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
