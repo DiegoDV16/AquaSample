@@ -32,7 +32,11 @@ data class MuestraDto(
     val timestamp: Long? = null,
     val estado: String? = null,
     val sincronizado: Boolean? = null,
-    val operatorAlias: String? = null
+    val operatorAlias: String? = null,
+    val marineTime: String? = null,
+    val marineWaveHeight: Double? = null,
+    val marineSeaSurfaceTemperature: Double? = null,
+    val marineWindSpeed: Double? = null
 )
 
 private val mapperGson = Gson()
@@ -59,7 +63,11 @@ fun MuestraEntity.toDto(): MuestraDto = MuestraDto(
     timestamp = timestamp,
     estado = estado,
     sincronizado = true,
-    operatorAlias = operatorAlias
+    operatorAlias = operatorAlias,
+    marineTime = marineTime,
+    marineWaveHeight = marineWaveHeight,
+    marineSeaSurfaceTemperature = marineSeaSurfaceTemperature,
+    marineWindSpeed = marineWindSpeed
 )
 
 /**
@@ -88,7 +96,11 @@ fun MuestraDto.toEntity(): MuestraEntity = MuestraEntity(
     timestamp = timestamp ?: 0L,
     estado = estado ?: "PENDIENTE",
     sincronizado = true,
-    operatorAlias = operatorAlias.orEmpty()
+    operatorAlias = operatorAlias.orEmpty(),
+    marineTime = marineTime,
+    marineWaveHeight = marineWaveHeight,
+    marineSeaSurfaceTemperature = marineSeaSurfaceTemperature,
+    marineWindSpeed = marineWindSpeed
 )
 
 private fun parseStringList(raw: String?): List<String> {

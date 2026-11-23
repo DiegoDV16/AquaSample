@@ -50,5 +50,9 @@ data class MuestraEntity(
     val timestamp: Long = System.currentTimeMillis(), // Filtros cronológicos
     val estado: String = "COMPLETADO", // PENDIENTE, COMPLETADO, VALIDADO
     val sincronizado: Boolean = true, // Flag de sincronización local
-    val operatorAlias: String = "" // Alias/Nombre rápido del operador
+    val operatorAlias: String = "", // Alias/Nombre rápido del operador
+    val marineTime: String? = null, // Hora de la lectura de la API (ISO)
+    val marineWaveHeight: Double? = null, // Oleaje (m) - Open-Meteo
+    val marineSeaSurfaceTemperature: Double? = null, // Temperatura del mar (°C) - Open-Meteo
+    val marineWindSpeed: Double? = null // Viento (m/s) - Open-Meteo
 )

@@ -209,7 +209,11 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                     timestamp = now.time,
                     estado = "PENDIENTE",
                     sincronizado = false,
-                    operatorAlias = operatorAlias
+                    operatorAlias = operatorAlias,
+                    marineTime = state.marineCurrent?.time,
+                    marineWaveHeight = state.marineCurrent?.waveHeight,
+                    marineSeaSurfaceTemperature = state.marineCurrent?.seaSurfaceTemperature,
+                    marineWindSpeed = state.marineCurrent?.windSpeed10m
                 )
 
                 repository.insertSample(entity)
