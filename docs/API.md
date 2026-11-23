@@ -44,13 +44,23 @@ Sin token, `/api/**` responde **401**. El secreto se configura con
 | GET | `/api/muestras/{id}` | Muestra por id | Sí |
 | POST | `/api/muestras` | Crea muestra | Sí |
 | PUT | `/api/muestras/{id}` | Actualiza muestra | Sí |
-| PATCH | `/api/muestras/{id}/estado?estado=VALIDADO` | Cambia estado | Sí |
-| DELETE | `/api/muestras/{id}` | Borrado lógico (tombstone) | Sí |
+| PATCH | `/api/muestras/{id}/estado?estado=VALIDADO` | Cambia estado | Analista/Admin |
+| DELETE | `/api/muestras/{id}` | Borrado lógico (tombstone) | Analista/Admin |
 | POST | `/api/fotos` | Sube foto multipart (`file`) | Sí |
 | GET | `/api/fotos/{archivo}` | Descarga foto | Sí |
 | GET | `/api/centros` | Catálogo de centros | Sí |
 | GET | `/api/tramos` | Catálogo de tramos | Sí |
 | GET | `/api/usuarios` | Usuarios del backend | Sí |
+| POST | `/api/usuarios` | Crea usuario | Admin |
+| PATCH | `/api/usuarios/{id}/estado` | Activa/desactiva usuario | Admin |
+
+## Permisos
+
+- **Operador**: registrar y editar muestras, subir fotos, consultar catálogos.
+- **Analista**: todo lo anterior + validar y eliminar muestras.
+- **Admin**: todo + gestionar usuarios.
+
+La API responde **403** cuando el rol no alcanza.
 
 ## Ejemplo con curl
 

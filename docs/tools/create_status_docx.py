@@ -713,10 +713,10 @@ def section_4(doc):
         ),
         (
             "4.4 Autenticación y migraciones del backend",
-            "JWT y BCrypt ya protegen la API; falta autorización por rol y migraciones Flyway (hoy ddl-auto=update).",
-            "Agregar @PreAuthorize por rol y migraciones Flyway para versionar el esquema sin perder datos.",
+            "JWT, BCrypt y autorización por rol ya protegen la API; falta migrar el esquema a Flyway (hoy ddl-auto=update).",
+            "Agregar Flyway con una migración base y probar que un esquema existente y uno limpio arrancan igual.",
             [
-                "Un operador no puede validar muestras desde la API.",
+                "Un esquema limpio y uno existente arrancan con las mismas tablas.",
                 "Un cambio de esquema del backend conserva los datos.",
                 "Las migraciones están versionadas y probadas.",
             ],
@@ -777,7 +777,7 @@ def section_5(doc):
             ("1", "Despliegue público del backend y fotos multidispositivo", "2–3 días", "Operación real"),
             ("2", "Pruebas de ViewModels y Compose + umbral de cobertura", "2–3 días", "Cobertura global"),
             ("3", "Trello, Swagger publicado y guía de despliegue", "1–2 días", "Entrega y documentación"),
-            ("4", "Autorización por rol y Flyway", "2 días", "Backend endurecido"),
+            ("4", "Flyway y respaldo del esquema", "1–2 días", "Backend versionado"),
         ],
         [1.4, 8.2, 2.4, 4.6],
     )
@@ -794,7 +794,7 @@ def section_6(doc):
             "La API externa ya está integrada; el viento queda nulo porque la API marina no lo entrega y las coordenadas son fijas.",
             "La cobertura global es 4,2 %; si el docente exige 90 % global, habrá que instrumentar ViewModels y pantallas o acordar la métrica por lógica evaluable.",
             "La APK release ya está firmada y verificada; si se pide publicación, crear la cuenta de tienda y la ficha.",
-            "La API ya usa JWT y BCrypt; falta restringir la validación de muestras a analista/admin.",
+            "La API ya restringe validar/eliminar a analista/admin; falta versionar el esquema con Flyway.",
             "La cámara y el conteo están implementados y compilan, pero la verificación de toques en teléfono físico sigue pendiente.",
             "Falta el tablero Trello y publicar Swagger; el repositorio ya está público con main actualizado.",
         ],

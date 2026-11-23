@@ -39,12 +39,20 @@ public class JwtService {
     }
 
     public String extractEmail(String token) {
-        Claims claims = Jwts.parser()
+        return claims(token).getSubject();
+    }
+
+    public Long extractRolId(String token) {
+        Number rolId = claims(token).get("rolId", Number.class);
+        return rolId == null ? null : rolId.longValue();
+    }
+
+    private Claims claims(String token) {
+        return Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claims.getSubject();
     }
 
     public long expirationMs() {

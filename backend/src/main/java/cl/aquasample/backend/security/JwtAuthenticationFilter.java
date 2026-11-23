@@ -33,10 +33,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String email = jwtService.extractEmail(header.substring(7));
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    Long rolId = jwtService.extractRolId(header.substring(7));
+                    String role = switch (rolId == null ? -1 : rolId.intValue()) {
+                        case 3 -> "ROLE_ADMIN";
+                        case 2 -> "ROLE_ANALISTA";
+                        case 1 -> "ROLE_OPERADOR";
+                        default -> "ROLE_USER";
+                    };
                     var authentication = new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                            List.of(new SimpleGrantedAuthority(role))
                     );
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -58,12 +59,14 @@ public class MuestraController {
     }
 
     @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('ANALISTA','ADMIN')")
     @Operation(summary = "Cambia el estado de revisión de una muestra")
     public Muestra updateEstado(@PathVariable String id, @RequestParam String estado) {
         return service.updateEstado(id, estado);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ANALISTA','ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Elimina una muestra")
     public void delete(@PathVariable String id) {

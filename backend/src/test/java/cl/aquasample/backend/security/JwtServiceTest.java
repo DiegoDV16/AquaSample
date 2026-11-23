@@ -24,5 +24,6 @@ class JwtServiceTest {
 
         assertNotNull(token);
         assertEquals("operador@aquasample.cl", service.extractEmail(token));
+        assertEquals(1L, service.extractRolId(token));
     }
 }
