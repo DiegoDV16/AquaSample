@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.aquasample.appContainer
+import com.example.aquasample.data.notifications.SyncNotifications
 import com.example.aquasample.data.remote.ApiClient
 import com.example.aquasample.data.remote.toDto
 import com.example.aquasample.data.remote.toEntity
@@ -120,6 +121,10 @@ class SampleSyncWorker(
                 // Una muestra pendiente local siempre gana sobre la copia del servidor.
                 if (local != null && !local.sincronizado) return@forEach
 
+                if (dto.estado == "VALIDADO" && local?.estado != "VALIDADO") {
+                    SyncNotifications.notifyValidated(application, dto.id)
+                }
+
                 val downloaded = downloadPhotos(dto, application, local)
                 val entity = dto.toEntity().copy(
                     fotos = downloaded.ifEmpty { local?.fotos ?: emptyList() },
@@ -133,6 +138,13 @@ class SampleSyncWorker(
             } catch (exception: Exception) {
                 Log.w(TAG, "No se pudo importar ${dto.id}: ${exception.localizedMessage}")
             }
+        }
+
+        val pendingAfter = runCatching { repository.getPendingSync().size }.getOrDefault(0)
+        if (pendingAfter > 0) {
+            SyncNotifications.notifyPending(application, pendingAfter)
+        } else {
+            SyncNotifications.cancelPending(application)
         }
 
         return if (shouldRetry) Result.retry() else Result.success()

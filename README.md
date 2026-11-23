@@ -26,6 +26,7 @@ offline.
 - Edición de muestras guardadas: conteo, matriz de calibre y observaciones, con resincronización automática.
 - Reportes consolidados: PDF de la jornada filtrada y Excel/CSV con todas las muestras visibles.
 - Borrado logico y conflictos: las eliminaciones se propagan y una muestra validada en el servidor no se sobrescribe.
+- Notificaciones: aviso de muestras pendientes de sincronizar y de muestras validadas por el analista.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -91,8 +92,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.12-release.apk](dist/AquaSample-1.0.12-release.apk) (`versionName` 1.0.0).
-- SHA-256: `f69c25b5b28db798bec0315016275457a1cd6eae6776367de769419fe5dd0845`.
+- [AquaSample-1.0.13-release.apk](dist/AquaSample-1.0.13-release.apk) (`versionName` 1.0.0).
+- SHA-256: `eccc6b0049bd5181a34ad2bd6ab2fb11ffe0b7f53b9029a71b27a36c3f984dc9`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 

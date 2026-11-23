@@ -3,6 +3,7 @@ package com.example.aquasample
 import android.app.Application
 import android.net.ConnectivityManager
 import android.net.Network
+import com.example.aquasample.data.notifications.SyncNotifications
 import com.example.aquasample.data.remote.ServerConfig
 import com.example.aquasample.data.sync.SyncScheduler
 import com.example.aquasample.di.AppContainer
@@ -18,6 +19,7 @@ class AquaApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ServerConfig.init(this)
+        SyncNotifications.createChannel(this)
         SyncScheduler.schedulePeriodic(this)
         SyncScheduler.syncNow(this)
 
