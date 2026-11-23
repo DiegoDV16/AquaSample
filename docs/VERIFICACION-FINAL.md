@@ -58,14 +58,16 @@ Evidencia: [`screenshots/30-verificacion-final.png`](screenshots/30-verificacion
 
 1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica
    evaluable está cubierta, pero no el 90 % global.
-2. **Swagger público**: `render.yaml` está listo, pero la URL pública requiere
-   ejecutar el blueprint en Render.
-3. **Roles en el backend**: JWT autentica, pero aún no separa permisos por rol.
-4. **Flyway**: el esquema usa `ddl-auto=update`; falta versionar migraciones.
-5. **Fotos**: se sincronizan al subir; las fotos antiguas de otro teléfono se
+2. **Persistencia en Render**: el plan gratuito no tiene disco; H2 y `uploads/`
+   se pierden en cada redeploy. Flyway ya versiona el esquema.
+3. **HTTPS y secretos**: falta forzar HTTPS y rotar `AQUASAMPLE_JWT_SECRET` en
+   producción.
+4. **Fotos**: se sincronizan al subir; las fotos antiguas de otro teléfono se
    descargan al abrir la muestra, no antes.
-6. **Modificación en vivo**: el runbook está listo; falta ejecutarlo delante del
+5. **Modificación en vivo**: el runbook está listo; falta ejecutarlo delante del
    docente y registrar el tiempo real.
+6. **Verificación física**: cámara, conteo y notificaciones no se probaron en un
+   teléfono real.
 
 ## Conclusión
 

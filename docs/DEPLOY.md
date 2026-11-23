@@ -125,5 +125,7 @@ en cada redeploy o reinicio. Para conservar muestras y fotos:
 - Agrega un **disco persistente** y monta `/app/data` y `/app/uploads`, o
 - migra a PostgreSQL y almacenamiento de objetos (S3/Cloudinary).
 
-Para la defensa alcanza con el plan gratuito si se demuestra la sincronización
-en la misma sesión.
+El esquema se versiona con **Flyway** (`backend/src/main/resources/db/migration`).
+Al arrancar, una base limpia ejecuta `V2__schema_inicial.sql`; una base existente
+se adopta con baseline 1 y la misma migración idempotente. Para la defensa alcanza
+con el plan gratuito si se demuestra la sincronización en la misma sesión.
