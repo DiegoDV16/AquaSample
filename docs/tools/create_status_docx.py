@@ -677,7 +677,7 @@ def section_3(doc):
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Parcial", "84 unitarias, 6 de backend y 6 instrumentadas (login, historial, perfil); 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels"),
         ("APK firmada", "Completo", "Release 1.0.20 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
-        ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
+        ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, API/SWAGGER, openapi.json, 24 tarjetas y guía de despliegue", "URL permanente de Swagger y tablero Trello creado con credenciales"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
     add_table(
@@ -739,8 +739,8 @@ def section_4(doc):
         ),
         (
             "4.5 Documentación y colaboración",
-            "El repositorio incluye API.md, TRELLO.md, render.yaml y Swagger local; falta desplegar la URL pública y crear el tablero real.",
-            "Ejecutar render.yaml, publicar Swagger, crear el tablero desde tarjetas.csv y adjuntar la URL a la entrega.",
+            "El repositorio incluye API.md, SWAGGER.md, openapi.json, TRELLO.md, 24 tarjetas, script de creación, render.yaml y guía. Swagger se verificó local y por túnel temporal; falta la URL permanente y crear el tablero con credenciales.",
+            "Crear el tablero con tools/crear-tablero-trello.ps1 y desplegar render.yaml para una URL estable de Swagger.",
             [
                 "README que permita levantar app y backend desde cero.",
                 "Swagger accesible y enlazado desde el README.",
@@ -792,7 +792,7 @@ def section_5(doc):
         [
             ("1", "Despliegue público del backend y fotos multidispositivo", "2–3 días", "Operación real"),
             ("2", "Pruebas de ViewModels y Compose + umbral de cobertura", "2–3 días", "Cobertura global"),
-            ("3", "Trello, Swagger publicado y guía de despliegue", "1–2 días", "Entrega y documentación"),
+            ("3", "Tablero Trello real y Swagger permanente", "1–2 días", "Entrega y documentación"),
             ("4", "Disco persistente y rotación de secretos", "1 día", "Operación estable"),
         ],
         [1.4, 8.2, 2.4, 4.6],
@@ -812,7 +812,7 @@ def section_6(doc):
             "La APK release ya está firmada y verificada; si se pide publicación, crear la cuenta de tienda y la ficha.",
             "La API ya restringe por rol y Flyway versiona el esquema; falta persistencia en el hosting.",
             "La cámara y el conteo están implementados y compilan, pero la verificación de toques en teléfono físico sigue pendiente.",
-            "Falta el tablero Trello y publicar Swagger; el repositorio ya está público con main actualizado.",
+            "Swagger está verificado local y por túnel; faltan la URL permanente y el tablero Trello creado con credenciales.",
         ],
     )
 

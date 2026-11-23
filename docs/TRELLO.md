@@ -41,3 +41,17 @@ copiar al tablero. Cada una debe tener:
 - Build y pruebas en verde.
 - Documentación o README actualizado.
 - Evidencia de prueba (captura, log o comando).
+
+## Crear el tablero automáticamente
+
+1. Obtén tu API key y token en <https://trello.com/app-key>.
+2. Ejecuta:
+
+```powershell
+.\tools\crear-tablero-trello.ps1 -Key "TU_KEY" -Token "TU_TOKEN"
+```
+
+El script crea el tablero, las cuatro listas, las tarjetas del CSV y sus
+checklists. Al final imprime la URL del tablero.
+
+El CSV debe estar en `docs/trello/tarjetas.csv` (por defecto).

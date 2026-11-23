@@ -126,6 +126,7 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 - [Informe de estado y brechas](docs/informe/AquaSample-Estado-del-Sistema-v2.docx)
 - [Backend](backend/README.md)
 - [API y autenticación](docs/API.md)
+- [Swagger y OpenAPI](docs/SWAGGER.md)
 - [Tablero Trello](docs/TRELLO.md)
 - [Conectar la app con el backend](docs/DEPLOY.md)
 

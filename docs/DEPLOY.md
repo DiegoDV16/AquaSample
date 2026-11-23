@@ -129,3 +129,14 @@ El esquema se versiona con **Flyway** (`backend/src/main/resources/db/migration`
 Al arrancar, una base limpia ejecuta `V2__schema_inicial.sql`; una base existente
 se adopta con baseline 1 y la misma migración idempotente. Para la defensa alcanza
 con el plan gratuito si se demuestra la sincronización en la misma sesión.
+
+## Túnel temporal para mostrar Swagger
+
+Con el backend corriendo en el PC:
+
+```powershell
+ssh -T -R 80:localhost:8080 serveo.net
+```
+
+La terminal entrega una URL `https://<subdominio>.serveousercontent.com`.
+Agrega `/swagger-ui.html`. Vive mientras el túnel y el PC estén activos.
