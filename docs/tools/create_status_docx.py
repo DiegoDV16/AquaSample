@@ -227,7 +227,7 @@ def cover(doc):
         ("Documento", "Estado del sistema · versión 1.0"),
         ("Fecha", "22 de noviembre de 2026"),
         ("Repositorio", "github.com/DiegoDV16/AquaSample (público)"),
-        ("Commit auditado", "main · bc415de (tombstones y APK 1.0.12)"),
+        ("Commit auditado", "main · ca72475 (notificaciones y APK 1.0.13)"),
         ("Plataforma", "Android · Kotlin 2.0.21 · Jetpack Compose · Material 3"),
         ("Backend", "Spring Boot 3.5.16 · H2 · springdoc 2.8.13"),
         ("Verificación", "App + backend en emulador, con sincronización offline y online"),
