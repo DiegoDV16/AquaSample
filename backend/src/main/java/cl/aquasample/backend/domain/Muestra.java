@@ -67,6 +67,11 @@ public class Muestra {
 
     private String operatorAlias;
 
+    private String marineTime;
+    private Double marineWaveHeight;
+    private Double marineSeaSurfaceTemperature;
+    private Double marineWindSpeed;
+
     public Muestra() {
     }
 
@@ -246,6 +251,38 @@ public class Muestra {
         this.operatorAlias = operatorAlias;
     }
 
+    public String getMarineTime() {
+        return marineTime;
+    }
+
+    public void setMarineTime(String marineTime) {
+        this.marineTime = marineTime;
+    }
+
+    public Double getMarineWaveHeight() {
+        return marineWaveHeight;
+    }
+
+    public void setMarineWaveHeight(Double marineWaveHeight) {
+        this.marineWaveHeight = marineWaveHeight;
+    }
+
+    public Double getMarineSeaSurfaceTemperature() {
+        return marineSeaSurfaceTemperature;
+    }
+
+    public void setMarineSeaSurfaceTemperature(Double marineSeaSurfaceTemperature) {
+        this.marineSeaSurfaceTemperature = marineSeaSurfaceTemperature;
+    }
+
+    public Double getMarineWindSpeed() {
+        return marineWindSpeed;
+    }
+
+    public void setMarineWindSpeed(Double marineWindSpeed) {
+        this.marineWindSpeed = marineWindSpeed;
+    }
+
     /** Copia los campos editables de otra muestra conservando el id. */
     public void copyFrom(Muestra other) {
         this.centroId = other.centroId;
@@ -269,5 +306,9 @@ public class Muestra {
         this.estado = other.estado;
         this.sincronizado = other.sincronizado;
         this.operatorAlias = other.operatorAlias;
+        this.marineTime = other.marineTime;
+        this.marineWaveHeight = other.marineWaveHeight;
+        this.marineSeaSurfaceTemperature = other.marineSeaSurfaceTemperature;
+        this.marineWindSpeed = other.marineWindSpeed;
     }
 }

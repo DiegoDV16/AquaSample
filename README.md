@@ -22,6 +22,7 @@ offline.
 - Servidor configurable desde **Perfil** (IP del PC en WiFi o URL pública), con reintento automático al recuperar conexión.
 - Sincronización bidireccional: sube pendientes y descarga las muestras del backend, sin pisar las locales.
 - Fotos compartidas: se suben al backend y se descargan en los demas telefonos.
+- Clima sincronizado: oleaje, temperatura del mar y viento via Open-Meteo, guardados en Room y backend.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -87,8 +88,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.8-release.apk](dist/AquaSample-1.0.8-release.apk) (`versionName` 1.0.0).
-- SHA-256: `0abd2df7a12c146c88f9ba01d89ef79a857ae5b0670cf14e3bb13d83143a665a`.
+- [AquaSample-1.0.9-release.apk](dist/AquaSample-1.0.9-release.apk) (`versionName` 1.0.0).
+- SHA-256: `1e2904f1a54c2e002b79b97ddaa3b5af0236333eb4f8e2a0c0752e74f660611c`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 

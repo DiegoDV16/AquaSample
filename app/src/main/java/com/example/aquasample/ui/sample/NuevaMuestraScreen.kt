@@ -174,10 +174,6 @@ fun NuevaMuestraScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchMarineConditions(latitude = -35.9, longitude = -72.9)
-    }
-
     BackHandler(enabled = step > SampleViewModel.STEP_LOCATION && !imeVisible) { step-- }
 
     val galleryLauncher = rememberLauncherForActivityResult(

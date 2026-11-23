@@ -10,6 +10,7 @@ import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.data.local.entity.TramoEntity
 import com.example.aquasample.data.repository.MarineRepository
 import com.example.aquasample.data.repository.ProfileRepository
+import com.example.aquasample.data.remote.MarineCoordinates
 import com.example.aquasample.data.remote.model.MarineCurrent
 import com.example.aquasample.data.session.SessionManager
 import com.google.gson.Gson
@@ -73,6 +74,9 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                 tramoLongitudCm = ""
             )
         }
+
+        val (latitude, longitude) = MarineCoordinates.forCentro(centro.id)
+        fetchMarineConditions(latitude, longitude)
     }
 
     fun onTramoSelected(tramo: TramoEntity) {

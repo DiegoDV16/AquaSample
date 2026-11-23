@@ -7,8 +7,23 @@ import kotlinx.coroutines.withContext
 
 class MarineRepository {
 
-    private val api = NetworkModule.aquaSampleApi
+    private val marineApi = NetworkModule.aquaSampleApi
+    private val windApi = NetworkModule.windApi
 
     suspend fun getMarineConditions(latitude: Double, longitude: Double): MarineForecastResponse? =
-        withContext(Dispatchers.IO) { api.getMarineForecast(latitude, longitude) }
+        withContext(Dispatchers.IO) {
+            val marine = runCatching {
+                marineApi.getMarineForecast(
+                    latitude = latitude,
+                    longitude = longitude,
+                    current = "wave_height,sea_surface_temperature"
+                )
+            }.getOrNull() ?: return@withContext null
+
+            val wind = runCatching {
+                windApi.getWind(latitude, longitude).current?.windSpeed10m
+            }.getOrNull()
+
+            marine.copy(current = marine.current?.copy(windSpeed10m = wind))
+        }
 }

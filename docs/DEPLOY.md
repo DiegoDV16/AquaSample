@@ -78,3 +78,5 @@ Con HTTPS no hace falta tocar la configuración de tráfico claro.
 - Las muestras descargadas se guardan en Room y se ven con cualquier rol en ese teléfono.
 - Una muestra pendiente local no se sobrescribe con la copia del servidor.
 - Las fotos se suben al backend y se descargan en los demas telefonos.
+- Oleaje, temperatura del mar y viento se guardan en Room y tambien en el backend.
+- Las coordenadas son aproximadas por centro; viento en m/s desde api.open-meteo.com.

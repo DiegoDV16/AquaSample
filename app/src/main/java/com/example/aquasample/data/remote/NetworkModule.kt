@@ -17,6 +17,13 @@ object NetworkModule {
 
     val aquaSampleApi: AquaSampleApi = retrofit.create(AquaSampleApi::class.java)
 
+    private val windRetrofit = Retrofit.Builder()
+        .baseUrl("https://api.open-meteo.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val windApi: WindApi = windRetrofit.create(WindApi::class.java)
+
     suspend fun fetchMarineForecast(latitude: Double, longitude: Double): MarineForecastResponse =
         withContext(Dispatchers.IO) { aquaSampleApi.getMarineForecast(latitude, longitude) }
 }
