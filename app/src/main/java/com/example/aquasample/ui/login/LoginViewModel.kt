@@ -8,6 +8,7 @@ import com.example.aquasample.data.local.entity.UsuarioEntity
 import com.example.aquasample.data.remote.ApiClient
 import com.example.aquasample.data.remote.AuthTokenStore
 import com.example.aquasample.data.remote.LoginRequest
+import com.example.aquasample.data.security.PasswordHasher
 import com.example.aquasample.data.session.SessionManager
 import com.example.aquasample.data.session.UserRole
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +73,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 return@launch
             }
 
-            if (user.passwordHash.trim() != inputPass) {
+            val storedHash = user.passwordHash.trim()
+            val passwordValid = if (PasswordHasher.isHashed(storedHash)) {
+                PasswordHasher.verify(inputPass, storedHash)
+            } else {
+                storedHash == inputPass
+            }
+
+            if (!passwordValid) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -81,6 +89,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
                 return@launch
+            }
+
+            // Migra cuentas antiguas en texto plano a PBKDF2 en el primer login.
+            if (!PasswordHasher.isHashed(storedHash)) {
+                val upgraded = user.copy(passwordHash = PasswordHasher.hash(inputPass))
+                runCatching { usuarioRepository.updateUser(upgraded) }
+                user = upgraded
             }
 
             if (user.estado.equals("INACTIVO", ignoreCase = true)) {
@@ -133,7 +148,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun ensureDemoUserExists(email: String) {
         val demoUser = DEMO_USERS[email.trim().lowercase()] ?: return
-        runCatching { usuarioRepository.insertUser(demoUser) }
+        val hashed = demoUser.copy(passwordHash = PasswordHasher.hash(demoUser.passwordHash))
+        runCatching { usuarioRepository.insertUser(hashed) }
     }
 
     fun resetLoginState() {

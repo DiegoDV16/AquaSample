@@ -28,6 +28,7 @@ class SessionManagerTest {
         context.getSharedPreferences(prefsName, Context.MODE_PRIVATE).edit().clear().commit()
         context.getSharedPreferences("aquasample_auth", Context.MODE_PRIVATE).edit().clear().commit()
         AuthTokenStore.init(context)
+        AuthTokenStore.clear()
         SessionManager.init(context)
         SessionManager.logout()
         ProfileRepository.reset()
