@@ -32,3 +32,6 @@ local.properties
 # Cache de Python
 __pycache__/
 docs/informe/~$*
+
+# Binario local del túnel
+/tools/cloudflared.exe
