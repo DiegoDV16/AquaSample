@@ -1,5 +1,8 @@
 package com.example.aquasample.ui.history
 
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,9 +27,11 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -38,14 +43,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.content.FileProvider
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.AquaDropdownField
 import com.example.aquasample.ui.designsystem.AquaScaffold
@@ -59,6 +69,7 @@ import com.example.aquasample.ui.model.SampleSummary
 import com.example.aquasample.ui.theme.AquaSampleTheme
 import com.example.aquasample.ui.theme.Spacing
 import com.example.aquasample.ui.theme.ThemeManager
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -78,10 +89,13 @@ fun HistorialMuestrasScreen(
     viewModel: HistoryViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var showExport by remember { mutableStateOf(false) }
 
     HistoryContent(
         state = state,
         canCreateSample = canCreateSample,
+        onExportClick = { showExport = true },
         onQueryChange = viewModel::onQueryChange,
         onStatusChange = viewModel::onStatusChange,
         onPeriodChange = viewModel::onPeriodChange,
@@ -93,6 +107,27 @@ fun HistorialMuestrasScreen(
         onLogout = onLogout,
         modifier = modifier
     )
+
+    if (showExport) {
+        JourneyExportDialog(
+            count = state.items.size,
+            onDismiss = { showExport = false },
+            onExport = { format ->
+                showExport = false
+                viewModel.exportJourney(format) { result ->
+                    result.onSuccess { file ->
+                        shareJourney(context, file)
+                    }.onFailure { error ->
+                        Toast.makeText(
+                            context,
+                            "No se pudo exportar: ${error.localizedMessage}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -100,6 +135,7 @@ fun HistorialMuestrasScreen(
 fun HistoryContent(
     state: HistoryUiState,
     canCreateSample: Boolean,
+    onExportClick: () -> Unit,
     onQueryChange: (String) -> Unit,
     onStatusChange: (SampleStatus?) -> Unit,
     onPeriodChange: (HistoryPeriod) -> Unit,
@@ -121,6 +157,12 @@ fun HistoryContent(
                 title = "Muestras",
                 subtitle = "${state.totalCount} registros en el dispositivo",
                 actions = {
+                    IconButton(onClick = onExportClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.FileDownload,
+                            contentDescription = "Exportar jornada"
+                        )
+                    }
                     IconButton(onClick = { ThemeManager.setDarkMode(!isDarkMode) }) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Rounded.LightMode else Icons.Rounded.DarkMode,
@@ -490,6 +532,7 @@ private fun HistoryPreview() {
                 )
             ),
             canCreateSample = true,
+            onExportClick = {},
             onQueryChange = {},
             onStatusChange = {},
             onPeriodChange = {},
@@ -582,4 +625,53 @@ private fun ComparisonMetric(
             )
         }
     }
+}
+
+@Composable
+private fun JourneyExportDialog(
+    count: Int,
+    onDismiss: () -> Unit,
+    onExport: (JourneyExportFormat) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Exportar jornada") },
+        text = {
+            Text(
+                "Se exportarán $count muestras con los filtros actuales. " +
+                    "Elige PDF o Excel (CSV)."
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onExport(JourneyExportFormat.PDF) }) {
+                Text("PDF")
+            }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = { onExport(JourneyExportFormat.CSV) }) {
+                    Text("Excel (CSV)")
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("Cancelar")
+                }
+            }
+        }
+    )
+}
+
+private fun shareJourney(context: Context, file: File) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
+    val mime = if (file.extension.equals("csv", ignoreCase = true)) "text/csv" else "application/pdf"
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = mime
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "Reporte AquaSample")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Compartir reporte"))
 }

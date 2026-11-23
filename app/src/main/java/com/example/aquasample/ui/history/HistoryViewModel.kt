@@ -5,17 +5,23 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.CentroCultivoEntity
+import com.example.aquasample.data.report.JourneyReportGenerator
 import com.example.aquasample.ui.designsystem.SampleStatus
 import com.example.aquasample.ui.model.SampleSummary
 import com.example.aquasample.ui.model.toSampleSummary
+import java.io.File
 import java.util.Calendar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Rangos de fecha disponibles en el historial. */
 enum class HistoryPeriod(val label: String, val daysBack: Int?) {
@@ -70,6 +76,9 @@ data class HistoryUiState(
     val comparison: HistoryComparison = HistoryComparison(),
     val error: String? = null
 )
+
+/** Formato del reporte consolidado. */
+enum class JourneyExportFormat { PDF, CSV }
 
 /**
  * ViewModel del historial. Combina el flujo de Room con los filtros elegidos
@@ -136,6 +145,26 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     fun clearFilters() {
         filters.value = HistoryFilters()
+    }
+
+    /** Exporta las muestras visibles (filtros actuales) como PDF o CSV de Excel. */
+    fun exportJourney(format: JourneyExportFormat, onResult: (Result<File>) -> Unit) {
+        val visibleIds = uiState.value.items.map { it.id }.toSet()
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                val all = repository.allMuestrasConDetalle.first()
+                val selected = all
+                    .filter { it.muestra.id in visibleIds }
+                    .sortedByDescending { it.muestra.timestamp }
+                val generator = JourneyReportGenerator(getApplication())
+                if (format == JourneyExportFormat.PDF) {
+                    generator.generatePdf(selected)
+                } else {
+                    generator.generateCsv(selected)
+                }
+            }
+            withContext(Dispatchers.Main) { onResult(result) }
+        }
     }
 
     /**
