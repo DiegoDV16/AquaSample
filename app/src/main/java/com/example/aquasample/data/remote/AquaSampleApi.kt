@@ -1,5 +1,6 @@
 package com.example.aquasample.data.remote
 
+import com.example.aquasample.data.remote.model.MarineForecastResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -29,4 +30,11 @@ interface AquaSampleApi {
         @Path("id") id: String,
         @Query("estado") estado: String
     ): Response<MuestraDto>
+
+    @GET("v1/marine")
+    suspend fun getMarineForecast(
+        @Query("latitude") latitude: Double,
+        @Query("longitude") longitude: Double,
+        @Query("current") current: String = "wave_height,sea_surface_temperature,wind_speed_10m"
+    ): MarineForecastResponse
 }

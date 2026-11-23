@@ -8,7 +8,9 @@ import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.CentroCultivoEntity
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.data.local.entity.TramoEntity
+import com.example.aquasample.data.repository.MarineRepository
 import com.example.aquasample.data.repository.ProfileRepository
+import com.example.aquasample.data.remote.model.MarineCurrent
 import com.example.aquasample.data.session.SessionManager
 import com.google.gson.Gson
 import java.io.File
@@ -39,6 +41,7 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
     private val repository = application.appContainer.muestraRepository
     private val centroRepository = application.appContainer.centroRepository
     private val tramoRepository = application.appContainer.tramoRepository
+    private val marineRepository = MarineRepository()
 
     private val _uiState = MutableStateFlow(SampleUiState())
     val uiState: StateFlow<SampleUiState> = _uiState
@@ -85,6 +88,19 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
 
     fun onConteoManualChanged(value: String) {
         _uiState.update { it.copy(conteoManual = value) }
+    }
+
+    /** Consulta condiciones marinas (oleaje, temperatura y viento) a Open-Meteo. */
+    fun fetchMarineConditions(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingMarine = true, marineError = null) }
+            try {
+                val response = marineRepository.getMarineConditions(latitude, longitude)
+                _uiState.update { it.copy(isLoadingMarine = false, marineCurrent = response?.current) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoadingMarine = false, marineError = "No se pudo obtener las condiciones marinas") }
+            }
+        }
     }
 
     fun onCalibreCellChanged(index: Int, value: String) {
@@ -193,13 +209,17 @@ class SampleViewModel(application: Application) : AndroidViewModel(application) 
                     timestamp = now.time,
                     estado = "PENDIENTE",
                     sincronizado = false,
-                    operatorAlias = operatorAlias
+                    operatorAlias = operatorAlias,
+                    marineTime = state.marineCurrent?.time,
+                    marineWaveHeight = state.marineCurrent?.waveHeight,
+                    marineSeaSurfaceTemperature = state.marineCurrent?.seaSurfaceTemperature,
+                    marineWindSpeed = state.marineCurrent?.windSpeed10m
                 )
 
                 repository.insertSample(entity)
                 com.example.aquasample.data.sync.SyncScheduler.syncNow(getApplication())
 
-                _uiState.update { it.copy(isSaving = false, isSavedSuccess = true) }
+                _uiState.update { it.copy(isSaving = false, isSavedSuccess = true, savedMarineCurrent = it.marineCurrent) }
             } catch (exception: Exception) {
                 _uiState.update { it.copy(isSaving = false) }
                 withContext(Dispatchers.Main) {

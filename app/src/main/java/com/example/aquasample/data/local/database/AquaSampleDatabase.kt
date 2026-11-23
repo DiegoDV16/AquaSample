@@ -28,7 +28,7 @@ import java.util.concurrent.Executors
         MuestraEntity::class,
         TramoEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -51,7 +51,7 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     AquaSampleDatabase::class.java,
                     "aquasample_db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
@@ -112,6 +112,19 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                             "VALUES ($id, $centroId, '$tren', '$linea', $longitud, 'ACTIVO')"
                     )
                 }
+            }
+        }
+
+        /**
+         * Agrega las condiciones climáticas (oleaje, temperatura del mar y viento)
+         * capturadas por la Open-Meteo Marine API a las muestras existentes.
+         */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE muestras ADD COLUMN marineTime TEXT")
+                db.execSQL("ALTER TABLE muestras ADD COLUMN marineWaveHeight REAL")
+                db.execSQL("ALTER TABLE muestras ADD COLUMN marineSeaSurfaceTemperature REAL")
+                db.execSQL("ALTER TABLE muestras ADD COLUMN marineWindSpeed REAL")
             }
         }
 

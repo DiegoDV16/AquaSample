@@ -1,6 +1,7 @@
 package com.example.aquasample.ui.sample
 
 import android.graphics.Bitmap
+import com.example.aquasample.data.remote.model.MarineCurrent
 
 /** Marca de conteo asistido, normalizada respecto de la fotografía (0..1). */
 data class CountMark(
@@ -22,7 +23,11 @@ data class SampleUiState(
     val observaciones: String = "",
     val selectedTags: Set<String> = emptySet(),
     val isSaving: Boolean = false,
-    val isSavedSuccess: Boolean = false
+    val isSavedSuccess: Boolean = false,
+    val isLoadingMarine: Boolean = false,
+    val marineCurrent: MarineCurrent? = null,
+    val marineError: String? = null,
+    val savedMarineCurrent: MarineCurrent? = null
 ) {
     val photoCount: Int
         get() = photoBitmaps.size
