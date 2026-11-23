@@ -72,6 +72,12 @@ Detalle: [`VERIFICACION-E2E.md`](VERIFICACION-E2E.md).
 - [x] El backend quedó con `conteoManual=42`.
 - [x] Evidencia: [`screenshots/34-edicion-e2e.png`](screenshots/34-edicion-e2e.png).
 
+## Notificación E2E
+
+- [x] Muestra pendiente `#M-9600` sin JWT.
+- [x] Notificación “Muestras sin sincronizar” publicada.
+- [x] Evidencia: [`screenshots/35-notificacion.png`](screenshots/35-notificacion.png).
+
 ## Limitaciones conocidas
 
 1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica

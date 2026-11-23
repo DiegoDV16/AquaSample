@@ -56,6 +56,20 @@ Con la sesión de administrador iniciada (login manual; el JWT quedó guardado):
 
 Evidencia: [`screenshots/34-edicion-e2e.png`](screenshots/34-edicion-e2e.png).
 
+## Notificación de pendientes
+
+Con una muestra pendiente (`#M-9600`) y sin JWT, el worker falló como se esperaba
+y publicó la notificación del canal `aquasample_sync`:
+
+```text
+AquaSample · Muestras sin sincronizar
+1 muestra(s) guardadas en el teléfono esperando conexión al servidor.
+```
+
+Verificado con `dumpsys notification --noredact` y captura del panel:
+
+Evidencia: [`screenshots/35-notificacion.png`](screenshots/35-notificacion.png).
+
 ## Limitación del ensayo
 
 La interacción automática con el formulario de login por coordenadas fue
