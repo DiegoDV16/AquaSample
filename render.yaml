@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: aquasample-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: AQUASAMPLE_JWT_SECRET
+        generateValue: true

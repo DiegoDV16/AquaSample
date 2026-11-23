@@ -93,3 +93,37 @@ $env:AQUASAMPLE_JWT_SECRET="cambia-este-secreto-de-produccion-0123456789"
 ```
 
 - Para producción usa HTTPS; el token viaja en cada request.
+
+## Despliegue en Render (Swagger público)
+
+El repositorio incluye `render.yaml` para crear el servicio con Docker.
+
+1. En Render: **New → Blueprint** y conecta el repositorio.
+2. Render lee `render.yaml` y crea `aquasample-backend`.
+3. El secreto JWT se genera automáticamente (`AQUASAMPLE_JWT_SECRET`).
+4. Cuando termine el deploy, la URL queda así:
+
+```text
+https://aquasample-backend.onrender.com/
+```
+
+5. Comprueba:
+
+```text
+https://aquasample-backend.onrender.com/api/health
+https://aquasample-backend.onrender.com/swagger-ui.html
+```
+
+6. En la app: **Perfil → Servidor** con esa URL y vuelve a iniciar sesión para
+   obtener el JWT.
+
+### Persistencia
+
+El plan gratuito de Render no incluye disco. La base H2 y `uploads/` se pierden
+en cada redeploy o reinicio. Para conservar muestras y fotos:
+
+- Agrega un **disco persistente** y monta `/app/data` y `/app/uploads`, o
+- migra a PostgreSQL y almacenamiento de objetos (S3/Cloudinary).
+
+Para la defensa alcanza con el plan gratuito si se demuestra la sincronización
+en la misma sesión.

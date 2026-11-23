@@ -723,8 +723,8 @@ def section_4(doc):
         ),
         (
             "4.5 Documentación y colaboración",
-            "Existen README, DESIGN.md, informe actualizado, backend README y ejemplos; faltan Swagger publicado y evidencia de Trello.",
-            "Publicar Swagger, mantener el tablero Trello con historias y responsables, y documentar el despliegue del backend.",
+            "El repositorio incluye API.md, TRELLO.md, render.yaml y Swagger local; falta desplegar la URL pública y crear el tablero real.",
+            "Ejecutar render.yaml, publicar Swagger, crear el tablero desde tarjetas.csv y adjuntar la URL a la entrega.",
             [
                 "README que permita levantar app y backend desde cero.",
                 "Swagger accesible y enlazado desde el README.",
