@@ -107,3 +107,10 @@ Pendiente:
 - Migraciones versionadas (Flyway/Liquibase) en lugar de `ddl-auto=update`.
 - Endpoint de sincronización por lote y resolución de conflictos.
 - Pruebas de integración con `MockMvc` y Testcontainers.
+
+
+## Fotos
+
+- POST /api/fotos (multipart, campo file) guarda una foto y devuelve el path.
+- GET /api/fotos/{archivo} sirve la imagen.
+- Tamano maximo: 10 MB; formatos jpg, jpeg, png y webp.

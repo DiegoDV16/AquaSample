@@ -21,6 +21,7 @@ offline.
 - SincronizaciÃ³n offline: Room + WorkManager + Retrofit.
 - Servidor configurable desde **Perfil** (IP del PC en WiFi o URL pública), con reintento automático al recuperar conexión.
 - Sincronización bidireccional: sube pendientes y descarga las muestras del backend, sin pisar las locales.
+- Fotos compartidas: se suben al backend y se descargan en los demas telefonos.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -86,8 +87,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.7-release.apk](dist/AquaSample-1.0.7-release.apk) (`versionName` 1.0.0).
-- SHA-256: `d74ba3b9239a20468867031132ed5062a0017e9bec3cd7e7c46dac10db1b1f13`.
+- [AquaSample-1.0.8-release.apk](dist/AquaSample-1.0.8-release.apk) (`versionName` 1.0.0).
+- SHA-256: `0abd2df7a12c146c88f9ba01d89ef79a857ae5b0670cf14e3bb13d83143a665a`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 

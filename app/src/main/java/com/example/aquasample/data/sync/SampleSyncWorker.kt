@@ -9,7 +9,12 @@ import com.example.aquasample.appContainer
 import com.example.aquasample.data.remote.ApiClient
 import com.example.aquasample.data.remote.toDto
 import com.example.aquasample.data.remote.toEntity
+import com.google.gson.Gson
+import java.io.File
 import java.io.IOException
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 
 /**
  * Envía al backend las muestras que aún no se han sincronizado.
@@ -31,8 +36,12 @@ class SampleSyncWorker(
         var shouldRetry = false
 
         for (sample in pending) {
-            val dto = sample.toDto()
             try {
+                val remotePaths = uploadPhotos(sample)
+                val dto = sample.copy(
+                    fotos = remotePaths,
+                    photoCount = remotePaths.size
+                ).toDto()
                 val created = ApiClient.api.create(dto)
                 when {
                     created.isSuccessful -> repository.markSynced(sample.id)
@@ -83,9 +92,14 @@ class SampleSyncWorker(
                 // Una muestra pendiente local siempre gana sobre la copia del servidor.
                 if (local != null && !local.sincronizado) return@forEach
 
+                val downloaded = downloadPhotos(dto, application, local)
                 val entity = dto.toEntity().copy(
-                    fotos = local?.fotos ?: emptyList(),
-                    photoCount = local?.photoCount ?: 0
+                    fotos = downloaded.ifEmpty { local?.fotos ?: emptyList() },
+                    photoCount = when {
+                        downloaded.isNotEmpty() -> downloaded.size
+                        local != null -> local.photoCount
+                        else -> dto.photoCount ?: 0
+                    }
                 )
                 repository.upsertFromServer(entity)
             } catch (exception: Exception) {
@@ -94,6 +108,69 @@ class SampleSyncWorker(
         }
 
         return if (shouldRetry) Result.retry() else Result.success()
+    }
+
+    /** Sube las fotos locales y devuelve las rutas remotas que se guardan en el backend. */
+    private suspend fun uploadPhotos(sample: com.example.aquasample.data.local.entity.MuestraEntity): List<String> {
+        val remotePaths = mutableListOf<String>()
+        for (path in sample.fotos) {
+            val file = File(path)
+            if (!file.exists() || file.length() == 0L) continue
+
+            val part = MultipartBody.Part.createFormData(
+                "file",
+                file.name,
+                file.asRequestBody("image/jpeg".toMediaType())
+            )
+            val response = ApiClient.api.uploadPhoto(part)
+            val uploaded = response.body()
+            if (!response.isSuccessful || uploaded == null || uploaded.path.isBlank()) {
+                throw IOException("No se pudo subir la foto ${file.name}: ${response.code()}")
+            }
+            remotePaths.add(uploaded.path)
+        }
+        return remotePaths
+    }
+
+    /** Descarga las fotos remotas a archivos locales para mostrarlas en el detalle. */
+    private suspend fun downloadPhotos(
+        dto: com.example.aquasample.data.remote.MuestraDto,
+        application: Application,
+        local: com.example.aquasample.data.local.entity.MuestraEntity?
+    ): List<String> {
+        val raw = dto.fotos
+        if (raw.isNullOrBlank()) return emptyList()
+
+        val remote = runCatching {
+            Gson().fromJson(raw, Array<String>::class.java)?.toList().orEmpty()
+        }.getOrDefault(emptyList())
+        if (remote.isEmpty()) return emptyList()
+
+        val directory = File(application.filesDir, "muestras").apply { mkdirs() }
+        val safeId = dto.id.replace("#", "").replace("/", "-")
+        val result = mutableListOf<String>()
+
+        remote.forEachIndexed { index, path ->
+            val name = path.substringAfterLast('/')
+            if (name.isBlank()) return@forEachIndexed
+
+            val response = runCatching { ApiClient.api.downloadPhoto(name) }.getOrNull()
+                ?: return@forEachIndexed
+            if (!response.isSuccessful) return@forEachIndexed
+
+            val file = File(directory, "remoto_${safeId}_${index + 1}.jpg")
+            runCatching {
+                response.body()?.use { body ->
+                    body.byteStream().use { input ->
+                        file.outputStream().use { output -> input.copyTo(output) }
+                    }
+                }
+            }
+            if (file.exists() && file.length() > 0L) {
+                result.add(file.absolutePath)
+            }
+        }
+        return result
     }
 
     private companion object {

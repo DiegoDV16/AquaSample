@@ -22,6 +22,7 @@ local.properties
 /backend/build
 /backend/.gradle
 /backend/data
+/backend/uploads
 
 # Firma de release: el keystore y sus credenciales no se publican
 /keystore.properties

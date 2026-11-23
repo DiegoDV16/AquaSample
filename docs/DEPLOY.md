@@ -77,4 +77,4 @@ Con HTTPS no hace falta tocar la configuración de tráfico claro.
 - Al sincronizar, la app sube las pendientes y descarga las muestras del backend.
 - Las muestras descargadas se guardan en Room y se ven con cualquier rol en ese teléfono.
 - Una muestra pendiente local no se sobrescribe con la copia del servidor.
-- Las fotos no se descargan: cada teléfono conserva las suyas.
+- Las fotos se suben al backend y se descargan en los demas telefonos.

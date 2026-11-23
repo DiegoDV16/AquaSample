@@ -1,12 +1,16 @@
 package com.example.aquasample.data.remote
 
 import com.example.aquasample.data.remote.model.MarineForecastResponse
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -37,4 +41,11 @@ interface AquaSampleApi {
         @Query("longitude") longitude: Double,
         @Query("current") current: String = "wave_height,sea_surface_temperature,wind_speed_10m"
     ): MarineForecastResponse
+
+    @Multipart
+    @POST("api/fotos")
+    suspend fun uploadPhoto(@Part file: MultipartBody.Part): Response<PhotoUploadResponse>
+
+    @GET("api/fotos/{name}")
+    suspend fun downloadPhoto(@Path("name") name: String): Response<ResponseBody>
 }

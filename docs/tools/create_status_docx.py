@@ -287,7 +287,7 @@ def summary(doc):
             ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
             ("Documentación", "README, DESIGN.md, informe y 23 capturas"),
-            ("APK", "Release 1.0.7 firmada (v2), 18 MB, instalada y verificada"),
+            ("APK", "Release 1.0.8 firmada (v2), 18 MB, instalada y verificada"),
             ("Build verificado", "app y backend en verde; 39 + 2 pruebas (main · 81998ac)"),
         ],
         [4.6, 12.0],
@@ -618,15 +618,15 @@ def section_2(doc):
 
     doc.add_heading("2.14 APK firmada", level=2)
     doc.add_paragraph(
-        "La entrega incluye un APK release 1.0.7 firmado con un keystore propio, versionName 1.0.7 "
-        "y versionCode 8. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
+        "La entrega incluye un APK release 1.0.8 firmado con un keystore propio, versionName 1.0.8 "
+        "y versionCode 9. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
         "se verificó con apksigner antes de instalar el APK en el emulador."
     )
     bullets(
         doc,
         [
             "Firma APK Signature Scheme v2 con clave RSA de 2048 bits.",
-            "SHA-256 del APK: d74ba3b9239a20468867031132ed5062a0017e9bec3cd7e7c46dac10db1b1f13.",
+            "SHA-256 del APK: 0abd2df7a12c146c88f9ba01d89ef79a857ae5b0670cf14e3bb13d83143a665a.",
             "Instalado y abierto en el emulador; el build release no es depurable.",
             "Incluye las cuentas demo de operador, analista y administrador en una instalación limpia.",
             "Nuevo logo AquaSample en el login y como icono adaptativo de la app.",
@@ -660,7 +660,7 @@ def section_3(doc):
         ("Consumo de APIs externas", "Completo", "Open-Meteo Marine con Retrofit: oleaje y temperatura en el formulario, guardados en Room", "El viento no lo entrega la API marina y las coordenadas son fijas"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Parcial", "54 unitarias y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
-        ("APK firmada", "Completo", "Release 1.0.7 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
+        ("APK firmada", "Completo", "Release 1.0.8 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
@@ -682,13 +682,13 @@ def section_4(doc):
     )
     gaps = [
         (
-            "4.1 Despliegue público y fotos multidispositivo",
-            "El backend corre en el PC y el APK apunta a localhost por defecto; además las fotos no se suben al servidor.",
-            "Desplegar el backend con HTTPS, configurar la URL desde Perfil y subir las fotos a un almacenamiento para que otro dispositivo pueda verlas.",
+            "4.1 Despliegue público y almacenamiento persistente",
+            "El backend corre en el PC y el APK apunta a localhost por defecto; las fotos ya se suben y descargan, pero la base H2 y la carpeta uploads viven en el equipo local.",
+            "Desplegar el backend con HTTPS y un volumen persistente para la base y las fotos, y configurar la URL desde Perfil.",
             [
                 "La app sincroniza por datos móviles con una URL pública.",
-                "El analista ve en su teléfono las muestras y fotos creadas por el operador.",
-                "El backend conserva los datos tras reiniciarse.",
+                "Las muestras y fotos sobreviven a un reinicio del servidor.",
+                "El analista ve en su teléfono las fotos creadas por el operador.",
             ],
         ),
         (
@@ -703,7 +703,7 @@ def section_4(doc):
         ),
         (
             "4.3 Publicación en tienda (opcional)",
-            "El APK release 1.0.7 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
+            "El APK release 1.0.8 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
             "Si se solicita publicar, crear la ficha, la política de privacidad y la cuenta de Google Play, y subir el APK o AAB firmado.",
             [
                 "Ficha con capturas, descripción y política de privacidad.",

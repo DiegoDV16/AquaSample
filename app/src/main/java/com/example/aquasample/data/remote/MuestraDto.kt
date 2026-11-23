@@ -41,6 +41,9 @@ data class MuestraDto(
 
 private val mapperGson = Gson()
 
+/** Respuesta del backend al subir una foto. */
+data class PhotoUploadResponse(val path: String = "")
+
 fun MuestraEntity.toDto(): MuestraDto = MuestraDto(
     id = id,
     centroId = centroId,
