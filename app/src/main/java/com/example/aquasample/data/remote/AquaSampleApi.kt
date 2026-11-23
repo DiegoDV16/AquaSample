@@ -6,10 +6,10 @@ import retrofit2.http.Query
 
 interface AquaSampleApi {
 
-    @GET("v1/forecast")
+    @GET("v1/marine")
     suspend fun getMarineForecast(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("current") current: String = "temperature_water,wave_height_max,wind_speed_10m"
+        @Query("current") current: String = "wave_height,sea_surface_temperature,wind_speed_10m"
     ): MarineForecastResponse
 }

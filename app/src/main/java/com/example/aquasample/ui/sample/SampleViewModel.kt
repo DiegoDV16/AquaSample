@@ -1,5 +1,6 @@
 package com.example.aquasample.ui.sample
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -79,6 +80,7 @@ class SampleViewModel : ViewModel() {
                 val response = marineRepository.getMarineConditions(latitude, longitude)
                 _uiState.update { it.copy(isLoadingMarine = false, marineCurrent = response?.current) }
             } catch (e: Exception) {
+                Log.e("MarineRepository", "Error obteniendo condiciones marinas", e)
                 _uiState.update { it.copy(isLoadingMarine = false, marineError = "No se pudo obtener las condiciones marinas") }
             }
         }

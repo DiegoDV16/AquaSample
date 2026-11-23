@@ -598,8 +598,8 @@ fun NuevaMuestraScreen(
                         fontWeight = FontWeight.Bold
                     )
                     uiState.marineCurrent?.let { marine ->
-                        Text("Oleaje (m): ${marine.waveHeightMax ?: 0.0}")
-                        Text("Temperatura del mar: ${marine.temperatureWater ?: 0.0} °C")
+                        Text("Oleaje (m): ${marine.waveHeight ?: 0.0}")
+                        Text("Temperatura del mar: ${marine.seaSurfaceTemperature ?: 0.0} °C")
                         Text("Viento: ${marine.windSpeed10m ?: 0.0} m/s")
                     }
                     uiState.marineError?.let { error ->

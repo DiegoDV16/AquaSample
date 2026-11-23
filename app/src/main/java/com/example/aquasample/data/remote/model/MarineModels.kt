@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 data class MarineCurrent(
     @SerializedName("time") val time: String? = null,
-    @SerializedName("temperature_water") val temperatureWater: Double? = null,
-    @SerializedName("wave_height_max") val waveHeightMax: Double? = null,
+    @SerializedName("wave_height") val waveHeight: Double? = null,
+    @SerializedName("sea_surface_temperature") val seaSurfaceTemperature: Double? = null,
     @SerializedName("wind_speed_10m") val windSpeed10m: Double? = null
 )
 
