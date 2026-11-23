@@ -58,4 +58,12 @@ class MuestraDtoTest {
         assertTrue(entity.calibreMatrix.isEmpty())
         assertTrue(entity.tags.isEmpty())
     }
+
+    @Test
+    fun `mapea tombstone y version de modificacion`() {
+        val entity = dto.copy(eliminado = true, updatedAt = 123456789L).toEntity()
+
+        assertTrue(entity.eliminado)
+        assertEquals(123456789L, entity.updatedAt)
+    }
 }

@@ -36,7 +36,9 @@ data class MuestraDto(
     val marineTime: String? = null,
     val marineWaveHeight: Double? = null,
     val marineSeaSurfaceTemperature: Double? = null,
-    val marineWindSpeed: Double? = null
+    val marineWindSpeed: Double? = null,
+    val updatedAt: Long? = null,
+    val eliminado: Boolean? = null
 )
 
 private val mapperGson = Gson()
@@ -70,7 +72,9 @@ fun MuestraEntity.toDto(): MuestraDto = MuestraDto(
     marineTime = marineTime,
     marineWaveHeight = marineWaveHeight,
     marineSeaSurfaceTemperature = marineSeaSurfaceTemperature,
-    marineWindSpeed = marineWindSpeed
+    marineWindSpeed = marineWindSpeed,
+    updatedAt = updatedAt,
+    eliminado = eliminado
 )
 
 /**
@@ -103,7 +107,9 @@ fun MuestraDto.toEntity(): MuestraEntity = MuestraEntity(
     marineTime = marineTime,
     marineWaveHeight = marineWaveHeight,
     marineSeaSurfaceTemperature = marineSeaSurfaceTemperature,
-    marineWindSpeed = marineWindSpeed
+    marineWindSpeed = marineWindSpeed,
+    updatedAt = updatedAt ?: 0L,
+    eliminado = eliminado ?: false
 )
 
 private fun parseStringList(raw: String?): List<String> {

@@ -24,7 +24,7 @@ interface MuestraDao {
     @Query("SELECT * FROM muestras WHERE id = :id LIMIT 1")
     suspend fun getSampleById(id: String): MuestraEntity?
 
-    @Query("SELECT * FROM muestras ORDER BY timestamp DESC")
+    @Query("SELECT * FROM muestras WHERE eliminado = 0 ORDER BY timestamp DESC")
     fun getAllSamples(): Flow<List<MuestraEntity>>
 
     @Query("""
@@ -37,6 +37,7 @@ interface MuestraDao {
         FROM muestras m
         LEFT JOIN centros_cultivo c ON m.centroId = c.id
         LEFT JOIN usuarios u ON m.operadorId = u.id
+        WHERE m.eliminado = 0
         ORDER BY m.timestamp DESC
     """)
     fun getAllMuestrasConDetalle(): Flow<List<MuestraConDetalle>>
@@ -53,11 +54,12 @@ interface MuestraDao {
         LEFT JOIN usuarios u ON m.operadorId = u.id
         WHERE (:filtroText IS NULL OR :filtroText = '' OR m.id LIKE '%' || :filtroText || '%' OR m.linea LIKE '%' || :filtroText || '%' OR m.concesion LIKE '%' || :filtroText || '%')
           AND (:filtroEstado IS NULL OR :filtroEstado = '' OR m.estado = :filtroEstado)
+          AND m.eliminado = 0
         ORDER BY m.timestamp DESC
     """)
     fun getMuestrasFiltradas(filtroText: String?, filtroEstado: String?): Flow<List<MuestraConDetalle>>
 
-    @Query("SELECT * FROM muestras ORDER BY timestamp DESC LIMIT 1")
+    @Query("SELECT * FROM muestras WHERE eliminado = 0 ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLastSample(): MuestraEntity?
 
     @Query("SELECT * FROM muestras WHERE sincronizado = 0 ORDER BY timestamp ASC")
@@ -77,6 +79,7 @@ interface MuestraDao {
         LEFT JOIN centros_cultivo c ON m.centroId = c.id
         LEFT JOIN usuarios u ON m.operadorId = u.id
         WHERE m.id = :id
+          AND m.eliminado = 0
         LIMIT 1
     """)
     suspend fun getMuestraConDetalleById(id: String): MuestraConDetalle?
@@ -86,4 +89,7 @@ interface MuestraDao {
 
     @Query("UPDATE muestras SET sincronizado = :sincronizado, estado = :nuevoEstado WHERE id = :id")
     suspend fun updateEstadoSincronizacion(id: String, sincronizado: Boolean, nuevoEstado: String): Int
+
+    @Query("UPDATE muestras SET eliminado = 1, sincronizado = 0, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun markDeleted(id: String, updatedAt: Long): Int
 }

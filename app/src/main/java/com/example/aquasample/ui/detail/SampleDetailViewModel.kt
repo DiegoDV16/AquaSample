@@ -148,6 +148,26 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    /** Borra lógicamente la muestra y deja que el worker propague la eliminación. */
+    fun deleteSample(onResult: (String?) -> Unit) {
+        val sample = _uiState.value.sample ?: return
+        _uiState.update { it.copy(isUpdating = true) }
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                repository.markDeleted(sample.id)
+                SyncScheduler.syncNow(getApplication())
+            }.onSuccess {
+                _uiState.update { it.copy(isUpdating = false) }
+                withContext(Dispatchers.Main) { onResult(null) }
+            }.onFailure { exception ->
+                _uiState.update { it.copy(isUpdating = false) }
+                withContext(Dispatchers.Main) {
+                    onResult("No se pudo eliminar la muestra: ${exception.localizedMessage}")
+                }
+            }
+        }
+    }
+
     /** Genera el PDF de la muestra en segundo plano y entrega el archivo. */
     fun exportPdf(onResult: (Result<File>) -> Unit) {
         val state = _uiState.value

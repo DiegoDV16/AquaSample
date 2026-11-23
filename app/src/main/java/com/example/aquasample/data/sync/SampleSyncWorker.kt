@@ -37,6 +37,16 @@ class SampleSyncWorker(
 
         for (sample in pending) {
             try {
+                if (sample.eliminado) {
+                    val deleted = ApiClient.api.deleteSample(sample.id)
+                    if (deleted.isSuccessful || deleted.code() == 404) {
+                        repository.markSynced(sample.id)
+                    } else {
+                        shouldRetry = true
+                    }
+                    continue
+                }
+
                 val remotePaths = uploadPhotos(sample)
                 val dto = sample.copy(
                     fotos = remotePaths,
@@ -47,11 +57,29 @@ class SampleSyncWorker(
                     created.isSuccessful -> repository.markSynced(sample.id)
 
                     created.code() == 409 -> {
-                        val updated = ApiClient.api.update(sample.id, dto)
-                        if (updated.isSuccessful) {
-                            repository.markSynced(sample.id)
+                        val server = runCatching { ApiClient.api.getById(sample.id) }
+                            .getOrNull()
+                            ?.takeIf { it.isSuccessful }
+                            ?.body()
+
+                        if (server?.eliminado == true) {
+                            // El servidor ya la eliminó: gana el tombstone.
+                            repository.upsertFromServer(
+                                server.toEntity().copy(fotos = sample.fotos, photoCount = sample.photoCount)
+                            )
+                        } else if (server?.estado == "VALIDADO" && sample.estado != "VALIDADO") {
+                            // Conflicto: una muestra validada en el servidor no se sobrescribe.
+                            Log.w(TAG, "Conflicto en ${sample.id}: gana la versión validada del servidor")
+                            repository.upsertFromServer(
+                                server.toEntity().copy(fotos = sample.fotos, photoCount = sample.photoCount)
+                            )
                         } else {
-                            shouldRetry = true
+                            val updated = ApiClient.api.update(sample.id, dto)
+                            if (updated.isSuccessful) {
+                                repository.markSynced(sample.id)
+                            } else {
+                                shouldRetry = true
+                            }
                         }
                     }
 

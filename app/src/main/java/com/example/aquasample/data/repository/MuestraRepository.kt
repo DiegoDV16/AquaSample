@@ -50,6 +50,11 @@ class MuestraRepository(private val muestraDao: MuestraDao) {
         muestraDao.markSynced(id)
     }
 
+    /** Borrado lógico: queda pendiente de propagarse al backend. */
+    suspend fun markDeleted(id: String): Int = withContext(Dispatchers.IO) {
+        muestraDao.markDeleted(id, System.currentTimeMillis())
+    }
+
     suspend fun getMuestraConDetalleById(id: String): MuestraConDetalle? = withContext(Dispatchers.IO) {
         muestraDao.getMuestraConDetalleById(id)
     }

@@ -54,5 +54,7 @@ data class MuestraEntity(
     val marineTime: String? = null, // Hora de la lectura de la API (ISO)
     val marineWaveHeight: Double? = null, // Oleaje (m) - Open-Meteo
     val marineSeaSurfaceTemperature: Double? = null, // Temperatura del mar (°C) - Open-Meteo
-    val marineWindSpeed: Double? = null // Viento (m/s) - Open-Meteo
+    val marineWindSpeed: Double? = null, // Viento (m/s) - Open-Meteo
+    val updatedAt: Long = 0, // Última modificación conocida (servidor)
+    val eliminado: Boolean = false // Borrado lógico para propagar eliminaciones
 )

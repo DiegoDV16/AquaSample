@@ -72,6 +72,12 @@ public class Muestra {
     private Double marineSeaSurfaceTemperature;
     private Double marineWindSpeed;
 
+    /** Marca de borrado lógico para propagar eliminaciones entre dispositivos. */
+    private Boolean eliminado = Boolean.FALSE;
+
+    /** Última modificación en el servidor, para detectar conflictos. */
+    private Long updatedAt;
+
     public Muestra() {
     }
 
@@ -281,6 +287,22 @@ public class Muestra {
 
     public void setMarineWindSpeed(Double marineWindSpeed) {
         this.marineWindSpeed = marineWindSpeed;
+    }
+
+    public Boolean getEliminado() {
+        return eliminado;
+    }
+
+    public void setEliminado(Boolean eliminado) {
+        this.eliminado = eliminado;
+    }
+
+    public Long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Long updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     /** Copia los campos editables de otra muestra conservando el id. */

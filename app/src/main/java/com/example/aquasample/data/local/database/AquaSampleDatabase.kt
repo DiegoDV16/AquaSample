@@ -28,7 +28,7 @@ import java.util.concurrent.Executors
         MuestraEntity::class,
         TramoEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -51,7 +51,7 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                     AquaSampleDatabase::class.java,
                     "aquasample_db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
@@ -125,6 +125,14 @@ abstract class AquaSampleDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE muestras ADD COLUMN marineWaveHeight REAL")
                 db.execSQL("ALTER TABLE muestras ADD COLUMN marineSeaSurfaceTemperature REAL")
                 db.execSQL("ALTER TABLE muestras ADD COLUMN marineWindSpeed REAL")
+            }
+        }
+
+        /** Agrega marca de borrado lógico y versión de modificación para sincronizar. */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE muestras ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE muestras ADD COLUMN eliminado INTEGER NOT NULL DEFAULT 0")
             }
         }
 

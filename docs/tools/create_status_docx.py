@@ -287,7 +287,7 @@ def summary(doc):
             ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
             ("Documentación", "README, DESIGN.md, informe y 23 capturas"),
-            ("APK", "Release 1.0.11 firmada (v2), 18 MB, instalada y verificada"),
+            ("APK", "Release 1.0.12 firmada (v2), 18 MB, instalada y verificada"),
             ("Build verificado", "app y backend en verde; 56 + 2 pruebas (main · 72285bd)"),
         ],
         [4.6, 12.0],
@@ -618,15 +618,15 @@ def section_2(doc):
 
     doc.add_heading("2.14 APK firmada", level=2)
     doc.add_paragraph(
-        "La entrega incluye un APK release 1.0.11 firmado con un keystore propio, versionName 1.0.11 "
-        "y versionCode 12. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
+        "La entrega incluye un APK release 1.0.12 firmado con un keystore propio, versionName 1.0.12 "
+        "y versionCode 13. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
         "se verificó con apksigner antes de instalar el APK en el emulador."
     )
     bullets(
         doc,
         [
             "Firma APK Signature Scheme v2 con clave RSA de 2048 bits.",
-            "SHA-256 del APK: 8b56048054a20bf8246a997a11b21aa8f2c9c758beb04f2651886966efbe7d7a.",
+            "SHA-256 del APK: f69c25b5b28db798bec0315016275457a1cd6eae6776367de769419fe5dd0845.",
             "Instalado y abierto en el emulador; el build release no es depurable.",
             "Incluye las cuentas demo de operador, analista y administrador en una instalación limpia.",
             "Nuevo logo AquaSample en el login y como icono adaptativo de la app.",
@@ -660,7 +660,7 @@ def section_3(doc):
         ("Consumo de APIs externas", "Completo", "Open-Meteo Marine y forecast de viento con Retrofit; oleaje, temperatura y viento guardados en Room y backend", "Coordenadas aproximadas por centro"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
         ("Pruebas y cobertura", "Parcial", "54 unitarias y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
-        ("APK firmada", "Completo", "Release 1.0.11 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
+        ("APK firmada", "Completo", "Release 1.0.12 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
@@ -703,7 +703,7 @@ def section_4(doc):
         ),
         (
             "4.3 Publicación en tienda (opcional)",
-            "El APK release 1.0.11 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
+            "El APK release 1.0.12 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
             "Si se solicita publicar, crear la ficha, la política de privacidad y la cuenta de Google Play, y subir el APK o AAB firmado.",
             [
                 "Ficha con capturas, descripción y política de privacidad.",

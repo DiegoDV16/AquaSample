@@ -55,6 +55,8 @@ public class MuestraService {
             throw new ConflictException("Ya existe una muestra con id " + muestra.getId());
         }
         aplicarValoresPorDefecto(muestra);
+        muestra.setEliminado(Boolean.FALSE);
+        muestra.setUpdatedAt(System.currentTimeMillis());
         return repository.save(muestra);
     }
 
@@ -64,6 +66,7 @@ public class MuestraService {
         if (actual.getEstado() == null || actual.getEstado().isBlank()) {
             actual.setEstado("PENDIENTE");
         }
+        actual.setUpdatedAt(System.currentTimeMillis());
         return repository.save(actual);
     }
 
@@ -74,14 +77,15 @@ public class MuestraService {
         }
         var muestra = get(id);
         muestra.setEstado(nuevo);
+        muestra.setUpdatedAt(System.currentTimeMillis());
         return repository.save(muestra);
     }
 
     public void delete(String id) {
-        if (!repository.existsById(id)) {
-            throw new NotFoundException("No existe la muestra " + id);
-        }
-        repository.deleteById(id);
+        var muestra = get(id);
+        muestra.setEliminado(Boolean.TRUE);
+        muestra.setUpdatedAt(System.currentTimeMillis());
+        repository.save(muestra);
     }
 
     private void aplicarValoresPorDefecto(Muestra muestra) {

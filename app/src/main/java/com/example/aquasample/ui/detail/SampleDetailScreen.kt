@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.LocationOn
@@ -35,12 +36,14 @@ import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -93,6 +96,7 @@ fun SampleDetailScreen(
     val context = LocalContext.current
     var viewerPhoto by remember { mutableStateOf<String?>(null) }
     var showEdit by remember { mutableStateOf(false) }
+    var showDelete by remember { mutableStateOf(false) }
 
     LaunchedEffect(sampleId) { viewModel.load(sampleId) }
 
@@ -123,6 +127,12 @@ fun SampleDetailScreen(
                             Icon(
                                 imageVector = Icons.Rounded.Edit,
                                 contentDescription = "Editar muestra"
+                            )
+                        }
+                        IconButton(onClick = { showDelete = true }) {
+                            Icon(
+                                imageVector = Icons.Rounded.DeleteOutline,
+                                contentDescription = "Eliminar muestra"
                             )
                         }
                     }
@@ -183,8 +193,42 @@ fun SampleDetailScreen(
             )
         }
     }
-}
 
+    if (showDelete) {
+        AlertDialog(
+            onDismissRequest = { showDelete = false },
+            title = { Text("Eliminar muestra") },
+            text = {
+                Text(
+                    "La muestra se eliminará de este teléfono y del backend. " +
+                        "La acción se sincronizará automáticamente."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDelete = false
+                        viewModel.deleteSample { error ->
+                            Toast.makeText(
+                                context,
+                                error ?: "Muestra eliminada",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            if (error == null) onBack()
+                        }
+                    }
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDelete = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+}
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DetailContent(

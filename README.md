@@ -25,6 +25,7 @@ offline.
 - Clima sincronizado: oleaje, temperatura del mar y viento via Open-Meteo, guardados en Room y backend.
 - Edición de muestras guardadas: conteo, matriz de calibre y observaciones, con resincronización automática.
 - Reportes consolidados: PDF de la jornada filtrada y Excel/CSV con todas las muestras visibles.
+- Borrado logico y conflictos: las eliminaciones se propagan y una muestra validada en el servidor no se sobrescribe.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -90,8 +91,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.11-release.apk](dist/AquaSample-1.0.11-release.apk) (`versionName` 1.0.0).
-- SHA-256: `8b56048054a20bf8246a997a11b21aa8f2c9c758beb04f2651886966efbe7d7a`.
+- [AquaSample-1.0.12-release.apk](dist/AquaSample-1.0.12-release.apk) (`versionName` 1.0.0).
+- SHA-256: `f69c25b5b28db798bec0315016275457a1cd6eae6776367de769419fe5dd0845`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 
