@@ -174,6 +174,10 @@ fun NuevaMuestraScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchMarineConditions(latitude = -35.9, longitude = -72.9)
+    }
+
     BackHandler(enabled = step > SampleViewModel.STEP_LOCATION && !imeVisible) { step-- }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -422,6 +426,46 @@ private fun LocationStep(
         text = "La muestra queda asociada a tu usuario y a la fecha de la jornada.",
         icon = Icons.Rounded.Info
     )
+
+    MarineConditionsCard(state = state)
+}
+
+/** Tarjeta con las condiciones marinas actuales (oleaje, temperatura y viento). */
+@Composable
+private fun MarineConditionsCard(state: SampleUiState) {
+    AquaCard {
+        Column(
+            modifier = Modifier.padding(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Text(
+                text = "Condiciones Marinas (Open-Meteo)",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            if (state.isLoadingMarine) {
+                Text(
+                    text = "Consultando condiciones marinas…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else if (state.marineCurrent != null) {
+                Text("Oleaje (m): ${state.marineCurrent.waveHeight ?: 0.0}")
+                Text("Temperatura del mar: ${state.marineCurrent.seaSurfaceTemperature ?: 0.0} °C")
+                Text("Viento: ${state.marineCurrent.windSpeed10m ?: 0.0} m/s")
+            }
+
+            state.marineError?.let { error ->
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
