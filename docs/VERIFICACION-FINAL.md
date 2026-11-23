@@ -54,6 +54,16 @@ POST /api/auth/login (mala clave)  -> 401
 
 Evidencia: [`screenshots/30-verificacion-final.png`](screenshots/30-verificacion-final.png).
 
+## Sincronización E2E con JWT y foto
+
+- [x] Muestra `#M-9500` subida al backend con `photoCount=1`.
+- [x] Foto guardada como `/api/fotos/3b204a1b-....png`.
+- [x] App descargó la foto a `files/muestras/remoto_M-9500_1.jpg`.
+- [x] Room marcó `sincronizado=1`.
+- [x] Worker terminó en `SUCCESS`.
+
+Detalle: [`VERIFICACION-E2E.md`](VERIFICACION-E2E.md).
+
 ## Limitaciones conocidas
 
 1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica

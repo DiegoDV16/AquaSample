@@ -1,0 +1,69 @@
+# Verificación E2E de sincronización y fotos
+
+Fecha: 23/11/2026 · Build debug sobre `main` con JWT y Flyway.
+
+## Escenario
+
+1. Backend con Flyway y JWT en `localhost:8080`.
+2. Emulador con la app debug y `adb reverse tcp:8080 tcp:8080`.
+3. Se sembró una muestra pendiente `#M-9500` con una foto local y se inyectó
+   un JWT válido en `shared_prefs/aquasample_auth.xml`.
+4. Se abrió la app para que WorkManager ejecutara el worker.
+
+## Resultado
+
+### Backend
+
+```json
+{
+  "id": "#M-9500",
+  "estado": "PENDIENTE",
+  "photoCount": 1,
+  "fotos": ["/api/fotos/3b204a1b-8276-400e-8a8a-365aa2f90bd5.png"],
+  "conteoManual": 30
+}
+```
+
+- La foto se subió y quedó con ruta remota, no con la ruta local del teléfono.
+
+### App (Room)
+
+```text
+#M-9500 | sincronizado=1 | fotos=[".../files/muestras/remoto_M-9500_1.jpg"]
+```
+
+- La app descargó la foto remota a `files/muestras/remoto_M-9500_1.jpg`.
+- WorkManager registró `Worker result SUCCESS`.
+- También se descargaron las muestras del backend (`#M-0001` a `#M-0008`,
+  `#M-7777`, `#M-8888`, `#M-9100`, `#M-9200`, `#M-9300`, `#M-9301`).
+
+## Limitación del ensayo
+
+La interacción automática con el formulario de login por coordenadas fue
+inestable (el teclado desplaza los campos). Para aislar la sincronización se
+inyectó un JWT obtenido con `POST /api/auth/login`. El login manual sí se había
+verificado antes en la prueba de humo con la APK firmada.
+
+## Reproducir
+
+```powershell
+# Backend
+$env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"
+.\gradlew.bat -p backend run
+
+# Emulador
+adb reverse tcp:8080 tcp:8080
+
+# Token
+$login = curl.exe -s -X POST -H "Content-Type: application/json" `
+  --data-binary '@login.json' http://localhost:8080/api/auth/login | ConvertFrom-Json
+
+# Sembrar #M-9500 con foto y el token, abrir la app y consultar
+curl.exe -H "Authorization: Bearer $($login.token)" `
+  http://localhost:8080/api/muestras/%23M-9500
+```
+
+## Conclusión
+
+El flujo **muestra pendiente → subida de foto → POST al backend → descarga de la
+foto → Room marcado como sincronizado** funciona de punta a punta con JWT.
