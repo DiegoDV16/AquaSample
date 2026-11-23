@@ -64,6 +64,14 @@ Evidencia: [`screenshots/30-verificacion-final.png`](screenshots/30-verificacion
 
 Detalle: [`VERIFICACION-E2E.md`](VERIFICACION-E2E.md).
 
+## Edición E2E
+
+- [x] Login manual con guardado del JWT.
+- [x] Historial abrió `#M-9500`.
+- [x] Diálogo de edición cambió el conteo de 30 a 42.
+- [x] El backend quedó con `conteoManual=42`.
+- [x] Evidencia: [`screenshots/34-edicion-e2e.png`](screenshots/34-edicion-e2e.png).
+
 ## Limitaciones conocidas
 
 1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica

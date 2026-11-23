@@ -37,12 +37,30 @@ Fecha: 23/11/2026 · Build debug sobre `main` con JWT y Flyway.
 - También se descargaron las muestras del backend (`#M-0001` a `#M-0008`,
   `#M-7777`, `#M-8888`, `#M-9100`, `#M-9200`, `#M-9300`, `#M-9301`).
 
+## Edición desde la UI
+
+Con la sesión de administrador iniciada (login manual; el JWT quedó guardado):
+
+1. Se abrió **Muestras → #M-9500**.
+2. Se tocó el ícono **Editar muestra**.
+3. Se cambió el conteo de `30` a `42` y se guardó.
+4. El worker envió el `PUT` y el backend quedó actualizado:
+
+```json
+{
+  "id": "#M-9500",
+  "conteoManual": 42,
+  "estado": "PENDIENTE"
+}
+```
+
+Evidencia: [`screenshots/34-edicion-e2e.png`](screenshots/34-edicion-e2e.png).
+
 ## Limitación del ensayo
 
 La interacción automática con el formulario de login por coordenadas fue
-inestable (el teclado desplaza los campos). Para aislar la sincronización se
-inyectó un JWT obtenido con `POST /api/auth/login`. El login manual sí se había
-verificado antes en la prueba de humo con la APK firmada.
+inestable al principio; se resolvió enfocando el campo y usando `TAB` para pasar
+a la contraseña. El login manual y el guardado del JWT quedaron verificados.
 
 ## Reproducir
 
