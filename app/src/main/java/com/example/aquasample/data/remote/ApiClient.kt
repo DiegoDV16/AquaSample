@@ -1,6 +1,7 @@
 package com.example.aquasample.data.remote
 
 import java.util.concurrent.TimeUnit
+import com.example.aquasample.data.session.SessionManager
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -29,6 +30,16 @@ object ApiClient {
                     .build()
             }
             chain.proceed(request)
+        }
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val response = chain.proceed(request)
+            if (response.code == 401 &&
+                !request.url.encodedPath.contains("/api/auth/login")
+            ) {
+                SessionManager.onUnauthorized()
+            }
+            response
         }
         .build()
 

@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AquaSampleTheme {
                 val session by SessionManager.currentSession.collectAsStateWithLifecycle()
+                val sessionMessage by SessionManager.message.collectAsStateWithLifecycle()
                 val view = LocalView.current
                 val context = LocalContext.current
                 val lightBackground = MaterialTheme.colorScheme.background.luminance() > 0.5f
@@ -59,6 +61,13 @@ class MainActivity : ComponentActivity() {
                     controller.isAppearanceLightStatusBars =
                         if (session == null) false else lightBackground
                     controller.isAppearanceLightNavigationBars = lightBackground
+                }
+
+                LaunchedEffect(sessionMessage) {
+                    if (sessionMessage != null) {
+                        Toast.makeText(context, sessionMessage, Toast.LENGTH_LONG).show()
+                        SessionManager.consumeMessage()
+                    }
                 }
 
                 Surface(

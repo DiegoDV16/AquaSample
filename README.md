@@ -30,6 +30,7 @@ offline.
 - Respaldo local: exporta/importa un .aquabackup con muestras, catalogos y fotos.
 - Seguridad: login JWT en el backend, contrasenas BCrypt y token adjunto automaticamente en la app.
 - Indice de condicion calculado sobre el calibre promedio, visible en detalle y PDF.
+- Sesion persistente: sobrevive al cierre de la app; un 401 cierra la sesion y avisa.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -95,8 +96,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.17-release.apk](dist/AquaSample-1.0.17-release.apk) (`versionName` 1.0.0).
-- SHA-256: `c6b0ed635d2a52c86690e62e093a9263a0466caf1bccf066e312d17b4f0136e6`.
+- [AquaSample-1.0.18-release.apk](dist/AquaSample-1.0.18-release.apk) (`versionName` 1.0.0).
+- SHA-256: `114c482cb9ad491c2956bd88c546eead7c8eb2229e8fc2913c216d62b747a4dc`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 

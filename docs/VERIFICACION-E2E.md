@@ -83,6 +83,16 @@ Prueba Robolectric `BackupManagerTest`:
 
 Resultado: **1 prueba, 0 fallos**.
 
+## Sesión persistente y 401
+
+- Login manual y cierre forzado de la app (`force-stop`).
+- Al reabrir, la app entró directo al panel sin pedir login.
+- Evidencia: [`screenshots/36-sesion-persistente.png`](screenshots/36-sesion-persistente.png).
+- Se reemplazó el JWT por uno inválido y se abrió la app.
+- El worker recibió 401, `SessionManager` limpió sesión y token, y la app volvió al login.
+- `shared_prefs/aquasample_session.xml` quedó vacío.
+- Evidencia: [`screenshots/37-sesion-expirada.png`](screenshots/37-sesion-expirada.png).
+
 ## Limitación del ensayo
 
 La interacción automática con el formulario de login por coordenadas fue

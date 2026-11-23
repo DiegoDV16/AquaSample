@@ -85,6 +85,13 @@ Detalle: [`VERIFICACION-E2E.md`](VERIFICACION-E2E.md).
 - [x] Muestra y foto restauradas; queda pendiente de sincronizar.
 - [x] `BackupManagerTest` en verde.
 
+## Sesión persistente y 401
+
+- [x] La sesión sobrevive a cerrar y reabrir la app.
+- [x] Un JWT inválido devuelve 401 y la app vuelve al login.
+- [x] Token y sesión se limpian.
+- [x] Evidencias: [`36-sesion-persistente.png`](screenshots/36-sesion-persistente.png) y [`37-sesion-expirada.png`](screenshots/37-sesion-expirada.png).
+
 ## Limitaciones conocidas
 
 1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica
