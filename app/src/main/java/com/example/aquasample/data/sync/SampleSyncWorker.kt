@@ -8,11 +8,13 @@ import androidx.work.WorkerParameters
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.notifications.SyncNotifications
 import com.example.aquasample.data.remote.ApiClient
+import com.example.aquasample.data.remote.MuestraDto
 import com.example.aquasample.data.remote.toDto
 import com.example.aquasample.data.remote.toEntity
 import com.google.gson.Gson
 import java.io.File
 import java.io.IOException
+import java.util.Locale
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -65,12 +67,34 @@ class SampleSyncWorker(
                             ?.takeIf { it.isSuccessful }
                             ?.body()
 
-                        if (server?.eliminado == true) {
+                        if (server == null) {
+                            lastError = "No se pudo resolver el conflicto de ${sample.id}."
+                            shouldRetry = true
+                        } else if (!isSameSample(server, sample)) {
+                            // El id ya existe en el servidor pero es OTRA muestra:
+                            // se renombra la local y se crea una nueva, sin sobrescribir.
+                            val newId = nextAvailableId()
+                            Log.w(TAG, "Colisión de id ${sample.id}; se reasigna a $newId")
+                            val renamed = sample.copy(
+                                id = newId,
+                                fotos = remotePaths,
+                                photoCount = remotePaths.size,
+                                sincronizado = false
+                            )
+                            repository.renameSample(sample, renamed)
+                            val retry = ApiClient.api.create(renamed.toDto())
+                            if (retry.isSuccessful) {
+                                repository.markSynced(newId)
+                            } else {
+                                lastError = "No se pudo crear la muestra con id $newId (${retry.code()})."
+                                shouldRetry = retry.code() in 500..599 || retry.code() == 409
+                            }
+                        } else if (server.eliminado == true) {
                             // El servidor ya la eliminó: gana el tombstone.
                             repository.upsertFromServer(
                                 server.toEntity().copy(fotos = sample.fotos, photoCount = sample.photoCount)
                             )
-                        } else if (server?.estado == "VALIDADO" && sample.estado != "VALIDADO") {
+                        } else if (server.estado == "VALIDADO" && sample.estado != "VALIDADO") {
                             // Conflicto: una muestra validada en el servidor no se sobrescribe.
                             Log.w(TAG, "Conflicto en ${sample.id}: gana la versión validada del servidor")
                             repository.upsertFromServer(
@@ -170,6 +194,25 @@ class SampleSyncWorker(
         }
 
         return if (shouldRetry) Result.retry() else Result.success()
+    }
+
+    /** Mismo timestamp y operador: es una edición de la misma muestra, no una colisión. */
+    private fun isSameSample(server: MuestraDto, local: com.example.aquasample.data.local.entity.MuestraEntity): Boolean =
+        server.timestamp == local.timestamp && server.operadorId == local.operadorId
+
+    /** Busca el siguiente #M-XXXX libre en el servidor para no pisar otra muestra. */
+    private suspend fun nextAvailableId(): String {
+        val ids = runCatching { ApiClient.api.list().map { it.id } }.getOrDefault(emptyList())
+        val max = ids.mapNotNull { id ->
+            Regex("#M-(\\d+)").find(id)?.groupValues?.getOrNull(1)?.toIntOrNull()
+        }.maxOrNull() ?: 0
+        var number = max + 1
+        var candidate = String.format(Locale.US, "#M-%04d", number)
+        while (ids.contains(candidate)) {
+            number++
+            candidate = String.format(Locale.US, "#M-%04d", number)
+        }
+        return candidate
     }
 
     /** Sube las fotos locales y devuelve las rutas remotas que se guardan en el backend. */

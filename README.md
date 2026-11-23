@@ -98,8 +98,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.22-release.apk](dist/AquaSample-1.0.22-release.apk) (`versionName` 1.0.0).
-- SHA-256: `76472ea6715349a700e80d5fffa084a2a66d61321c08937d592653067f26bfb9`.
+- [AquaSample-1.0.23-release.apk](dist/AquaSample-1.0.23-release.apk) (`versionName` 1.0.0).
+- SHA-256: `7aeda41a068608b18351e985b421da3cd8feb8340fbdc998d726352adf94bc49`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 

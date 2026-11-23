@@ -55,6 +55,14 @@ class MuestraRepository(private val muestraDao: MuestraDao) {
         muestraDao.markDeleted(id, System.currentTimeMillis())
     }
 
+    /** Cambia el id de una muestra local sin perder sus datos ni fotos. */
+    suspend fun renameSample(old: MuestraEntity, updated: MuestraEntity) = withContext(Dispatchers.IO) {
+        muestraDao.insertSample(updated)
+        if (old.id != updated.id) {
+            muestraDao.deleteSample(old)
+        }
+    }
+
     suspend fun getMuestraConDetalleById(id: String): MuestraConDetalle? = withContext(Dispatchers.IO) {
         muestraDao.getMuestraConDetalleById(id)
     }

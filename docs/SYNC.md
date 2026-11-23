@@ -71,3 +71,10 @@ ssh -T -R 80:localhost:8080 serveo.net
 New-NetFirewallRule -DisplayName "AquaSample Backend" `
   -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
 ```
+
+## Conflicto de IDs
+
+Si el teléfono creó una muestra sin haber descargado antes las del backend, puede
+usar un ID que ya existe (`#M-0001`). Desde 1.0.23 la app detecta que el servidor
+tiene **otra** muestra con ese ID, renombra la local al siguiente número libre y
+la crea sin sobrescribir. Una edición real de la misma muestra sigue usando `PUT`.
