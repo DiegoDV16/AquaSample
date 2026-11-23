@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.aquasample.data.remote.AuthTokenStore
 import com.example.aquasample.data.session.SessionManager
 import com.example.aquasample.ui.login.LoginScreen
 import com.example.aquasample.ui.navigation.MainScreen
@@ -77,7 +78,10 @@ class MainActivity : ComponentActivity() {
                         } else {
                             MainScreen(
                                 userSession = currentSession,
-                                onLogout = { SessionManager.logout() }
+                                onLogout = {
+                                    AuthTokenStore.clear()
+                                    SessionManager.logout()
+                                }
                             )
                         }
                     }

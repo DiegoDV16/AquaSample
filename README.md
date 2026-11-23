@@ -28,6 +28,7 @@ offline.
 - Borrado logico y conflictos: las eliminaciones se propagan y una muestra validada en el servidor no se sobrescribe.
 - Notificaciones: aviso de muestras pendientes de sincronizar y de muestras validadas por el analista.
 - Respaldo local: exporta/importa un .aquabackup con muestras, catalogos y fotos.
+- Seguridad: login JWT en el backend, contrasenas BCrypt y token adjunto automaticamente en la app.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -93,8 +94,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.15-release.apk](dist/AquaSample-1.0.15-release.apk) (`versionName` 1.0.0).
-- SHA-256: `5bd90a2b055893c8862abd30e4ba4c835d7b61782056deae9d68599839cacebe`.
+- [AquaSample-1.0.16-release.apk](dist/AquaSample-1.0.16-release.apk) (`versionName` 1.0.0).
+- SHA-256: `4e52b97012e8425943e2e84160949618e98cf0191442b27acd7d4e7989065015`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 

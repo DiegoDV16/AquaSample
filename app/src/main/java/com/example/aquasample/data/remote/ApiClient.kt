@@ -19,6 +19,17 @@ object ApiClient {
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(20, TimeUnit.SECONDS)
         .writeTimeout(20, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            val token = AuthTokenStore.token
+            val request = if (token.isNullOrBlank()) {
+                chain.request()
+            } else {
+                chain.request().newBuilder()
+                    .header("Authorization", "Bearer $token")
+                    .build()
+            }
+            chain.proceed(request)
+        }
         .build()
 
     @Volatile

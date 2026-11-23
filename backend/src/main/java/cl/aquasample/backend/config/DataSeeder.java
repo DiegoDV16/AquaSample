@@ -7,6 +7,7 @@ import cl.aquasample.backend.domain.Usuario;
 import cl.aquasample.backend.repository.CentroCultivoRepository;
 import cl.aquasample.backend.repository.MuestraRepository;
 import cl.aquasample.backend.repository.TramoRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import cl.aquasample.backend.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,13 +26,16 @@ public class DataSeeder implements CommandLineRunner {
     private final UsuarioRepository usuarios;
     private final MuestraRepository muestras;
     private final TramoRepository tramos;
+    private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(CentroCultivoRepository centros, UsuarioRepository usuarios,
-                      MuestraRepository muestras, TramoRepository tramos) {
+                      MuestraRepository muestras, TramoRepository tramos,
+                      PasswordEncoder passwordEncoder) {
         this.centros = centros;
         this.usuarios = usuarios;
         this.muestras = muestras;
         this.tramos = tramos;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -92,7 +96,7 @@ public class DataSeeder implements CommandLineRunner {
         var usuario = new Usuario();
         usuario.setId(id);
         usuario.setEmail(email);
-        usuario.setPasswordHash(password);
+        usuario.setPasswordHash(passwordEncoder.encode(password));
         usuario.setNombres(nombres);
         usuario.setApellidoPaterno(apellidoPaterno);
         usuario.setApellidoMaterno(apellidoMaterno);

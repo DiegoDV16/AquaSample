@@ -80,3 +80,16 @@ Con HTTPS no hace falta tocar la configuración de tráfico claro.
 - Las fotos se suben al backend y se descargan en los demas telefonos.
 - Oleaje, temperatura del mar y viento se guardan en Room y tambien en el backend.
 - Las coordenadas son aproximadas por centro; viento en m/s desde api.open-meteo.com.
+
+## Seguridad (JWT)
+
+- `POST /api/auth/login` recibe `{"email":"...","password":"..."}` y devuelve un token JWT.
+- Todas las rutas `/api/**` (excepto `/api/auth/**`) exigen `Authorization: Bearer <token>`.
+- Las contraseñas se guardan con BCrypt; las cuentas antiguas se migran en el primer login.
+- Configura un secreto propio de al menos 32 caracteres:
+
+```powershell
+$env:AQUASAMPLE_JWT_SECRET="cambia-este-secreto-de-produccion-0123456789"
+```
+
+- Para producción usa HTTPS; el token viaja en cada request.

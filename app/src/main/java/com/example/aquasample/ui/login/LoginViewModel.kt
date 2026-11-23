@@ -5,6 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.UsuarioEntity
+import com.example.aquasample.data.remote.ApiClient
+import com.example.aquasample.data.remote.AuthTokenStore
+import com.example.aquasample.data.remote.LoginRequest
 import com.example.aquasample.data.session.SessionManager
 import com.example.aquasample.data.session.UserRole
 import kotlinx.coroutines.Dispatchers
@@ -106,6 +109,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     isLoggedIn = true,
                     authenticatedUserRole = role
                 )
+            }
+
+            // El login local no bloquea la navegación; si el backend está
+            // disponible, se obtiene el JWT para las llamadas autenticadas.
+            viewModelScope.launch(Dispatchers.IO) {
+                authenticateBackend(inputEmail, inputPass)
+            }
+        }
+    }
+
+    private suspend fun authenticateBackend(email: String, password: String) {
+        AuthTokenStore.clear()
+        runCatching {
+            val response = ApiClient.api.login(LoginRequest(email, password))
+            if (response.isSuccessful) {
+                response.body()?.token?.takeIf { it.isNotBlank() }?.let {
+                    AuthTokenStore.token = it
+                }
             }
         }
     }

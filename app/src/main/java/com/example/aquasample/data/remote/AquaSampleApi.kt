@@ -21,6 +21,9 @@ interface AquaSampleApi {
     @GET("api/muestras")
     suspend fun list(): List<MuestraDto>
 
+    @POST("api/auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
     @GET("api/muestras/{id}")
     suspend fun getById(@Path("id") id: String): Response<MuestraDto>
 

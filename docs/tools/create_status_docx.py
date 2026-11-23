@@ -280,14 +280,14 @@ def summary(doc):
             ("Código Kotlin", "65 archivos · más de 8.100 líneas en app/src/main"),
             ("Capa de datos", "5 tablas Room · 8 ViewModels · 5 repositorios"),
             ("Backend", "Spring Boot + H2 · 8 rutas REST / 14 operaciones · Swagger"),
-            ("Pruebas", "64 unitarias (JUnit + MockK), 5 de backend y 2 instrumentadas de Compose"),
+            ("Pruebas", "64 unitarias (JUnit + MockK), 6 de backend y 2 instrumentadas de Compose"),
             ("Cobertura", "100 % en la lógica evaluable (validadores, filtros, mapeo y repositorio)"),
             ("Informes", "PDF A4 por muestra con FileProvider y ejemplo en docs/ejemplos"),
             ("Catálogos", "3 centros y 8 tramos con CRUD, baja lógica y selección en cascada"),
             ("Dashboard", "2 gráficos (estado y evolución del calibre) y comparación de períodos"),
             ("Sincronización", "WorkManager + Retrofit · verificada offline → online en emulador"),
             ("Documentación", "README, DESIGN.md, informe y 23 capturas"),
-            ("APK", "Release 1.0.15 firmada (v2), 18 MB, instalada y verificada"),
+            ("APK", "Release 1.0.16 firmada (v2), 18 MB, instalada y verificada"),
             ("Build verificado", "app y backend en verde; 64 + 5 + 2 pruebas (main · 72285bd)"),
         ],
         [4.6, 12.0],
@@ -618,15 +618,15 @@ def section_2(doc):
 
     doc.add_heading("2.14 APK firmada", level=2)
     doc.add_paragraph(
-        "La entrega incluye un APK release 1.0.15 firmado con un keystore propio, versionName 1.0.15 "
-        "y versionCode 16. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
+        "La entrega incluye un APK release 1.0.16 firmado con un keystore propio, versionName 1.0.16 "
+        "y versionCode 17. El keystore y sus credenciales quedan fuera del repositorio, y la firma "
         "se verificó con apksigner antes de instalar el APK en el emulador."
     )
     bullets(
         doc,
         [
             "Firma APK Signature Scheme v2 con clave RSA de 2048 bits.",
-            "SHA-256 del APK: 5bd90a2b055893c8862abd30e4ba4c835d7b61782056deae9d68599839cacebe.",
+            "SHA-256 del APK: 4e52b97012e8425943e2e84160949618e98cf0191442b27acd7d4e7989065015.",
             "Instalado y abierto en el emulador; el build release no es depurable.",
             "Incluye las cuentas demo de operador, analista y administrador en una instalación limpia.",
             "Nuevo logo AquaSample en el login y como icono adaptativo de la app.",
@@ -659,8 +659,8 @@ def section_3(doc):
         ("Microservicios Spring Boot", "Completo", "API Spring Boot con JPA, H2, CRUD, filtros, validación, Swagger y datos demo", "Autenticación por rol, migraciones versionadas y despliegue"),
         ("Consumo de APIs externas", "Completo", "Open-Meteo Marine y forecast de viento con Retrofit; oleaje, temperatura y viento guardados en Room y backend", "Coordenadas aproximadas por centro"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
-        ("Pruebas y cobertura", "Parcial", "64 unitarias, 5 de backend y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
-        ("APK firmada", "Completo", "Release 1.0.15 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
+        ("Pruebas y cobertura", "Parcial", "64 unitarias, 6 de backend y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
+        ("APK firmada", "Completo", "Release 1.0.16 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
     ]
@@ -693,7 +693,7 @@ def section_4(doc):
         ),
         (
             "4.2 Cobertura global y pruebas de ViewModels/UI",
-            "Hay 64 pruebas unitarias, 5 del backend y 2 instrumentadas; la lógica evaluable está al 100 %, pero la cobertura global del módulo es 4,2 % por el peso de Compose y el código generado por Room.",
+            "Hay 64 pruebas unitarias, 6 del backend y 2 instrumentadas; la lógica evaluable está al 100 %, pero la cobertura global del módulo es 4,2 % por el peso de Compose y el código generado por Room.",
             "Agregar pruebas de ViewModels con coroutines test, pruebas de Compose para login, registro y filtros, y MockMvc para el backend. Definir un umbral por paquete o por capa.",
             [
                 "Cobertura global medida y umbral acordado con el docente.",
@@ -703,7 +703,7 @@ def section_4(doc):
         ),
         (
             "4.3 Publicación en tienda (opcional)",
-            "El APK release 1.0.15 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
+            "El APK release 1.0.16 ya está firmado, verificado e instalado; no existe ficha de tienda ni cuenta de desarrollador.",
             "Si se solicita publicar, crear la ficha, la política de privacidad y la cuenta de Google Play, y subir el APK o AAB firmado.",
             [
                 "Ficha con capturas, descripción y política de privacidad.",
@@ -713,8 +713,8 @@ def section_4(doc):
         ),
         (
             "4.4 Autenticación y migraciones del backend",
-            "La API es abierta, no valida roles y usa ddl-auto=update; Room ya migra de 1 a 2 conservando datos.",
-            "Agregar Spring Security o JWT con roles, migraciones Flyway en el backend y validar los permisos también en el servidor.",
+            "JWT y BCrypt ya protegen la API; falta autorización por rol y migraciones Flyway (hoy ddl-auto=update).",
+            "Agregar @PreAuthorize por rol y migraciones Flyway para versionar el esquema sin perder datos.",
             [
                 "Un operador no puede validar muestras desde la API.",
                 "Un cambio de esquema del backend conserva los datos.",
@@ -757,7 +757,7 @@ def section_4(doc):
             "Cobertura global baja (4,2 %): presentar la métrica por lógica evaluable y acordar el umbral.",
             "Contraseñas en texto plano: el campo se llama passwordHash pero almacena la clave; migrar a BCrypt o Argon2.",
             "Perfil solo en memoria: alias y foto se pierden al cerrar la app; persistirlos en DataStore.",
-            "Backend sin autenticación: cualquier cliente puede modificar o validar muestras.",
+            "La API ya exige JWT, pero cualquier usuario autenticado puede validar muestras: falta separar permisos por rol.",
             "Cámara y conteo compilan y la migración está probada, pero falta verificar los toques en un teléfono físico.",
             "Resolución de conflictos: la sincronización asume un solo dispositivo por muestra.",
         ],
@@ -777,7 +777,7 @@ def section_5(doc):
             ("1", "Despliegue público del backend y fotos multidispositivo", "2–3 días", "Operación real"),
             ("2", "Pruebas de ViewModels y Compose + umbral de cobertura", "2–3 días", "Cobertura global"),
             ("3", "Trello, Swagger publicado y guía de despliegue", "1–2 días", "Entrega y documentación"),
-            ("4", "Spring Security/JWT y Flyway", "2 días", "Backend endurecido"),
+            ("4", "Autorización por rol y Flyway", "2 días", "Backend endurecido"),
         ],
         [1.4, 8.2, 2.4, 4.6],
     )
@@ -794,7 +794,7 @@ def section_6(doc):
             "La API externa ya está integrada; el viento queda nulo porque la API marina no lo entrega y las coordenadas son fijas.",
             "La cobertura global es 4,2 %; si el docente exige 90 % global, habrá que instrumentar ViewModels y pantallas o acordar la métrica por lógica evaluable.",
             "La APK release ya está firmada y verificada; si se pide publicación, crear la cuenta de tienda y la ficha.",
-            "El backend no tiene autenticación: no se puede demostrar que un operador no valide muestras.",
+            "La API ya usa JWT y BCrypt; falta restringir la validación de muestras a analista/admin.",
             "La cámara y el conteo están implementados y compilan, pero la verificación de toques en teléfono físico sigue pendiente.",
             "Falta el tablero Trello y publicar Swagger; el repositorio ya está público con main actualizado.",
         ],

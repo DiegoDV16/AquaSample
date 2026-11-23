@@ -114,3 +114,9 @@ Pendiente:
 - POST /api/fotos (multipart, campo file) guarda una foto y devuelve el path.
 - GET /api/fotos/{archivo} sirve la imagen.
 - Tamano maximo: 10 MB; formatos jpg, jpeg, png y webp.
+
+## Autenticacion
+
+- POST /api/auth/login con email y password devuelve un JWT.
+- Enviar `Authorization: Bearer <token>` en las demas rutas /api/**.
+- Secreto configurable con AQUASAMPLE_JWT_SECRET (32+ caracteres).
