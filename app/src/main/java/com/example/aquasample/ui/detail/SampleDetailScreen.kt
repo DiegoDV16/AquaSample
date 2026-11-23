@@ -281,6 +281,14 @@ private fun DetailContent(
                 "Fecha de registro",
                 sample.fechaHora.ifBlank { "—" }
             )
+            DetailRow(
+                "Condiciones marinas (Open-Meteo)",
+                listOfNotNull(
+                    sample.marineWaveHeight?.let { "Oleaje: ${it} m" },
+                    sample.marineSeaSurfaceTemperature?.let { "Temp. del mar: ${it} °C" },
+                    sample.marineWindSpeed?.let { "Viento: ${it} m/s" }
+                ).joinToString(" · ").ifBlank { "Sin datos" }
+            )
         }
 
         SectionHeader(

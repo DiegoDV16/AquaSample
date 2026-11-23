@@ -906,6 +906,17 @@ private fun SampleSummaryCard(state: SampleUiState) {
             if (state.conteoAsistido == 0) "Sin marcas" else "${state.conteoAsistido} marcas"
         )
         SummaryRow("Fotografías", "${state.photoCount} de ${SampleViewModel.MAX_PHOTOS}")
+        state.marineCurrent?.let { marine ->
+            Spacer(Modifier.height(Spacing.sm))
+            SummaryRow(
+                "Condiciones marinas",
+                listOfNotNull(
+                    marine.waveHeight?.let { "Oleaje: ${it} m" },
+                    marine.seaSurfaceTemperature?.let { "Temp. del mar: ${it} °C" },
+                    marine.windSpeed10m?.let { "Viento: ${it} m/s" }
+                ).joinToString(" · ").ifBlank { "Sin datos" }
+            )
+        }
     }
 }
 
