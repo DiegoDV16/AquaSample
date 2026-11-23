@@ -65,6 +65,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aquasample.AquaApplication
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.backup.BackupManager
+import com.example.aquasample.data.remote.AuthTokenStore
 import com.example.aquasample.data.remote.ServerConfig
 import com.example.aquasample.data.sync.SyncScheduler
 import com.example.aquasample.ui.designsystem.AquaCard
@@ -436,7 +437,7 @@ fun ProfileContent(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "AquaSample 1.0.21",
+                text = "AquaSample 1.0.22",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -484,22 +485,51 @@ fun ProfileContent(
                             testingConnection = true
                             connectionTest = null
                             scope.launch {
-                                val ok = withContext(Dispatchers.IO) {
+                                val result = withContext(Dispatchers.IO) {
                                     runCatching {
                                         val client = OkHttpClient.Builder()
                                             .connectTimeout(6, TimeUnit.SECONDS)
                                             .readTimeout(6, TimeUnit.SECONDS)
                                             .build()
-                                        val url = ServerConfig.normalize(serverUrl) + "api/health"
-                                        client.newCall(
-                                            Request.Builder().url(url).build()
-                                        ).execute().use { it.isSuccessful }
-                                    }.getOrDefault(false)
+                                        val base = ServerConfig.normalize(serverUrl)
+                                        val healthCode = client.newCall(
+                                            Request.Builder().url(base + "api/health").build()
+                                        ).execute().use { it.code }
+                                        if (healthCode != 200) return@runCatching "HTTP_$healthCode"
+
+                                        val token = AuthTokenStore.token
+                                        if (token.isNullOrBlank()) return@runCatching "NO_TOKEN"
+
+                                        val apiCode = client.newCall(
+                                            Request.Builder()
+                                                .url(base + "api/muestras")
+                                                .header("Authorization", "Bearer $token")
+                                                .build()
+                                        ).execute().use { it.code }
+                                        "API_$apiCode"
+                                    }.getOrElse { "NETWORK" }
                                 }
-                                connectionTest = if (ok) {
-                                    "OK: el servidor responde."
-                                } else {
-                                    "Error: no se pudo conectar. Revisa la URL, la red y el firewall."
+
+                                if (result == "API_200") {
+                                    ServerConfig.baseUrl = serverUrl
+                                    SyncScheduler.syncNow(context)
+                                }
+
+                                connectionTest = when {
+                                    result == "API_200" ->
+                                        "OK: URL y sesión válidas. Guardado y sincronizando…"
+                                    result == "NO_TOKEN" ->
+                                        "URL correcta, pero no hay sesión. Inicia sesión de nuevo."
+                                    result == "API_401" ->
+                                        "URL correcta, pero la sesión expiró. Inicia sesión de nuevo."
+                                    result == "API_403" ->
+                                        "URL correcta, pero el usuario no tiene permisos."
+                                    result == "API_404" ->
+                                        "Error 404: la URL no debe incluir /api ni /api/health."
+                                    result.startsWith("HTTP_") ->
+                                        "El servidor respondió ${result.removePrefix("HTTP_")} en /api/health."
+                                    else ->
+                                        "Error: no se pudo conectar. Revisa la URL, la red y el firewall."
                                 }
                                 testingConnection = false
                             }
@@ -523,7 +553,7 @@ fun ProfileContent(
                             modifier = Modifier.weight(1f)
                         )
                         PrimaryButton(
-                            text = "Guardar",
+                            text = "Guardar y sincronizar",
                             onClick = {
                                 ServerConfig.baseUrl = serverUrl
                                 showServerDialog = false
