@@ -78,6 +78,13 @@ Detalle: [`VERIFICACION-E2E.md`](VERIFICACION-E2E.md).
 - [x] Notificación “Muestras sin sincronizar” publicada.
 - [x] Evidencia: [`screenshots/35-notificacion.png`](screenshots/35-notificacion.png).
 
+## Respaldo E2E
+
+- [x] Exportar `.aquabackup` con muestra y foto.
+- [x] Borrar la muestra e importar el respaldo.
+- [x] Muestra y foto restauradas; queda pendiente de sincronizar.
+- [x] `BackupManagerTest` en verde.
+
 ## Limitaciones conocidas
 
 1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica

@@ -70,6 +70,19 @@ Verificado con `dumpsys notification --noredact` y captura del panel:
 
 Evidencia: [`screenshots/35-notificacion.png`](screenshots/35-notificacion.png).
 
+## Respaldo de ida y vuelta
+
+Prueba Robolectric `BackupManagerTest`:
+
+1. Inserta `#M-9700` con una foto local.
+2. Exporta `.aquabackup`.
+3. Borra la muestra de Room.
+4. Importa el respaldo.
+5. Verifica: 1 importada, 1 foto restaurada, muestra con `sincronizado=false` y
+   archivo de foto existente.
+
+Resultado: **1 prueba, 0 fallos**.
+
 ## Limitación del ensayo
 
 La interacción automática con el formulario de login por coordenadas fue
