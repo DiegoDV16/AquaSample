@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.MuestraEntity
 import com.example.aquasample.data.report.PdfReportGenerator
+import com.example.aquasample.data.repository.MuestraRepository
 import com.example.aquasample.data.sync.SyncScheduler
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -34,9 +35,10 @@ data class SampleDetailUiState(
  * ViewModel del detalle: carga la muestra con sus relaciones y permite al
  * supervisor marcarla como validada.
  */
-class SampleDetailViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = application.appContainer.muestraRepository
+class SampleDetailViewModel @JvmOverloads constructor(
+    application: Application,
+    private val repository: MuestraRepository = application.appContainer.muestraRepository
+) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(SampleDetailUiState())
     val uiState: StateFlow<SampleDetailUiState> = _uiState.asStateFlow()
 
@@ -47,7 +49,7 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
         loadedId = sampleId
         _uiState.update { it.copy(isLoading = true, error = null) }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             runCatching { repository.getMuestraConDetalleById(sampleId) }
                 .onSuccess { detalle ->
                     if (detalle == null) {
@@ -86,7 +88,7 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
         val sample = _uiState.value.sample ?: return
         _uiState.update { it.copy(isUpdating = true) }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             runCatching { repository.updateEstado(sample.id, "VALIDADO") }
                 .onSuccess {
                     _uiState.update { it.copy(isUpdating = false) }
@@ -117,7 +119,7 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
         }
 
         _uiState.update { it.copy(isUpdating = true) }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             runCatching {
                 repository.updateSample(
                     sample.copy(
@@ -146,7 +148,7 @@ class SampleDetailViewModel(application: Application) : AndroidViewModel(applica
     fun deleteSample(onResult: (String?) -> Unit) {
         val sample = _uiState.value.sample ?: return
         _uiState.update { it.copy(isUpdating = true) }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             runCatching {
                 repository.markDeleted(sample.id)
                 SyncScheduler.syncNow(getApplication())

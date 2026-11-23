@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.aquasample.appContainer
 import com.example.aquasample.data.local.entity.CentroCultivoEntity
 import com.example.aquasample.data.report.JourneyReportGenerator
+import com.example.aquasample.data.repository.CentroCultivoRepository
+import com.example.aquasample.data.repository.MuestraRepository
 import com.example.aquasample.ui.designsystem.SampleStatus
 import com.example.aquasample.ui.model.SampleSummary
 import com.example.aquasample.ui.model.toSampleSummary
@@ -84,10 +86,11 @@ enum class JourneyExportFormat { PDF, CSV }
  * ViewModel del historial. Combina el flujo de Room con los filtros elegidos
  * por el usuario; la pantalla solo dibuja.
  */
-class HistoryViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = application.appContainer.muestraRepository
-    private val centroRepository = application.appContainer.centroRepository
+class HistoryViewModel @JvmOverloads constructor(
+    application: Application,
+    private val repository: MuestraRepository = application.appContainer.muestraRepository,
+    private val centroRepository: CentroCultivoRepository = application.appContainer.centroRepository
+) : AndroidViewModel(application) {
     private val filters = MutableStateFlow(HistoryFilters())
 
     val uiState: StateFlow<HistoryUiState> = combine(
