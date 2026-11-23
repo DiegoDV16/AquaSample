@@ -253,7 +253,7 @@ fun LoginContent(
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = "AquaSample 1.0.16 · Muestreo de choritos",
+            text = "AquaSample 1.0.17 · Muestreo de choritos",
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.70f),
             textAlign = TextAlign.Center,

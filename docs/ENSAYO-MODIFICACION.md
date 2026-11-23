@@ -123,3 +123,17 @@ Esto demuestra modificación de lógica + UI + PDF sin migración.
 - JSON del backend con `marea`.
 - PDF con la línea.
 - Tiempo real medido.
+
+## 7. Ejecución real del ensayo
+
+El ensayo se ejecutó el 23/11/2026 con la variante corta:
+
+- Cambio: **índice de condición** (`calibre promedio / 40 mm * 100`).
+- Archivos: `ConditionIndex.kt`, detalle, `PdfReportGenerator.kt` y prueba.
+- Inicio: 11:15:24 · Fin: 11:17:47 → **2 min 23 s** incluyendo pruebas y build.
+- Resultado: índice visible en el detalle y en el PDF.
+- Pruebas: 3 nuevas; total 72 unitarias, 0 fallos.
+- APK: 1.0.17 (`versionCode 18`).
+
+Este tiempo queda como referencia; en la defensa se puede usar la variante
+grande (campo Marea) con el presupuesto de 14 minutos.

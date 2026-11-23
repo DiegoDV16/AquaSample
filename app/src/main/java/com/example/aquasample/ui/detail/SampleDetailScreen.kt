@@ -64,6 +64,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.aquasample.data.local.entity.MuestraEntity
+import com.example.aquasample.data.report.ConditionIndex
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.AquaScaffold
 import com.example.aquasample.ui.designsystem.AquaTopBar
@@ -344,6 +345,7 @@ private fun DetailContent(
             DetailRow("Tren", sample.tren.ifBlank { "—" })
             DetailRow("Línea", sample.linea.ifBlank { "—" })
             DetailRow("Tramo", if (sample.tramoLongitudCm.isBlank()) "—" else "${sample.tramoLongitudCm} cm")
+            DetailRow("Índice de condición", ConditionIndex.label(sample.averageCalibre))
             DetailRow("Operador", state.operadorEmail ?: "—")
             DetailRow(
                 "Conteo asistido",

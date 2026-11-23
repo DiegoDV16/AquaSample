@@ -114,6 +114,7 @@ class PdfReportGenerator(private val context: Context) {
             String.format(Locale.getDefault(), "%.1f mm", muestra.averageCalibre),
             y
         )
+        y = row(canvas, "Índice de condición", ConditionIndex.label(muestra.averageCalibre), y)
 
         y += 6f
         canvas.drawText("Matriz de calibre", 40f, y, textPaint(11f, ink, bold = true))
