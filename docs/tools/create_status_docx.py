@@ -641,6 +641,22 @@ def section_2(doc):
     )
     paragraph.paragraph_format.space_before = Pt(6)
 
+    doc.add_heading("2.15 Sesión persistente y seguridad local", level=2)
+    doc.add_paragraph(
+        "La sesión se guarda en SharedPreferences y se restaura al abrir la app, por lo que "
+        "Android puede matar el proceso sin obligar a un nuevo login. El JWT se almacena con "
+        "EncryptedSharedPreferences y Android Keystore; las contraseñas locales usan PBKDF2-HMAC-SHA256 "
+        "con 120.000 iteraciones y salt aleatorio. Las cuentas antiguas se migran en el primer login."
+    )
+    bullets(
+        doc,
+        [
+            "Un 401 distinto de /api/auth/login limpia token y sesión, y devuelve al login con aviso.",
+            "Verificado en emulador: cerrar y reabrir mantiene la sesión; un token inválido la cierra.",
+            "78 pruebas unitarias, 6 de backend y 2 instrumentadas.",
+        ],
+    )
+
 def section_3(doc):
     doc.add_heading("3. Matriz de cumplimiento de la pauta", level=1)
     doc.add_paragraph(
