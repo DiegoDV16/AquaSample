@@ -675,7 +675,7 @@ def section_3(doc):
         ("Microservicios Spring Boot", "Completo", "API Spring Boot con JPA, H2, CRUD, filtros, validación, Swagger y datos demo", "Autenticación por rol, migraciones versionadas y despliegue"),
         ("Consumo de APIs externas", "Completo", "Open-Meteo Marine y forecast de viento con Retrofit; oleaje, temperatura y viento guardados en Room y backend", "Coordenadas aproximadas por centro"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
-        ("Pruebas y cobertura", "Parcial", "84 unitarias, 6 de backend y 6 instrumentadas (login, historial, perfil); 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels"),
+        ("Pruebas y cobertura", "Parcial", "84 unitarias (incluye ViewModels), 6 de backend y 6 instrumentadas; 100 % de la lógica evaluable", "Cobertura global 5,5 % vs 90 %; definir umbral por capa"),
         ("APK firmada", "Completo", "Release 1.0.20 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, API/SWAGGER, openapi.json, 24 tarjetas y guía de despliegue", "URL permanente de Swagger y tablero Trello creado con credenciales"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
@@ -709,7 +709,7 @@ def section_4(doc):
         ),
         (
             "4.2 Cobertura global y pruebas de ViewModels/UI",
-            "Hay 84 pruebas unitarias, 6 del backend y 6 instrumentadas; la lógica evaluable está al 100 %, pero la cobertura global del módulo es 5,5 % por el peso de Compose y el código generado por Room. Faltan pruebas de ViewModels y un umbral global.",
+            "Hay 84 pruebas unitarias, 6 del backend y 6 instrumentadas; la lógica evaluable está al 100 %, pero la cobertura global del módulo es 5,5 % por el peso de Compose y el código generado por Room. Faltan pruebas de Room y de las pantallas restantes, y un umbral global acordado.",
             "Agregar pruebas de ViewModels con coroutines test, pruebas de Compose para login, registro y filtros, y MockMvc para el backend. Definir un umbral por paquete o por capa.",
             [
                 "Cobertura global medida y umbral acordado con el docente.",
