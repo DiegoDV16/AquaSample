@@ -79,7 +79,10 @@ import com.example.aquasample.ui.theme.AquaSampleTheme
 import com.example.aquasample.ui.theme.Spacing
 import com.example.aquasample.ui.theme.ThemeManager
 import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -199,6 +202,8 @@ fun ProfileContent(
     val scope = rememberCoroutineScope()
     var showServerDialog by remember { mutableStateOf(false) }
     var serverUrl by remember { mutableStateOf(ServerConfig.baseUrl) }
+    var connectionTest by remember { mutableStateOf<String?>(null) }
+    var testingConnection by remember { mutableStateOf(false) }
 
     AquaScaffold(
         modifier = modifier,
@@ -371,6 +376,16 @@ fun ProfileContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if (ServerConfig.baseUrl.contains("127.0.0.1") ||
+                        ServerConfig.baseUrl.contains("localhost")
+                    ) {
+                        Text(
+                            text = "⚠ En un teléfono, 127.0.0.1 apunta al propio teléfono. " +
+                                "Configura la IP del PC o una URL pública.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                     Spacer(Modifier.height(Spacing.sm))
                     SecondaryButton(
                         text = "Cambiar dirección",
@@ -421,7 +436,7 @@ fun ProfileContent(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "AquaSample 1.0.20",
+                text = "AquaSample 1.0.21",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -463,6 +478,44 @@ fun ProfileContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    SecondaryButton(
+                        text = if (testingConnection) "Probando…" else "Probar conexión",
+                        onClick = {
+                            testingConnection = true
+                            connectionTest = null
+                            scope.launch {
+                                val ok = withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        val client = OkHttpClient.Builder()
+                                            .connectTimeout(6, TimeUnit.SECONDS)
+                                            .readTimeout(6, TimeUnit.SECONDS)
+                                            .build()
+                                        val url = ServerConfig.normalize(serverUrl) + "api/health"
+                                        client.newCall(
+                                            Request.Builder().url(url).build()
+                                        ).execute().use { it.isSuccessful }
+                                    }.getOrDefault(false)
+                                }
+                                connectionTest = if (ok) {
+                                    "OK: el servidor responde."
+                                } else {
+                                    "Error: no se pudo conectar. Revisa la URL, la red y el firewall."
+                                }
+                                testingConnection = false
+                            }
+                        }
+                    )
+                    connectionTest?.let { result ->
+                        Text(
+                            text = result,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (result.startsWith("OK")) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.error
+                            }
+                        )
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         SecondaryButton(
                             text = "Cancelar",

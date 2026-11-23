@@ -16,6 +16,7 @@ import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.HttpException
 
 /**
  * Envía al backend las muestras que aún no se han sincronizado.
@@ -35,6 +36,7 @@ class SampleSyncWorker(
 
         val pending = repository.getPendingSync()
         var shouldRetry = false
+        var lastError: String? = null
 
         for (sample in pending) {
             try {
@@ -86,19 +88,27 @@ class SampleSyncWorker(
 
                     created.code() in 500..599 -> {
                         Log.w(TAG, "Backend 5xx para ${sample.id}: ${created.code()}")
+                        lastError = "El servidor falló (${created.code()}). Reintentando."
                         shouldRetry = true
                     }
 
                     else -> {
                         // 400 u otro error de validación: no reintentar en bucle.
                         Log.w(TAG, "Backend rechazó ${sample.id}: ${created.code()}")
+                        lastError = "El servidor rechazó ${sample.id} (${created.code()})."
                     }
                 }
             } catch (io: IOException) {
                 Log.e(TAG, "Error de red al sincronizar ${sample.id}", io)
+                lastError = "No se pudo conectar con el servidor. Revisa la URL y la red."
                 shouldRetry = true
             } catch (exception: Exception) {
                 Log.e(TAG, "Error al sincronizar ${sample.id}", exception)
+                lastError = if (exception is HttpException && exception.code() == 401) {
+                    "Sesión expirada. Inicia sesión nuevamente."
+                } else {
+                    "Error al sincronizar: ${exception.localizedMessage}"
+                }
                 shouldRetry = true
             }
         }
@@ -107,10 +117,16 @@ class SampleSyncWorker(
             ApiClient.api.list()
         } catch (io: IOException) {
             Log.e(TAG, "No se pudo descargar muestras del backend", io)
+            lastError = "No se pudo conectar con el servidor. Revisa la URL y la red."
             shouldRetry = true
             null
         } catch (exception: Exception) {
             Log.e(TAG, "Error al descargar muestras", exception)
+            lastError = if (exception is HttpException && exception.code() == 401) {
+                "Sesión expirada. Inicia sesión nuevamente."
+            } else {
+                "No se pudieron descargar las muestras: ${exception.localizedMessage}"
+            }
             shouldRetry = true
             null
         }
@@ -145,6 +161,12 @@ class SampleSyncWorker(
             SyncNotifications.notifyPending(application, pendingAfter)
         } else {
             SyncNotifications.cancelPending(application)
+        }
+
+        if (shouldRetry || lastError != null) {
+            SyncStatusStore.error(lastError ?: "No se pudo sincronizar. Revisa el servidor.")
+        } else {
+            SyncStatusStore.success(pendingAfter)
         }
 
         return if (shouldRetry) Result.retry() else Result.success()

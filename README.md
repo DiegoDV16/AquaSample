@@ -32,6 +32,7 @@ offline.
 - Indice de condicion calculado sobre el calibre promedio, visible en detalle y PDF.
 - Sesion persistente: sobrevive al cierre de la app; un 401 cierra la sesion y avisa.
 - Seguridad local: JWT cifrado con Android Keystore y contrasenas PBKDF2.
+- Diagnostico de sincronizacion: aviso de localhost, boton Probar conexion y motivo visible del fallo.
 
 **Backend**
 - API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
@@ -97,8 +98,8 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 
 ## APK firmada
 
-- [AquaSample-1.0.20-release.apk](dist/AquaSample-1.0.20-release.apk) (`versionName` 1.0.0).
-- SHA-256: `811e25c473887bc14a7fe62d6942db150f072bd53de765114299f4ac3ed736b0`.
+- [AquaSample-1.0.21-release.apk](dist/AquaSample-1.0.21-release.apk) (`versionName` 1.0.0).
+- SHA-256: `8023fa8be7b54be1e5496b84e737e33c2b0edd1fab0bd1adc9afb69f0202b271`.
 - Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
 - El keystore y sus credenciales quedan fuera del repositorio.
 
@@ -127,6 +128,7 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 - [Backend](backend/README.md)
 - [API y autenticación](docs/API.md)
 - [Swagger y OpenAPI](docs/SWAGGER.md)
+- [Sincronización en el teléfono](docs/SYNC.md)
 - [Tablero Trello](docs/TRELLO.md)
 - [Conectar la app con el backend](docs/DEPLOY.md)
 

@@ -57,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aquasample.data.session.UserRole
 import com.example.aquasample.data.session.UserSession
+import com.example.aquasample.data.sync.SyncStatusStore
 import com.example.aquasample.ui.designsystem.AquaCard
 import com.example.aquasample.ui.designsystem.ChartPoint
 import com.example.aquasample.ui.designsystem.AquaScaffold
@@ -119,6 +120,7 @@ fun HomeContent(
     modifier: Modifier = Modifier
 ) {
     val isDarkMode by ThemeManager.isDarkMode.collectAsState()
+    val syncStatus by SyncStatusStore.state.collectAsState()
 
     AquaScaffold(
         modifier = modifier,
@@ -255,7 +257,11 @@ fun HomeContent(
 
             if (state.pendingSync > 0) {
                 item(key = "pending-sync") {
-                    PendingSyncCard(count = state.pendingSync, onSyncNow = onSyncNow)
+                    PendingSyncCard(
+                        count = state.pendingSync,
+                        statusMessage = if (syncStatus.isError) syncStatus.message else null,
+                        onSyncNow = onSyncNow
+                    )
                 }
             }
 
@@ -394,6 +400,7 @@ private fun GreetingCard(
 @Composable
 private fun PendingSyncCard(
     count: Int,
+    statusMessage: String?,
     onSyncNow: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -422,6 +429,13 @@ private fun PendingSyncCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (statusMessage != null) {
+                    Text(
+                        text = statusMessage,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
             TextButton(onClick = onSyncNow) {
                 Text("Sincronizar")
