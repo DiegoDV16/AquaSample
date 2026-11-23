@@ -280,7 +280,7 @@ def summary(doc):
             ("Código Kotlin", "65 archivos · más de 8.100 líneas en app/src/main"),
             ("Capa de datos", "5 tablas Room · 8 ViewModels · 5 repositorios"),
             ("Backend", "Spring Boot + H2 · 8 rutas REST / 14 operaciones · Swagger"),
-            ("Pruebas", "78 unitarias (JUnit + MockK), 6 de backend y 2 instrumentadas de Compose"),
+            ("Pruebas", "78 unitarias (JUnit + MockK), 6 de backend y 6 instrumentadas de Compose (login, historial, perfil)"),
             ("Cobertura", "100 % en la lógica evaluable (validadores, filtros, mapeo y repositorio)"),
             ("Informes", "PDF A4 por muestra con FileProvider y ejemplo en docs/ejemplos"),
             ("Catálogos", "3 centros y 8 tramos con CRUD, baja lógica y selección en cascada"),
@@ -477,7 +477,7 @@ def section_2(doc):
         doc,
         [
             "Build: :app:assembleDebug y :backend compileJava/run finalizan en verde.",
-            "Pruebas: 54 unitarias y 2 instrumentadas en verde; 100 % de la lógica evaluable (validadores, filtros, mapeo y repositorio).",
+            "Pruebas: 78 unitarias y 6 instrumentadas en verde; 100 % de la lógica evaluable (validadores, filtros, mapeo y repositorio).",
             "Ejecución: login, registro por pasos, cámara, historial, validación, creación de usuario y perfil recorridos en el emulador.",
             "Sincronización: muestra pendiente enviada al backend y marcada en Room; el flujo se repitió sin túnel y al recuperarlo.",
             "Catálogos: migración Room 2 → 3 probada con una base v2 real (conserva centros y usuarios, crea 8 tramos) y CRUD de tramos del backend (201/200/204/404).",
@@ -579,7 +579,7 @@ def section_2(doc):
     bullets(
         doc,
         [
-            "54 pruebas unitarias y 2 instrumentadas en verde.",
+            "78 pruebas unitarias y 6 instrumentadas en verde.",
             "Cobertura de 100 % en validadores, estado, mapeo de resumen, filtros y repositorio.",
             "La cobertura global del módulo es 4,2 % porque incluye pantallas Compose y código generado por Room.",
         ],
@@ -653,7 +653,7 @@ def section_2(doc):
         [
             "Un 401 distinto de /api/auth/login limpia token y sesión, y devuelve al login con aviso.",
             "Verificado en emulador: cerrar y reabrir mantiene la sesión; un token inválido la cierra.",
-            "78 pruebas unitarias, 6 de backend y 2 instrumentadas.",
+            "78 pruebas unitarias, 6 de backend y 6 instrumentadas de UI.",
         ],
     )
 
@@ -675,7 +675,7 @@ def section_3(doc):
         ("Microservicios Spring Boot", "Completo", "API Spring Boot con JPA, H2, CRUD, filtros, validación, Swagger y datos demo", "Autenticación por rol, migraciones versionadas y despliegue"),
         ("Consumo de APIs externas", "Completo", "Open-Meteo Marine y forecast de viento con Retrofit; oleaje, temperatura y viento guardados en Room y backend", "Coordenadas aproximadas por centro"),
         ("Persistencia offline + sync", "Completo", "Room + WorkManager + Retrofit; prueba offline → online con marca de sincronización", "Resolución de conflictos con varios dispositivos y reintentos avanzados"),
-        ("Pruebas y cobertura", "Parcial", "78 unitarias, 6 de backend y 2 instrumentadas; 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels/UI"),
+        ("Pruebas y cobertura", "Parcial", "78 unitarias, 6 de backend y 6 instrumentadas (login, historial, perfil); 100 % de la lógica evaluable", "Cobertura global y pruebas de ViewModels"),
         ("APK firmada", "Completo", "Release 1.0.19 firmada con esquema v2, hash SHA-256, instalada y verificada en el emulador", "Publicar en tienda solo si se solicita"),
         ("Documentación y colaboración", "Parcial", "Repositorio público, README, DESIGN.md, RELEASE.md, informe, backend README y 20 capturas", "Swagger publicado, tablero Trello y guía de despliegue"),
         ("Modificación en tiempo real", "Parcial", "Un campo nuevo se propaga por entidad, DAO, ViewModel y Compose", "Migración Room no destructiva y contrato con backend para el cambio extremo a extremo"),
@@ -709,7 +709,7 @@ def section_4(doc):
         ),
         (
             "4.2 Cobertura global y pruebas de ViewModels/UI",
-            "Hay 78 pruebas unitarias, 6 del backend y 2 instrumentadas; la lógica evaluable está al 100 %, pero la cobertura global del módulo es 4,2 % por el peso de Compose y el código generado por Room.",
+            "Hay 78 pruebas unitarias, 6 del backend y 6 instrumentadas; la lógica evaluable está al 100 %, pero la cobertura global del módulo es 4,2 % por el peso de Compose y el código generado por Room. Faltan pruebas de ViewModels y un umbral global.",
             "Agregar pruebas de ViewModels con coroutines test, pruebas de Compose para login, registro y filtros, y MockMvc para el backend. Definir un umbral por paquete o por capa.",
             [
                 "Cobertura global medida y umbral acordado con el docente.",
@@ -841,7 +841,7 @@ def section_7(doc):
         "    └── model/          (SampleSummary compartido)\n"
         "\n"
         "app/src/test/          39 pruebas unitarias (JUnit + MockK)\n"
-        "app/src/androidTest/   2 pruebas instrumentadas de Compose\n"
+        "app/src/androidTest/   6 pruebas instrumentadas de Compose\n"
         "\n"
         "backend/\n"
         "├── src/main/java/cl/aquasample/backend/{api, config, domain, repository, service}\n"

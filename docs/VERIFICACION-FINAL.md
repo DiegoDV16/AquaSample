@@ -16,7 +16,7 @@ Fecha de corte: 23/11/2026 · `main` en el commit de esta rama.
 | Notificaciones | Canal de pendientes y validadas | ✅ |
 | Respaldo | ZIP `.aquabackup` con fotos y catálogos | ✅ |
 | Seguridad | JWT + BCrypt; `/api/**` protegido | ✅ |
-| Pruebas | 64 app + 6 backend + 2 instrumentadas | ✅ |
+| Pruebas | 64 app + 6 backend + 6 instrumentadas | ✅ |
 
 ## Comandos de reproducción
 
