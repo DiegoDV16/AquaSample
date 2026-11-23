@@ -733,8 +733,8 @@ def section_4(doc):
         ),
         (
             "4.6 Modificación en tiempo real (ensayo)",
-            "La arquitectura permite agregar un campo y propagarlo hasta el backend; la migración de Room ya existe.",
-            "Preparar un cambio de ejemplo (peso de muestra): columna con migración, campo en DTO y backend, formulario y detalle. Ensayarlo cronometrado para la defensa.",
+            "El runbook está en docs/ENSAYO-MODIFICACION.md y la app se modificó varias veces en esta sesión; falta ejecutar el cambio cronometrado delante del docente.",
+            "Ensayar el cambio de ejemplo de 14 minutos: backend, Room, formulario, DTO, detalle y PDF; registrar tiempo y capturas.",
             [
                 "Cambio aplicado sin perder datos existentes.",
                 "Backend y app actualizados en menos de 10 minutos.",

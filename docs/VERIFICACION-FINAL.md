@@ -1,0 +1,74 @@
+# Verificación final de AquaSample
+
+Fecha de corte: 23/11/2026 · `main` en el commit de esta rama.
+
+## Matriz de funcionalidad
+
+| Funcionalidad | Evidencia | Estado |
+|---|---|---|
+| Login con roles | Login admin/operador/analista; JWT emitido | ✅ |
+| Registro de muestra | Asistente de 3 pasos; Room + backend | ✅ |
+| Fotos compartidas | Subida `POST /api/fotos` y descarga a `files/muestras` | ✅ |
+| Clima | Open-Meteo Marine + viento; guardado en Room y backend | ✅ |
+| Edición | Diálogo de conteo/calibre/observaciones; PUT al backend | ✅ |
+| Reportes | PDF por muestra y consolidado; CSV para Excel | ✅ |
+| Sincronización | Push, pull, tombstones, conflicto validado | ✅ |
+| Notificaciones | Canal de pendientes y validadas | ✅ |
+| Respaldo | ZIP `.aquabackup` con fotos y catálogos | ✅ |
+| Seguridad | JWT + BCrypt; `/api/**` protegido | ✅ |
+| Pruebas | 64 app + 6 backend + 2 instrumentadas | ✅ |
+
+## Comandos de reproducción
+
+```powershell
+$env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"
+
+# Pruebas
+.\gradlew.bat :app:testDebugUnitTest
+.\gradlew.bat -p backend test
+
+# Cobertura
+.\gradlew.bat :app:createDebugUnitTestCoverageReport
+
+# APK firmada
+.\gradlew.bat :app:assembleRelease
+```
+
+## Seguridad verificada
+
+```text
+GET /api/muestras sin token        -> 401
+POST /api/auth/login (correcto)    -> 200 + JWT
+GET /api/muestras con token        -> 200
+POST /api/auth/login (mala clave)  -> 401
+```
+
+## Prueba de humo con APK firmada
+
+- [x] APK 1.0.16 instalada sobre una instalación limpia.
+- [x] Login con `admin@aquasample.cl`.
+- [x] Inicio muestra el panel y las tarjetas de resumen.
+- [x] La app no se cierra al abrir Inicio.
+- [ ] Historial abre una muestra (no había muestras en la instalación limpia).
+- [ ] Detalle abre el PDF o el editor.
+
+Evidencia: [`screenshots/30-verificacion-final.png`](screenshots/30-verificacion-final.png).
+
+## Limitaciones conocidas
+
+1. **Cobertura global 4,2 %**: Compose y Room generan mucho código; la lógica
+   evaluable está cubierta, pero no el 90 % global.
+2. **Swagger público**: `render.yaml` está listo, pero la URL pública requiere
+   ejecutar el blueprint en Render.
+3. **Roles en el backend**: JWT autentica, pero aún no separa permisos por rol.
+4. **Flyway**: el esquema usa `ddl-auto=update`; falta versionar migraciones.
+5. **Fotos**: se sincronizan al subir; las fotos antiguas de otro teléfono se
+   descargan al abrir la muestra, no antes.
+6. **Modificación en vivo**: el runbook está listo; falta ejecutarlo delante del
+   docente y registrar el tiempo real.
+
+## Conclusión
+
+La app es funcional de punta a punta para el flujo de terreno: registrar,
+fotografiar, contar, editar, sincronizar, validar, reportar y respaldar. Las
+brechas restantes son de calidad/operación, no de funcionalidad principal.
