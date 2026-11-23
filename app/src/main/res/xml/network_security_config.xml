@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      Se permite HTTP porque el backend de terreno puede correr en la red local
+      (IP del PC) o detrás de un túnel. Para producción se recomienda HTTPS y
+      volver a bloquear el tráfico claro.
+    -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

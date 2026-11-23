@@ -13,3 +13,20 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Guías internas del asistente: no se publican en el repositorio
+/AGENT.md
+/SKILLS.md
+
+# Backend Spring Boot (artefactos de build y base H2 local)
+/backend/build
+/backend/.gradle
+/backend/data
+
+# Firma de release: el keystore y sus credenciales no se publican
+/keystore.properties
+/keystore/
+
+
+# Cache de Python
+__pycache__/
