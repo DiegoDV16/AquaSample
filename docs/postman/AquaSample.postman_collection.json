@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "aqua-sample-api-0001",
     "name": "AquaSample API",
-    "description": "Colección Postman para los microservicios de AquaSample: backend Spring Boot (muestras) y Open-Meteo Marine API (condiciones climáticas).",
+    "description": "Colección Postman para los microservicios de AquaSample: backend Spring Boot (muestras, centros, usuarios, tramos) y Open-Meteo Marine API (condiciones climáticas).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -188,6 +188,357 @@
           "protocol": "http"
         },
         "description": "Elimina una muestra (204 No Content)."
+      }
+    },
+    {
+      "name": "GET - Centros (Listar)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/centros",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "centros"
+          ],
+          "protocol": "http"
+        },
+        "description": "Lista centros y concesiones de cultivo. Filtro opcional: ?centroId= no aplica acá. Query opcional en tramos: ?centroId="
+      }
+    },
+    {
+      "name": "GET - Centro por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/centros/1",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "centros",
+            "1"
+          ],
+          "protocol": "http"
+        },
+        "description": "Obtiene un centro por ID."
+      }
+    },
+    {
+      "name": "POST - Centros (Crear)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"CONC-109\",\n  \"nombre\": \"Concesión Dalcahue #109\",\n  \"comuna\": \"Dalcahue\",\n  \"estado\": \"ACTIVO\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/centros",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "centros"
+          ],
+          "protocol": "http"
+        },
+        "description": "Crea un centro. Retorna 201 Created."
+      }
+    },
+    {
+      "name": "PUT - Centros (Actualizar)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"CONC-104\",\n  \"nombre\": \"Concesión Dalcahue #104\",\n  \"comuna\": \"Dalcahue\",\n  \"estado\": \"ACTIVO\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/centros/1",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "centros",
+            "1"
+          ],
+          "protocol": "http"
+        },
+        "description": "Actualiza un centro por ID."
+      }
+    },
+    {
+      "name": "DELETE - Centros (Eliminar)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/centros/1",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "centros",
+            "1"
+          ],
+          "protocol": "http"
+        },
+        "description": "Elimina un centro (204 No Content)."
+      }
+    },
+    {
+      "name": "GET - Usuarios (Listar)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/usuarios",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "usuarios"
+          ],
+          "protocol": "http"
+        },
+        "description": "Lista cuentas de usuarios."
+      }
+    },
+    {
+      "name": "GET - Usuario por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/usuarios/USR-001",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "usuarios",
+            "USR-001"
+          ],
+          "protocol": "http"
+        },
+        "description": "Obtiene un usuario por ID."
+      }
+    },
+    {
+      "name": "POST - Usuarios (Crear)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"USR-004\",\n  \"email\": \"operador2@aquasample.cl\",\n  \"passwordHash\": \"operador123\",\n  \"nombres\": \"Andrea\",\n  \"apellidoPaterno\": \"Perez\",\n  \"apellidoMaterno\": \"Lopez\",\n  \"rolId\": 1,\n  \"estado\": \"ACTIVO\",\n  \"creadoEn\": 1764000000000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/usuarios",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "usuarios"
+          ],
+          "protocol": "http"
+        },
+        "description": "Crea un usuario. Retorna 201 Created."
+      }
+    },
+    {
+      "name": "PATCH - Usuarios (Cambiar estado)",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/usuarios/USR-001/estado?estado=ACTIVO",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "usuarios",
+            "USR-001",
+            "estado"
+          ],
+          "query": [
+            {
+              "key": "estado",
+              "value": "ACTIVO"
+            }
+          ],
+          "protocol": "http"
+        },
+        "description": "Cambia el estado de un usuario (ACTIVO, INACTIVO...)."
+      }
+    },
+    {
+      "name": "GET - Tramos (Listar)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/tramos",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "tramos"
+          ],
+          "query": [
+            {
+              "key": "centroId",
+              "value": "1"
+            }
+          ],
+          "protocol": "http"
+        },
+        "description": "Lista tramos. Query opcional: ?centroId=<id> para filtrar por centro."
+      }
+    },
+    {
+      "name": "GET - Tramo por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/tramos/1",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "tramos",
+            "1"
+          ],
+          "protocol": "http"
+        },
+        "description": "Obtiene un tramo por ID."
+      }
+    },
+    {
+      "name": "POST - Tramos (Crear)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"centroId\": 1,\n  \"tren\": \"Tren 05\",\n  \"linea\": \"Línea L-07\",\n  \"longitudCm\": 140,\n  \"estado\": \"ACTIVO\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/tramos",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "tramos"
+          ],
+          "protocol": "http"
+        },
+        "description": "Crea un tramo. Retorna 201 Created."
+      }
+    },
+    {
+      "name": "PUT - Tramos (Actualizar)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"centroId\": 1,\n  \"tren\": \"Tren 05\",\n  \"linea\": \"Línea L-07\",\n  \"longitudCm\": 140,\n  \"estado\": \"ACTIVO\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/tramos/1",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "tramos",
+            "1"
+          ],
+          "protocol": "http"
+        },
+        "description": "Actualiza un tramo por ID."
+      }
+    },
+    {
+      "name": "DELETE - Tramos (Eliminar)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/tramos/1",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "tramos",
+            "1"
+          ],
+          "protocol": "http"
+        },
+        "description": "Elimina un tramo (204 No Content)."
       }
     }
   ]
