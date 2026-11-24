@@ -1,0 +1,194 @@
+{
+  "info": {
+    "_postman_id": "aqua-sample-api-0001",
+    "name": "AquaSample API",
+    "description": "Colección Postman para los microservicios de AquaSample: backend Spring Boot (muestras) y Open-Meteo Marine API (condiciones climáticas).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Open-Meteo - Condiciones Marinas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://marine-api.open-meteo.com/v1/marine?latitude=-35.9&longitude=-72.9&current=wave_height,sea_surface_temperature,wind_speed_10m",
+          "host": [
+            "marine-api.open-meteo.com"
+          ],
+          "path": [
+            "v1",
+            "marine"
+          ],
+          "query": [
+            {
+              "key": "latitude",
+              "value": "-35.9"
+            },
+            {
+              "key": "longitude",
+              "value": "-72.9"
+            },
+            {
+              "key": "current",
+              "value": "wave_height,sea_surface_temperature,wind_speed_10m"
+            }
+          ],
+          "protocol": "https"
+        },
+        "description": "Consulta las condiciones marinas (oleaje, temperatura del mar y viento) mediante la Open-Meteo Marine API."
+      }
+    },
+    {
+      "name": "GET - Muestras (Listar)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/muestras",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "muestras"
+          ],
+          "protocol": "http"
+        },
+        "description": "Lista muestras. Filtros opcionales: ?estado=&q="
+      }
+    },
+    {
+      "name": "GET - Muestra por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/muestras/%23M-0001",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "muestras",
+            "%23M-0001"
+          ],
+          "protocol": "http"
+        },
+        "description": "Obtiene una muestra por ID. El # se codifica como %23."
+      }
+    },
+    {
+      "name": "POST - Muestras (Crear)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"#M-0009\",\n  \"centroId\": 1,\n  \"operadorId\": \"USR-001\",\n  \"concesion\": \"Concesión Dalcahue #104\",\n  \"tren\": \"Tren 01\",\n  \"linea\": \"Línea L-09\",\n  \"tramoLongitudCm\": \"150\",\n  \"conteoManual\": 30,\n  \"calibreMatrix\": \"[34.0,35.0]\",\n  \"averageCalibre\": 34.5,\n  \"photoCount\": 1,\n  \"fotos\": \"[]\",\n  \"observaciones\": \"Prueba de API\",\n  \"tags\": \"[]\",\n  \"estado\": \"PENDIENTE\",\n  \"sincronizado\": false,\n  \"operatorAlias\": \"Francisca Rojas\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/muestras",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "muestras"
+          ],
+          "protocol": "http"
+        },
+        "description": "Crea una muestra nueva. Retorna 201 Created."
+      }
+    },
+    {
+      "name": "PUT - Muestras (Actualizar)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"#M-0009\",\n  \"centroId\": 1,\n  \"operadorId\": \"USR-001\",\n  \"concesion\": \"Concesión Dalcahue #104\",\n  \"tren\": \"Tren 01\",\n  \"linea\": \"Línea L-09\",\n  \"tramoLongitudCm\": \"150\",\n  \"conteoManual\": 30,\n  \"calibreMatrix\": \"[34.0,35.0]\",\n  \"averageCalibre\": 34.5,\n  \"photoCount\": 1,\n  \"fotos\": \"[]\",\n  \"observaciones\": \"Prueba de API\",\n  \"tags\": \"[]\",\n  \"estado\": \"PENDIENTE\",\n  \"sincronizado\": false,\n  \"operatorAlias\": \"Francisca Rojas\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/muestras/%23M-0001",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "muestras",
+            "%23M-0001"
+          ],
+          "protocol": "http"
+        },
+        "description": "Actualiza los datos de una muestra."
+      }
+    },
+    {
+      "name": "PATCH - Muestras (Cambiar estado)",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/muestras/%23M-0001/estado?estado=VALIDADO",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "muestras",
+            "%23M-0001",
+            "estado"
+          ],
+          "query": [
+            {
+              "key": "estado",
+              "value": "VALIDADO"
+            }
+          ],
+          "protocol": "http"
+        },
+        "description": "Cambia el estado de revisión de una muestra (PENDIENTE, COMPLETADO, VALIDADO, RECHAZADO)."
+      }
+    },
+    {
+      "name": "DELETE - Muestras (Eliminar)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/muestras/%23M-0001",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "muestras",
+            "%23M-0001"
+          ],
+          "protocol": "http"
+        },
+        "description": "Elimina una muestra (204 No Content)."
+      }
+    }
+  ]
+}
