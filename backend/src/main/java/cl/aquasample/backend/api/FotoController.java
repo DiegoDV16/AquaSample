@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -31,7 +32,11 @@ public class FotoController {
 
     private static final long MAX_BYTES = 10L * 1024 * 1024;
 
-    private final Path root = Paths.get("uploads").toAbsolutePath().normalize();
+    private final Path root;
+
+    public FotoController(@Value("${aquasample.uploads.dir:uploads}") String uploadDir) {
+        this.root = Paths.get(uploadDir).toAbsolutePath().normalize();
+    }
 
     @PostMapping
     public Map<String, String> upload(@RequestParam("file") MultipartFile file) throws IOException {
