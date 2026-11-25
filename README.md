@@ -131,6 +131,7 @@ recompilar. En emulador o por USB, `adb reverse` es suficiente.
 - [Sincronización en el teléfono](docs/SYNC.md)
 - [Tablero Trello](docs/TRELLO.md)
 - [Conectar la app con el backend](docs/DEPLOY.md)
+- [Despliegue en Render](docs/RENDER.md)
 
 ## Estado
 

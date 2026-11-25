@@ -3,8 +3,25 @@ services:
     name: aquasample-backend
     runtime: docker
     plan: free
+    region: oregon
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
+    autoDeploy: true
     envVars:
       - key: AQUASAMPLE_JWT_SECRET
         generateValue: true
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75
+
+# Persistencia (requiere plan pago; descomentar y ajustar las variables):
+#    disk:
+#      name: aquasample-data
+#      mountPath: /var/data
+#      sizeGB: 1
+#    envVars:
+#      - key: AQUASAMPLE_DB_URL
+#        value: jdbc:h2:file:/var/data/aquasample
+#      - key: AQUASAMPLE_UPLOAD_DIR
+#        value: /var/data/uploads
