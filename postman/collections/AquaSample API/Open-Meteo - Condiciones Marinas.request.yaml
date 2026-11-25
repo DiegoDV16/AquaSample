@@ -1,0 +1,9 @@
+$kind: http-request
+description: Consulta las condiciones marinas (oleaje, temperatura del mar y viento) mediante la Open-Meteo Marine API.
+url: https://marine-api.open-meteo.com/v1/marine?latitude=-35.9&longitude=-72.9&current=wave_height,sea_surface_temperature,wind_speed_10m
+method: GET
+queryParams:
+  latitude: "-35.9"
+  longitude: "-72.9"
+  current: wave_height,sea_surface_temperature,wind_speed_10m
+order: 1000

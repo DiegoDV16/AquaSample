@@ -1,0 +1,7 @@
+$kind: http-request
+description: Cambia el estado de revisión de una muestra (PENDIENTE, COMPLETADO, VALIDADO, RECHAZADO).
+url: http://localhost:8080/api/muestras/%23M-0001/estado?estado=VALIDADO
+method: PATCH
+queryParams:
+  estado: VALIDADO
+order: 6000

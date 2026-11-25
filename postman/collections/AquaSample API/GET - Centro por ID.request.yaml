@@ -1,0 +1,5 @@
+$kind: http-request
+description: Obtiene un centro por ID.
+url: http://localhost:8080/api/centros/1
+method: GET
+order: 9000

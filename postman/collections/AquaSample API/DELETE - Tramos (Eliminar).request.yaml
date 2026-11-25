@@ -1,0 +1,5 @@
+$kind: http-request
+description: Elimina un tramo (204 No Content).
+url: http://localhost:8080/api/tramos/1
+method: DELETE
+order: 21000

@@ -1,0 +1,5 @@
+$kind: http-request
+description: "Obtiene una muestra por ID. El # se codifica como %23."
+url: http://localhost:8080/api/muestras/%23M-0001
+method: GET
+order: 3000
