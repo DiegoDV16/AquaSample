@@ -1,0 +1,17 @@
+$kind: http-request
+description: Actualiza un tramo por ID.
+url: http://localhost:8080/api/tramos/1
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "centroId": 1,
+      "tren": "Tren 05",
+      "linea": "Línea L-07",
+      "longitudCm": 140,
+      "estado": "ACTIVO"
+    }
+order: 20000

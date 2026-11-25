@@ -1,0 +1,5 @@
+$kind: http-request
+description: "Lista muestras. Filtros opcionales: ?estado=&q="
+url: http://localhost:8080/api/muestras
+method: GET
+order: 2000

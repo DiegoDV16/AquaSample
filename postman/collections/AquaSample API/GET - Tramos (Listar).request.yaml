@@ -1,0 +1,7 @@
+$kind: http-request
+description: "Lista tramos. Query opcional: ?centroId=<id> para filtrar por centro."
+url: http://localhost:8080/api/tramos?centroId=1
+method: GET
+queryParams:
+  centroId: "1"
+order: 17000

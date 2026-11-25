@@ -1,0 +1,21 @@
+$kind: http-request
+description: Crea un usuario. Retorna 201 Created.
+url: http://localhost:8080/api/usuarios
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "id": "USR-004",
+      "email": "operador2@aquasample.cl",
+      "passwordHash": "operador123",
+      "nombres": "Andrea",
+      "apellidoPaterno": "Perez",
+      "apellidoMaterno": "Lopez",
+      "rolId": 1,
+      "estado": "ACTIVO",
+      "creadoEn": 1764000000000
+    }
+order: 15000

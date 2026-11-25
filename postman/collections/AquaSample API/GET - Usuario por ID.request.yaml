@@ -1,0 +1,5 @@
+$kind: http-request
+description: Obtiene un usuario por ID.
+url: http://localhost:8080/api/usuarios/USR-001
+method: GET
+order: 14000

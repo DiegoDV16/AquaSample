@@ -1,0 +1,5 @@
+$kind: http-request
+description: Elimina una muestra (204 No Content).
+url: http://localhost:8080/api/muestras/%23M-0001
+method: DELETE
+order: 7000

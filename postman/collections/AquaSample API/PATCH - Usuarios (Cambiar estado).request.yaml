@@ -1,0 +1,7 @@
+$kind: http-request
+description: Cambia el estado de un usuario (ACTIVO, INACTIVO...).
+url: http://localhost:8080/api/usuarios/USR-001/estado?estado=ACTIVO
+method: PATCH
+queryParams:
+  estado: ACTIVO
+order: 16000

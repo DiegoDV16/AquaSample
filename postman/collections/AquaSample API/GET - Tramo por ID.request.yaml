@@ -1,0 +1,5 @@
+$kind: http-request
+description: Obtiene un tramo por ID.
+url: http://localhost:8080/api/tramos/1
+method: GET
+order: 18000
