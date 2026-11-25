@@ -78,3 +78,15 @@ Si el teléfono creó una muestra sin haber descargado antes las del backend, pu
 usar un ID que ya existe (`#M-0001`). Desde 1.0.23 la app detecta que el servidor
 tiene **otra** muestra con ese ID, renombra la local al siguiente número libre y
 la crea sin sobrescribir. Una edición real de la misma muestra sigue usando `PUT`.
+
+## Backend por defecto
+
+Desde 1.0.24 la app apunta por defecto a:
+
+```text
+https://aquasample-backend.onrender.com/
+```
+
+En una instalación nueva no hay que configurar nada. Si la app venía de una URL
+de desarrollo (`127.0.0.1`, IP LAN, túnel `trycloudflare` o Serveo), se migra
+automáticamente a Render la primera vez que arranca.

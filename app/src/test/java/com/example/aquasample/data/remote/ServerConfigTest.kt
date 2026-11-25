@@ -22,4 +22,9 @@ class ServerConfigTest {
     fun `texto vacio usa el valor por defecto`() {
         assertEquals(ServerConfig.DEFAULT_BASE_URL, ServerConfig.normalize("   "))
     }
+
+    @Test
+    fun `el valor por defecto es el backend de Render`() {
+        assertEquals("https://aquasample-backend.onrender.com/", ServerConfig.DEFAULT_BASE_URL)
+    }
 }
