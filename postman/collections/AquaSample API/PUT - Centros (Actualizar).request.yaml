@@ -1,0 +1,16 @@
+$kind: http-request
+description: Actualiza un centro por ID.
+url: http://localhost:8080/api/centros/1
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "codigo": "CONC-104",
+      "nombre": "Concesión Dalcahue #104",
+      "comuna": "Dalcahue",
+      "estado": "ACTIVO"
+    }
+order: 11000

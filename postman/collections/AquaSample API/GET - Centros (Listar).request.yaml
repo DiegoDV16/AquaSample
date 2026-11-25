@@ -1,0 +1,5 @@
+$kind: http-request
+description: "Lista centros y concesiones de cultivo. Filtro opcional: ?centroId= no aplica acá. Query opcional en tramos: ?centroId="
+url: http://localhost:8080/api/centros
+method: GET
+order: 8000

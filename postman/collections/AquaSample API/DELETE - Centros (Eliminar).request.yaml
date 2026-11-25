@@ -1,0 +1,5 @@
+$kind: http-request
+description: Elimina un centro (204 No Content).
+url: http://localhost:8080/api/centros/1
+method: DELETE
+order: 12000

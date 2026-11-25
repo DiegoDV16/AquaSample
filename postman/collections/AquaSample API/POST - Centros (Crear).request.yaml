@@ -1,0 +1,16 @@
+$kind: http-request
+description: Crea un centro. Retorna 201 Created.
+url: http://localhost:8080/api/centros
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "codigo": "CONC-109",
+      "nombre": "Concesión Dalcahue #109",
+      "comuna": "Dalcahue",
+      "estado": "ACTIVO"
+    }
+order: 10000

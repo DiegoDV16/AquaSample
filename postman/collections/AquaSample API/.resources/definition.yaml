@@ -1,0 +1,2 @@
+$kind: collection
+description: "Colección Postman para los microservicios de AquaSample: backend Spring Boot (muestras, centros, usuarios, tramos) y Open-Meteo Marine API (condiciones climáticas)."

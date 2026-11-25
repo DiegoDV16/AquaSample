@@ -1,0 +1,17 @@
+$kind: http-request
+description: Crea un tramo. Retorna 201 Created.
+url: http://localhost:8080/api/tramos
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "centroId": 1,
+      "tren": "Tren 05",
+      "linea": "Línea L-07",
+      "longitudCm": 140,
+      "estado": "ACTIVO"
+    }
+order: 19000
