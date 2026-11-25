@@ -1,144 +1,352 @@
 # AquaSample
 
-AplicaciÃ³n Android para el registro, revisiÃ³n y trazabilidad de muestras de choritos
-en centros de cultivo de ALDEMAR SpA, con backend REST propio y sincronizaciÃ³n
-offline.
+Aplicación Android para digitalizar el muestreo de choritos (*Mytilus chilensis*) en centros de cultivo de **ALDEMAR SpA**. Registra ubicación, conteo, calibre, fotografías y condiciones marinas; funciona sin conexión y sincroniza con un backend Spring Boot cuando vuelve la red.
+
+[![Android](https://img.shields.io/badge/Android-API%2024%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.16-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Tests](https://img.shields.io/badge/tests-99%20automatizados-success)](#testing-y-calidad)
+[![Render](https://img.shields.io/badge/deploy-Render-46E3B7?logo=render&logoColor=white)](https://aquasample-backend.onrender.com/api/health)
+
+## Enlaces rápidos
+
+| Recurso | Enlace |
+|---|---|
+| APK firmada 1.0.24 | [AquaSample-1.0.24-release.apk](https://github.com/DiegoDV16/AquaSample/raw/v1.0.24/dist/AquaSample-1.0.24-release.apk) |
+| Backend en Render | https://aquasample-backend.onrender.com/ |
+| Swagger público | https://aquasample-backend.onrender.com/swagger-ui.html |
+| Repositorio | https://github.com/DiegoDV16/AquaSample |
+| Informe de estado v9 | [AquaSample-Estado-del-Sistema-v9.docx](docs/informe/AquaSample-Estado-del-Sistema-v9.docx) |
+| OpenAPI | [docs/openapi.json](docs/openapi.json) |
+
+## Problema y solución
+
+El registro manual de muestras en terreno produce pérdida de datos, fotos sin trazabilidad y dificultad para comparar calibres por tren, línea y período.
+
+AquaSample resuelve esto con:
+
+- Un asistente móvil de tres pasos: **ubicación → conteo/calibre → evidencia**.
+- Cámara y conteo asistido sobre la fotografía.
+- Persistencia local **Room** y sincronización **WorkManager** con el backend.
+- Historial filtrable, dashboard, comparación de períodos y reportes PDF/CSV.
+- Roles operador, analista y administrador.
+- Backend Spring Boot con JWT, H2, Flyway y Swagger.
+- API externa **Open-Meteo** para oleaje, temperatura del mar y viento.
+
+## Capturas
+
+| Login | Nueva muestra | Historial | Dashboard |
+|---|---|---|---|
+| ![Login](docs/screenshots/23-login-aquasample.png) | ![Muestra](docs/screenshots/04-nueva-muestra-paso1.png) | ![Historial](docs/screenshots/09-historial.png) | ![Dashboard](docs/screenshots/19-dashboard-graficos.png) |
+
+Más capturas en [docs/screenshots](docs/screenshots).
 
 ## Funcionalidades
 
-**App Android**
-- Login por rol: operador, analista y administrador.
-- Registro de muestras en un asistente de tres pasos (ubicaciÃ³n, conteo/calibre y evidencia).
-- CÃ¡mara propia con CameraX, galerÃ­a con Coil y visor con zoom (Telephoto).
-- Conteo asistido: marcar individuos sobre la foto, contador en vivo y correcciÃ³n.
-- CatÃ¡logos de centros y tramos con alta, ediciÃ³n y baja lÃ³gica; el asistente elige el tramo en cascada y completa tren, lÃ­nea y largo.
-- ExportaciÃ³n de un informe PDF por muestra y comparticiÃ³n con FileProvider.
-- Historial con bÃºsqueda, filtros por estado, perÃ­odo, centro y tren, agrupaciÃ³n por dÃ­a y comparaciÃ³n con el perÃ­odo anterior.
-- Dashboard con grÃ¡ficos de distribuciÃ³n por estado y evoluciÃ³n del calibre.
-- Detalle con trazabilidad, matriz de calibre, fotos y validaciÃ³n de supervisor.
-- Perfil con alias de terreno, foto y tema claro/oscuro.
-- GestiÃ³n de personal con altas, ediciones y bajas.
-- SincronizaciÃ³n offline: Room + WorkManager + Retrofit.
-- Servidor configurable desde **Perfil** (IP del PC en WiFi o URL pública), con reintento automático al recuperar conexión.
-- Sincronización bidireccional: sube pendientes y descarga las muestras del backend, sin pisar las locales.
-- Fotos compartidas: se suben al backend y se descargan en los demas telefonos.
-- Clima sincronizado: oleaje, temperatura del mar y viento via Open-Meteo, guardados en Room y backend.
-- Edición de muestras guardadas: conteo, matriz de calibre y observaciones, con resincronización automática.
-- Reportes consolidados: PDF de la jornada filtrada y Excel/CSV con todas las muestras visibles.
-- Borrado logico y conflictos: las eliminaciones se propagan y una muestra validada en el servidor no se sobrescribe.
-- Notificaciones: aviso de muestras pendientes de sincronizar y de muestras validadas por el analista.
-- Respaldo local: exporta/importa un .aquabackup con muestras, catalogos y fotos.
-- Seguridad: login JWT en el backend, contrasenas BCrypt y token adjunto automaticamente en la app.
-- Indice de condicion calculado sobre el calibre promedio, visible en detalle y PDF.
-- Sesion persistente: sobrevive al cierre de la app; un 401 cierra la sesion y avisa.
-- Seguridad local: JWT cifrado con Android Keystore y contrasenas PBKDF2.
-- Diagnostico de sincronizacion: aviso de localhost, boton Probar conexion y motivo visible del fallo.
+### Aplicación Android
 
-**Backend**
-- API REST Spring Boot con entidades JPA, H2, validaciones y manejo de errores.
-- CRUD de muestras, centros y usuarios; filtros y cambio de estado.
-- Swagger/OpenAPI y datos de demostraciÃ³n.
+- Login por rol con sesión persistente y cierre automático ante 401.
+- Asistente de muestra con centro, tren, línea, tramo, fecha/hora y operador.
+- Cámara propia con **CameraX**, galería con **Coil** y zoom con **Telephoto**.
+- Conteo asistido: marcar individuos, contador en vivo y corrección manual.
+- Matriz de calibre y cálculo de calibre promedio.
+- Condiciones marinas de **Open-Meteo**: oleaje, temperatura y viento.
+- Catálogos de centros y tramos con alta, edición y baja lógica.
+- Historial con búsqueda, filtros, agrupación y comparación de períodos.
+- Dashboard con distribución por estado y evolución del calibre.
+- Detalle con trazabilidad, fotos, validación y edición.
+- Exportación PDF por muestra y PDF consolidado de jornada.
+- CSV compatible con Excel y reporte de jornada.
+- Respaldo/restauración `.aquabackup` con fotos.
+- Tema claro/oscuro y perfil de terreno.
+- Notificaciones de pendientes y muestras validadas.
 
-## Stack
+### Sincronización offline
 
-| Capa | TecnologÃ­a |
+- Room como fuente de verdad local.
+- WorkManager con restricción de red y reintentos.
+- Subida de fotos por multipart y descarga de fotos remotas.
+- Sincronización bidireccional: sube pendientes y descarga cambios.
+- Borrado lógico y tombstones.
+- Conflicto de IDs resuelto: si el ID existe con **otra** muestra, se reasigna uno libre en vez de sobrescribir.
+- Una muestra validada en el servidor no se pisa desde el teléfono.
+- Estado visible del último error y botón **Probar conexión**.
+
+### Backend
+
+- API REST Spring Boot con JPA, validaciones y manejo global de errores.
+- CRUD de muestras, centros, tramos y usuarios.
+- Autenticación JWT y contraseñas BCrypt.
+- H2 en archivo + migraciones Flyway.
+- Swagger/OpenAPI.
+- Datos de demostración.
+- Almacenamiento de fotos en filesystem configurable.
+- Perfil `prod` y despliegue Docker/Render.
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+    UI[Compose + Material 3] --> VM[ViewModels / StateFlow]
+    VM --> REPO[Repositories]
+    REPO --> ROOM[(Room)]
+    REPO --> RETRO[Retrofit + OkHttp]
+    WORK[WorkManager] --> REPO
+    RETRO --> API[Spring Boot]
+    API --> DB[(H2 + Flyway)]
+    API --> FILES[(uploads)]
+    VM --> MARINE[Open-Meteo Marine]
+    VM --> WIND[Open-Meteo Forecast]
+```
+
+- **Patrón:** MVVM + Repository + inyección manual (`AppContainer`).
+- **UI:** una sola actividad, Navigation Compose, Material 3.
+- **Red:** Retrofit + Gson; interceptor JWT y manejo de 401.
+- **Offline:** Room + WorkManager; la UI observa Flows.
+- **Backend:** capas controller → service → repository → JPA.
+
+## Stack y herramientas utilizadas
+
+| Área | Tecnología / herramienta |
 |---|---|
-| UI | Kotlin, Jetpack Compose, Material 3, Navigation Compose |
-| PresentaciÃ³n | MVVM, ViewModel, StateFlow |
-| Datos | Room, DataStore pendiente, Retrofit + Gson |
-| Trabajo en segundo plano | WorkManager |
-| CÃ¡mara e imÃ¡genes | CameraX, Coil, Telephoto |
-| Backend | Spring Boot 3.5, Spring Data JPA, H2, springdoc-openapi |
-| Build | Gradle 9.5, AGP 9.3.3, compileSdk 37, minSdk 24 |
+| IDE | Android Studio, JBR 21+ |
+| Lenguaje | Kotlin 2.0.21, Java 21 |
+| UI | Jetpack Compose, Material 3, Navigation Compose 2.9.8 |
+| Build | Gradle 9.5.0, AGP 9.3.3, compileSdk/targetSdk 37, minSdk 24 |
+| Persistencia local | Room 2.8.5 |
+| Red | Retrofit 2.12.0, OkHttp, Gson |
+| Background | WorkManager 2.12.0 |
+| Cámara/imagen | CameraX 1.7.0, Coil 2.7.0, Telephoto 0.19.0 |
+| Seguridad local | Android Keystore, EncryptedSharedPreferences, PBKDF2-HMAC-SHA256 |
+| Backend | Spring Boot 3.5.16, Spring Data JPA, Spring Security, JJWT 0.12.6 |
+| Base de datos | H2 archivo, Flyway |
+| Documentación API | springdoc-openapi 2.8.13, Swagger UI, Postman |
+| API externa | Open-Meteo Marine + Forecast |
+| Pruebas | JUnit, MockK, Robolectric 4.16.1, coroutines-test, Compose UI Test, Espresso |
+| Infraestructura | Docker, Render, Cloudflare Tunnel (desarrollo) |
+| Control de versiones | Git, GitHub |
+| Informes | Generador Python + python-docx |
 
-## Estructura
+## Estructura del repositorio
 
-```
-app/                    AplicaciÃ³n Android
+```text
+app/                         App Android
   src/main/java/com/example/aquasample/
-    ui/                 Pantallas, componentes y ViewModels
-    data/               Room, Retrofit y sincronizaciÃ³n
-    di/                 Contenedor de dependencias
-backend/                API REST Spring Boot
-docs/                   DocumentaciÃ³n y capturas
-  DESIGN.md             Sistema de diseÃ±o y arquitectura
-  AquaSample-Estado-del-Sistema.docx
+    ui/                      Pantallas, componentes y ViewModels
+    data/                    Room, Retrofit, repositorios y sync
+    di/                      AppContainer
+  src/test/                  87 pruebas unitarias
+  src/androidTest/           6 pruebas instrumentadas
+backend/                     API Spring Boot
+  src/main/java/             Controllers, services, repos, security
+  src/main/resources/        application.properties, Flyway
+  src/test/                  6 pruebas backend
+docs/                        Documentación, capturas e informes
+  screenshots/               Evidencia visual
+  informe/                   Informe de estado v2–v9
+  API.md, SWAGGER.md, SYNC.md, RENDER.md, RELEASE.md
+postman/                     Colección de la API
+Dockerfile                   Imagen para Render
+render.yaml                  Blueprint de Render
+dist/                        APK release firmadas
 ```
 
-## CÃ³mo ejecutarlo
+## API
 
-Requisitos: JDK 21 o superior (el JBR de Android Studio sirve), Android Studio y un
-emulador o telÃ©fono con depuraciÃ³n USB.
+### API propia
+
+| Módulo | Endpoints |
+|---|---|
+| Auth | `POST /api/auth/login` |
+| Health | `GET /api/health` |
+| Muestras | `GET/POST /api/muestras`, `GET/PUT/DELETE /api/muestras/{id}`, `PATCH /api/muestras/{id}/estado` |
+| Fotos | `POST /api/fotos`, `GET /api/fotos/{name}` |
+| Centros | CRUD `/api/centros` |
+| Tramos | CRUD `/api/tramos` |
+| Usuarios | `GET/POST /api/usuarios`, `GET /api/usuarios/{id}`, `PATCH /api/usuarios/{id}/estado` |
+
+- Swagger: https://aquasample-backend.onrender.com/swagger-ui.html
+- OpenAPI: https://aquasample-backend.onrender.com/v3/api-docs
+- Snapshot: [docs/openapi.json](docs/openapi.json)
+- Colección Postman: [postman/](postman/)
+- Detalle y ejemplos: [docs/API.md](docs/API.md)
+
+### API externa
+
+| API | Uso | Endpoint |
+|---|---|---|
+| Open-Meteo Marine | Oleaje y temperatura del mar | `https://marine-api.open-meteo.com/v1/marine` |
+| Open-Meteo Forecast | Viento en m/s | `https://api.open-meteo.com/v1/forecast` |
+
+No requieren API key. Si no hay internet, la tarjeta de condiciones queda sin datos, pero la muestra se guarda localmente.
+
+## Testing y calidad
+
+| Suite | Cantidad | Estado |
+|---|---:|---|
+| Unitarias Android | **87** | ✅ en verde |
+| Backend | **6** | ✅ en verde |
+| Instrumentadas / Compose UI | **6** | ✅ ejecutadas en emulador |
+| **Total** | **99** | |
+
+Comandos:
 
 ```powershell
-# 1. Backend (deja la terminal abierta)
+# Unitarias Android
+.\gradlew.bat :app:testDebugUnitTest
+
+# Backend
+.\gradlew.bat -p backend test
+
+# Compose UI (requiere emulador o teléfono)
+.\gradlew.bat :app:connectedDebugAndroidTest
+```
+
+Cobertura medida (JaCoCo, última ejecución):
+
+| Capa | Cobertura de líneas |
+|---|---:|
+| Global | ~5,5 % (523/9575) |
+| `HistoryViewModel` | 80,7 % |
+| `SampleDetailViewModel` | 46,9 % |
+| `SampleViewModel` | 0 % |
+| `LoginViewModel` | 0 % |
+| `HomeViewModel` | 0 % |
+| `MuestraRepository` | 85,7 % |
+| `UsuarioRepository`, `CentroCultivoRepository`, `MarineRepository` | 0 % |
+
+> La pauta de defensa pide **>90 % en ViewModel/Repository**. Esa meta aún no se cumple; el README no declara una cobertura que no existe. El plan de mejora está en el informe v9.
+
+## Despliegue
+
+### Render (recomendado)
+
+Backend público, sin depender del PC ni de la misma WiFi:
+
+```text
+https://aquasample-backend.onrender.com/
+```
+
+- Health: `/api/health`
+- Swagger: `/swagger-ui.html`
+- Docker + `render.yaml`
+- Guía: [docs/RENDER.md](docs/RENDER.md)
+
+> Plan Free: cold start de 30–60 s y sin disco persistente. H2 y fotos se pierden en cada redeploy. Para la defensa, abrir `/api/health` unos minutos antes.
+
+### Local
+
+```powershell
+# Backend
 .\gradlew.bat -p backend run
 
-# 2. TÃºnel para que el emulador o el telÃ©fono lleguen al backend
+# Emulador o USB
 adb reverse tcp:8080 tcp:8080
 
-# 3. App
+# App debug
 .\gradlew.bat :app:installDebug
 ```
 
-- API: `http://localhost:8080/api/muestras`
-- Swagger: `http://localhost:8080/swagger-ui.html`
-- Consola H2: `http://localhost:8080/h2-console` (JDBC `jdbc:h2:file:./data/aquasample`, usuario `sa`, sin contraseÃ±a)
+La app apunta por defecto a Render. Para usar el backend local: **Perfil → Servidor** y escribir `http://10.0.2.2:8080/` (emulador) o la IP del PC (WiFi).
 
-En un telÃ©fono por WiFi hay que cambiar la URL de `ApiClient` por la IP del PC y
-recompilar. En emulador o por USB, `adb reverse` es suficiente.
+### Docker
 
-## Credenciales de demostraciÃ³n
+```powershell
+docker build -t aquasample-backend .
+docker run -p 8080:8080 -e AQUASAMPLE_JWT_SECRET=change-me aquasample-backend
+```
 
-| Rol | Correo | ContraseÃ±a |
+## APK firmada
+
+| Dato | Valor |
+|---|---|
+| Versión | 1.0.24 (`versionCode` 25) |
+| Archivo | [dist/AquaSample-1.0.24-release.apk](dist/AquaSample-1.0.24-release.apk) |
+| Tamaño | 19.427.327 bytes |
+| SHA-256 | `6b3e340075493c573dd2fb895f9658ca42848313adaa1e1576dedb13947a356d` |
+| Firma | APK Signature Scheme v2 |
+| Tag | `v1.0.24` |
+
+- Descarga directa: https://github.com/DiegoDV16/AquaSample/raw/v1.0.24/dist/AquaSample-1.0.24-release.apk
+- Instrucciones: [docs/RELEASE.md](docs/RELEASE.md)
+- El keystore y `keystore.properties` quedan fuera del repositorio.
+
+## Seguridad
+
+- JWT con expiración y validación en cada request.
+- Contraseñas backend con BCrypt.
+- Contraseñas locales con PBKDF2-HMAC-SHA256 (120 000 iteraciones).
+- Token en `EncryptedSharedPreferences` con Android Keystore.
+- Cierre de sesión automático ante 401.
+- Roles: operador crea/edita; analista/admin valida y elimina; admin gestiona usuarios.
+- Datos de demostración ficticios; no usar información real de ALDEMAR.
+
+## Credenciales de demostración
+
+| Rol | Correo | Contraseña |
 |---|---|---|
 | Operador | `operador@aquasample.cl` | `operador123` |
 | Analista | `analista@aquasample.cl` | `analista123` |
 | Administrador | `admin@aquasample.cl` | `admin123` |
 
-## APK firmada
+## Evidencias del sistema
 
-- [AquaSample-1.0.24-release.apk](dist/AquaSample-1.0.24-release.apk) (`versionName` 1.0.0).
-- SHA-256: `6b3e340075493c573dd2fb895f9658ca42848313adaa1e1576dedb13947a356d`.
-- Firma verificada con APK Signature Scheme v2; instrucciones en [docs/RELEASE.md](docs/RELEASE.md).
-- El keystore y sus credenciales quedan fuera del repositorio.
+| Requisito | Evidencia |
+|---|---|
+| App funcional | APK 1.0.24 + capturas en `docs/screenshots/` |
+| Login por rol | `docs/screenshots/01-login.png`, `22-login-operador.png` |
+| Muestreo y fotos | `04-nueva-muestra-paso1.png` a `08-validacion-foto.png` |
+| Historial y dashboard | `09-historial.png`, `19-dashboard-graficos.png`, `20-historial-comparacion.png` |
+| Reportes | `16-informe-pdf.png`, PDF de ejemplo en `docs/ejemplos/` |
+| Offline + sync | [docs/SYNC.md](docs/SYNC.md), [docs/VERIFICACION-E2E.md](docs/VERIFICACION-E2E.md) |
+| API y Swagger | [docs/API.md](docs/API.md), [docs/SWAGGER.md](docs/SWAGGER.md), [docs/openapi.json](docs/openapi.json) |
+| API externa | Open-Meteo Marine/Forecast en formulario de muestra |
+| Pruebas | 87 + 6 + 6; reporte HTML en `app/build/reports/tests/` |
+| APK firmada | Hash SHA-256, tag `v1.0.24`, `docs/RELEASE.md` |
+| Despliegue | Render + `Dockerfile` + `render.yaml`; [docs/RENDER.md](docs/RENDER.md) |
+| Modificación en vivo | [docs/ENSAYO-MODIFICACION.md](docs/ENSAYO-MODIFICACION.md) |
+| Informe técnico | [Informe v9](docs/informe/AquaSample-Estado-del-Sistema-v9.docx) |
 
-## VerificaciÃ³n
+## Documentación
 
-- `.\gradlew.bat :app:assembleDebug` y `:app:testDebugUnitTest` en verde.
-- Backend probado con 14 casos (CRUD, duplicados, validaciÃ³n, filtros y Swagger).
-- SincronizaciÃ³n verificada en emulador: muestra pendiente enviada al backend y
-  marcada como sincronizada en Room; el mismo flujo se probÃ³ sin tÃºnel y al recuperarlo.
-- MigraciÃ³n de Room 1 â†’ 2 verificada sobre una base existente: columnas nuevas y
-  las 10 muestras anteriores intactas.
-- MigraciÃ³n 2 â†’ 3 probada con una base v2 real: conserva centros y usuarios y crea
-  los 8 tramos del catÃ¡logo.
-- CRUD de tramos del backend probado (201, 200, 204 y 404 posterior).
-- PDF generado desde el detalle (58 KB, A4) y compartido con el selector de Android;
-  hay un ejemplo en [docs/ejemplos](docs/ejemplos).
-- APK release firmada (v2) instalada en el emulador y verificada con `apksigner`.
-- 39 pruebas unitarias (JUnit + MockK) y 2 instrumentadas de Compose en verde.
-- Cobertura de la lÃ³gica evaluable: 100 % en validadores, estado, mapeo de resumen,
-  filtro de historial y repositorio. Reporte: `:app:createDebugUnitTestCoverageReport`.
-
-## DocumentaciÃ³n
-
-- [DiseÃ±o y arquitectura](docs/DESIGN.md)
-- [Informe de estado y brechas](docs/informe/AquaSample-Estado-del-Sistema-v2.docx)
-- [Backend](backend/README.md)
+- [Diseño y arquitectura](docs/DESIGN.md)
 - [API y autenticación](docs/API.md)
 - [Swagger y OpenAPI](docs/SWAGGER.md)
 - [Sincronización en el teléfono](docs/SYNC.md)
-- [Tablero Trello](docs/TRELLO.md)
-- [Conectar la app con el backend](docs/DEPLOY.md)
 - [Despliegue en Render](docs/RENDER.md)
+- [Conectar la app con el backend](docs/DEPLOY.md)
+- [APK y firma](docs/RELEASE.md)
+- [Verificación E2E](docs/VERIFICACION-E2E.md)
+- [Verificación final](docs/VERIFICACION-FINAL.md)
+- [Ensayo de modificación en vivo](docs/ENSAYO-MODIFICACION.md)
+- [Trello](docs/TRELLO.md)
+- [Backend](backend/README.md)
+- [Informe de estado v9](docs/informe/AquaSample-Estado-del-Sistema-v9.docx)
 
-## Estado
+## Estado y limitaciones
 
-Implementado: interfaz, navegaciÃ³n, perfiles, historial, detalle, cÃ¡mara, conteo
-asistido, informes PDF, catÃ¡logos de centros y tramos, backend, sincronizaciÃ³n
-offline y gestiÃ³n de personal.
+**Implementado**
 
-Pendiente: API externa (Open-Meteo, a cargo de otro integrante), exportaciÃ³n a
-Excel, pruebas con cobertura, autenticaciÃ³n del backend y APK firmada.
+- App Android completa con Compose/Material 3, MVVM, Room, Retrofit y WorkManager.
+- Cámara, conteo asistido, historial, dashboard, PDF/CSV y respaldo.
+- Backend Spring Boot con JWT, H2, Flyway, Swagger y fotos.
+- Sincronización bidireccional y resolución de conflictos de IDs.
+- Render público y Docker validado.
+- 99 pruebas automatizadas.
 
+**Limitaciones conocidas**
+
+- Cobertura ViewModel/Repository por debajo del 90 % exigido en la pauta.
+- Plan Free de Render sin persistencia; cold start.
+- Tablero Trello documentado pero no creado en la nube.
+- Pruebas instrumentadas ejecutadas en emulador; falta repetir cámara/conteo en teléfono físico para la defensa.
+- La modificación en vivo está ensayada parcialmente; falta el cambio completo cronometrado.
+- Open-Meteo requiere internet; sin red no hay condiciones marinas.
+
+## Autoría
+
+Proyecto académico **DSY1105 Desarrollo de Aplicaciones Móviles**, Evaluación Parcial 5, para **ALDEMAR SpA**.
+
+- Repositorio: [DiegoDV16/AquaSample](https://github.com/DiegoDV16/AquaSample)
+- Backend: [aquasample-backend.onrender.com](https://aquasample-backend.onrender.com/)
