@@ -111,6 +111,12 @@ sequenceDiagram
 - **Open-Meteo:** entrega oleaje y temperatura del mar; el viento se consulta a la API Forecast.
 - **Postman:** colección completa en [postman/](postman/).
 
+### Panel de Render
+
+![Panel de Render](docs/screenshots/43-render-dashboard.png)
+
+El servicio `aquasample-backend` aparece **Deployed**, con runtime **Docker** y región **Oregon**. El health check confirma que la imagen está sirviendo la API pública.
+
 
 ## Funcionalidades
 
@@ -388,7 +394,7 @@ docker run -p 8080:8080 -e AQUASAMPLE_JWT_SECRET=change-me aquasample-backend
 | API externa | `42-open-meteo.png`; Open-Meteo Marine/Forecast en formulario de muestra |
 | Pruebas | 87 + 6 + 6; reporte HTML en `app/build/reports/tests/` |
 | APK firmada | Hash SHA-256, tag `v1.0.24`, `docs/RELEASE.md` |
-| Despliegue | Render + `Dockerfile` + `render.yaml`; [docs/RENDER.md](docs/RENDER.md) |
+| Despliegue | Render + `Dockerfile` + `render.yaml`; [docs/RENDER.md](docs/RENDER.md), `43-render-dashboard.png` |
 | Modificación en vivo | [docs/ENSAYO-MODIFICACION.md](docs/ENSAYO-MODIFICACION.md) |
 | Informe técnico | [Informe v9](docs/informe/AquaSample-Estado-del-Sistema-v9.docx) |
 
