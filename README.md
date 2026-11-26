@@ -273,6 +273,20 @@ Comandos:
 .\gradlew.bat :app:connectedDebugAndroidTest
 ```
 
+### Evidencia visual: 3 casos de prueba
+
+| `HistoryViewModelTest` · 3 tests | `PasswordHasherTest` · 3 tests | `SampleDetailViewModelTest` · 3 tests |
+|---|---|---|
+| ![HistoryViewModelTest](docs/screenshots/50-test-history.png) | ![PasswordHasherTest](docs/screenshots/51-test-password.png) | ![SampleDetailViewModelTest](docs/screenshots/52-test-detail.png) |
+
+Cada reporte muestra **3 tests, 0 fallos, 0 omitidos y 100 % de éxito**.
+
+### Resumen de la suite
+
+![Resumen 87 tests](docs/screenshots/53-test-summary.png)
+
+El reporte completo de Gradle muestra **87 tests, 0 fallos, 0 omitidos y 100 % de éxito**; se suman 6 tests de backend y 6 instrumentadas.
+
 Cobertura medida (JaCoCo, última ejecución):
 
 | Capa | Cobertura de líneas |
