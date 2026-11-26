@@ -34,13 +34,83 @@ AquaSample resuelve esto con:
 - Backend Spring Boot con JWT, H2, Flyway y Swagger.
 - API externa **Open-Meteo** para oleaje, temperatura del mar y viento.
 
-## Capturas
+## Flujo de la aplicación Android
 
-| Login | Nueva muestra | Historial | Dashboard |
-|---|---|---|---|
-| ![Login](docs/screenshots/23-login-aquasample.png) | ![Muestra](docs/screenshots/04-nueva-muestra-paso1.png) | ![Historial](docs/screenshots/09-historial.png) | ![Dashboard](docs/screenshots/19-dashboard-graficos.png) |
+### 1. Acceso y panel principal
 
-Más capturas en [docs/screenshots](docs/screenshots).
+| Login por rol | Inicio del operador |
+|---|---|
+| ![Login](docs/screenshots/01-login.png) | ![Inicio operador](docs/screenshots/03-home-operador.png) |
+
+El operador inicia sesión con JWT, ve el resumen de muestras del día, el acceso rápido a **Registrar nueva muestra** y el estado de sincronización.
+
+### 2. Registro de una muestra
+
+| Paso 1 · Ubicación | Paso 2 · Conteo y calibre | Paso 3 · Evidencia |
+|---|---|---|
+| ![Paso 1](docs/screenshots/04-nueva-muestra-paso1.png) | ![Paso 2](docs/screenshots/06-nueva-muestra-paso2.png) | ![Paso 3](docs/screenshots/07-nueva-muestra-paso3.png) |
+
+El asistente selecciona centro, tren, línea y tramo; luego registra conteo manual, matriz de calibre y observaciones; finalmente adjunta la fotografía.
+
+### 3. Validaciones del asistente
+
+| Validación de ubicación | Validación de evidencia |
+|---|---|
+| ![Validación de ubicación](docs/screenshots/05-validacion.png) | ![Validación de evidencia](docs/screenshots/08-validacion-foto.png) |
+
+El asistente no permite guardar si falta el centro, el tramo o al menos una fotografía; muestra el error junto al botón de avance. El conteo asistido se realiza sobre la foto dentro del flujo de cámara.
+
+### 4. Historial, detalle y reportes
+
+| Historial | Filtros | Detalle y trazabilidad |
+|---|---|---|
+| ![Historial](docs/screenshots/09-historial.png) | ![Filtros](docs/screenshots/12-historial-filtrado.png) | ![Detalle](docs/screenshots/10-detalle.png) |
+
+| Dashboard | Comparación de períodos | Informe PDF |
+|---|---|---|
+| ![Dashboard](docs/screenshots/19-dashboard-graficos.png) | ![Comparación](docs/screenshots/20-historial-comparacion.png) | ![PDF](docs/screenshots/16-informe-pdf.png) |
+
+### 5. Perfil, administración y sesión
+
+| Perfil y servidor | Gestión de personal | Notificación de pendientes |
+|---|---|---|
+| ![Perfil](docs/screenshots/15-perfil.png) | ![Personal](docs/screenshots/13-personal.png) | ![Notificación](docs/screenshots/35-notificacion.png) |
+
+| Sesión persistente | Sesión expirada (401) |
+|---|---|
+| ![Sesión persistente](docs/screenshots/36-sesion-persistente.png) | ![Sesión expirada](docs/screenshots/37-sesion-expirada.png) |
+
+## Flujo del backend y APIs
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant A as App Android
+    participant B as Spring Boot / Render
+    participant O as Open-Meteo
+
+    U->>A: Login
+    A->>B: POST /api/auth/login
+    B-->>A: JWT + rol
+    A->>B: GET /api/muestras
+    A->>O: Oleaje, temperatura y viento
+    O-->>A: JSON
+    U->>A: Crear muestra + foto
+    A->>B: POST /api/fotos
+    A->>B: POST /api/muestras
+    B-->>A: 201 Created
+    A->>B: GET /api/muestras (descarga cambios)
+```
+
+| Swagger / API propia | Health en Render | Open-Meteo Marine |
+|---|---|---|
+| ![Swagger](docs/screenshots/40-swagger.png) | ![Health](docs/screenshots/41-render-health.png) | ![Open-Meteo](docs/screenshots/42-open-meteo.png) |
+
+- **Swagger:** documenta y permite probar los endpoints de muestras, fotos, centros, tramos y usuarios.
+- **Health:** confirma que el backend Docker está activo en Render.
+- **Open-Meteo:** entrega oleaje y temperatura del mar; el viento se consulta a la API Forecast.
+- **Postman:** colección completa en [postman/](postman/).
+
 
 ## Funcionalidades
 
@@ -294,14 +364,14 @@ docker run -p 8080:8080 -e AQUASAMPLE_JWT_SECRET=change-me aquasample-backend
 
 | Requisito | Evidencia |
 |---|---|
-| App funcional | APK 1.0.24 + capturas en `docs/screenshots/` |
-| Login por rol | `docs/screenshots/01-login.png`, `22-login-operador.png` |
+| App funcional | APK 1.0.24 + flujo completo en capturas (login → muestra → historial → PDF) |
+| Login por rol | `docs/screenshots/01-login.png`, `22-login-operador.png`, `23-login-aquasample.png` |
 | Muestreo y fotos | `04-nueva-muestra-paso1.png` a `08-validacion-foto.png` |
 | Historial y dashboard | `09-historial.png`, `19-dashboard-graficos.png`, `20-historial-comparacion.png` |
 | Reportes | `16-informe-pdf.png`, PDF de ejemplo en `docs/ejemplos/` |
-| Offline + sync | [docs/SYNC.md](docs/SYNC.md), [docs/VERIFICACION-E2E.md](docs/VERIFICACION-E2E.md) |
-| API y Swagger | [docs/API.md](docs/API.md), [docs/SWAGGER.md](docs/SWAGGER.md), [docs/openapi.json](docs/openapi.json) |
-| API externa | Open-Meteo Marine/Forecast en formulario de muestra |
+| Offline + sync | [docs/SYNC.md](docs/SYNC.md), [docs/VERIFICACION-E2E.md](docs/VERIFICACION-E2E.md), `35-notificacion.png` |
+| API y Swagger | `40-swagger.png`, `41-render-health.png`, [docs/API.md](docs/API.md), [docs/openapi.json](docs/openapi.json) |
+| API externa | `42-open-meteo.png`; Open-Meteo Marine/Forecast en formulario de muestra |
 | Pruebas | 87 + 6 + 6; reporte HTML en `app/build/reports/tests/` |
 | APK firmada | Hash SHA-256, tag `v1.0.24`, `docs/RELEASE.md` |
 | Despliegue | Render + `Dockerfile` + `render.yaml`; [docs/RENDER.md](docs/RENDER.md) |
